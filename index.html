@@ -43,14 +43,14 @@ body.bare .ring{ display:none; }
 
 /* ---------- 목업 테두리 온오프 토글 (중앙 프레임과 겹치지 않게 우측) ---------- */
 .toggle{
-  position:fixed; right:24px; top:50%; translate:0 -50%; z-index:10;
-  display:flex; align-items:center; gap:10px;
-  padding:10px 16px 10px 12px; border:0; border-radius:999px;
-  background:#f2f2ef; color:#3d3d38; cursor:pointer;
-  font:inherit; font-size:13px; font-weight:500; line-height:1;
-  box-shadow:0 2px 10px rgba(0,0,0,.08);
+  position:fixed; right:16px; top:50%; translate:0 -50%; z-index:10;
+  display:flex; align-items:center; gap:9px;
+  padding:9px 14px 9px 10px; border:1px solid rgba(0,0,0,.1); border-radius:999px;
+  background:#fff; color:#3d3d38; cursor:pointer;
+  font:inherit; font-size:12px; font-weight:500; line-height:1;
+  box-shadow:0 2px 12px rgba(0,0,0,.14);
 }
-.toggle:hover{ background:#e9e9e4; }
+.toggle:hover{ background:#f4f4f1; }
 .toggle .sw{
   width:34px; height:20px; border-radius:999px; flex:none;
   background:#c9c087; transition:background-color .2s;
@@ -259,8 +259,9 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
 if (location.hash === '#screen') document.body.classList.add('bare','kiosk');
 
 // scale() 은 단위 없는 수만 받으므로 JS로 계산 (CSS calc 로는 px/숫자 → px 라 불가)
+const FILL = .86;   // 미리보기 여백. 실기기(#screen)는 항상 꽉 채움
 const fit = () => document.documentElement.style.setProperty('--s',
-  Math.min(innerWidth, innerHeight) /
+  Math.min(innerWidth, innerHeight) * (document.body.classList.contains('kiosk') ? 1 : FILL) /
   parseFloat(getComputedStyle(document.body).getPropertyValue('--fit')));
 addEventListener('resize', fit);
 fit();
