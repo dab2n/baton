@@ -19,8 +19,8 @@
      D .cyan   Ellipse 60    시안 블롭
 */
 
-:root{ --fit: 1128; }          /* 하우징 포함 미리보기 */
-body.bare{ --fit: 1080; }      /* 목업 테두리 끔 : 스크린만 꽉 채움 */
+:root{ --fit: 1128; }          /* 미리보기 : 하우징 자리를 늘 비워둔다 (토글해도 크기 불변) */
+body.kiosk{ --fit: 1080; }     /* #screen : 실기기, 스크린이 화면을 꽉 채움 */
 
 *{ box-sizing: border-box; }
 html,body{ height:100%; margin:0; overflow:hidden; background:#fff; }
@@ -45,22 +45,22 @@ body.bare .ring{ display:none; }
 .toggle{
   position:fixed; right:16px; top:50%; translate:0 -50%; z-index:10;
   display:flex; align-items:center; gap:9px;
-  padding:9px 14px 9px 10px; border:1px solid rgba(0,0,0,.1); border-radius:999px;
-  background:#fff; color:#3d3d38; cursor:pointer;
+  padding:9px 14px 9px 10px; border:1px solid rgba(0,0,0,.14); border-radius:999px;
+  background:#fff; color:#000; cursor:pointer;
   font:inherit; font-size:12px; font-weight:500; line-height:1;
   box-shadow:0 2px 12px rgba(0,0,0,.14);
 }
-.toggle:hover{ background:#f4f4f1; }
+.toggle:hover{ background:#f2f2f2; }
 .toggle .sw{
   width:34px; height:20px; border-radius:999px; flex:none;
-  background:#c9c087; transition:background-color .2s;
+  background:#000; transition:background-color .2s;
 }
 .toggle .sw::after{
   content:''; display:block; width:16px; height:16px; margin:2px; border-radius:50%;
-  background:#fff; transition:transform .2s;
+  background:#fff; transform:translateX(14px); transition:transform .2s;
 }
-body.bare .toggle .sw{ background:#cfcfc9; }
-body.bare .toggle .sw::after{ transform:translateX(14px); }
+body.bare .toggle .sw{ background:#d6d6d6; }
+body.bare .toggle .sw::after{ transform:none; }
 body.kiosk .toggle{ display:none; }   /* #screen : 실기기에선 숨김 */
 
 /* ---------- 스크린 1080x1080 ---------- */
@@ -100,34 +100,36 @@ body.fill       .field{ transform:translate(1.3px,100px)     scale(1.058,.996); 
 body.connecting .field{ transform:translate(1px,-112px); }
 body.connected  .field{ transform:translate(1px,30px); }
 /* body.message  : 기본 좌표 */
-body.doctor     .field{ transform:translate(-19.5px,125.5px) scale(1.177,1.138); }
 
 /* C : connecting 에서 켜지고 doctor 에서 꺼짐 */
 body.idle .core, body.fill .core{ transform:scale(.4); opacity:0; }
 body.connecting  .core{ transform:translate(9px,-29px); }
-body.doctor      .core{ opacity:0; }
 
 /* D : 본문 장면에서만 크게 */
-body.idle .cyan, body.fill .cyan, body.connecting .cyan, body.doctor .cyan{
+body.idle .cyan, body.fill .cyan, body.connecting .cyan{
   transform:translate(9px,172.5px) scale(.469); opacity:.09;
 }
 
 /* 살아있는 듯한 움직임 : transform 은 상태 전환이 쓰므로 개별 속성으로 분리.
    합성 순서상 translate 는 scale 바깥이라, 작을 때는 크게 배회하고 클 때는 은근하게 흐른다. */
 /* 배회는 idle 에서만. 원이 커진 뒤에는 멈추고 중앙에 정렬된다 */
-body.idle .field{ animation:wander 21s ease-in-out infinite; }
+body.idle .field{ animation:wander 18s linear infinite; }
 body:not(.idle) .field{ animation:none; translate:0 0; scale:1; }
 .sheen{ animation:drift2 11s ease-in-out infinite alternate; }
 .core { animation:drift4 17s ease-in-out infinite alternate; }
 .cyan { animation:drift3 19s ease-in-out infinite alternate; }
+/* 시선을 옮기는 생물처럼 : 짧고 빠르게 도약(7%) → 길게 머물며 미세하게 흔들림(18%).
+   구간마다 timing-function 을 따로 줘서 도약은 튕겨나가듯, 체류는 거의 멈춘 듯 보이게 한다. */
 @keyframes wander{
-   0%  { translate:  0px   0px; scale:1    1;    }
-  14%  { translate:-42px -26px; scale:1.07 .95;  }
-  29%  { translate: 18px -54px; scale:.93  1.09; }
-  43%  { translate: 56px -14px; scale:1.05 1.01; }
-  57%  { translate: 34px  40px; scale:.96  1.06; }
-  71%  { translate:-26px  52px; scale:1.08 .97;  }
-  86%  { translate:-54px  12px; scale:.98  1.04; }
+   0%  { translate:  0px   0px; scale:1    1;    animation-timing-function:cubic-bezier(.28,.86,.3,1); }
+   7%  { translate:-46px -30px; scale:1.09 .93;  animation-timing-function:cubic-bezier(.5,0,.5,1);    }
+  25%  { translate:-38px -22px; scale:1.01 1;    animation-timing-function:cubic-bezier(.28,.86,.3,1); }
+  32%  { translate: 30px -54px; scale:.92  1.11; animation-timing-function:cubic-bezier(.5,0,.5,1);    }
+  48%  { translate: 24px -44px; scale:1    1;    animation-timing-function:cubic-bezier(.28,.86,.3,1); }
+  54%  { translate: 56px  18px; scale:1.08 .94;  animation-timing-function:cubic-bezier(.5,0,.5,1);    }
+  70%  { translate: 48px  14px; scale:1    1.01; animation-timing-function:cubic-bezier(.28,.86,.3,1); }
+  77%  { translate:-28px  48px; scale:.94  1.08; animation-timing-function:cubic-bezier(.5,0,.5,1);    }
+  93%  { translate:-22px  40px; scale:1    1;    animation-timing-function:cubic-bezier(.28,.86,.3,1); }
  100%  { translate:  0px   0px; scale:1    1;    }
 }
 @keyframes drift2{ to{ translate:30px -26px; scale:1.22; } }
@@ -215,10 +217,14 @@ body.doctor .headline{ opacity:0; }
 /* 모션: DOM 순서 = 위 → 아래, 왼 → 오른쪽 */
 .w{ display:inline-block; opacity:0; will-change:transform,opacity,filter; }
 body.message .headline .w,
-body.doctor  .headline .w,
-body.doctor  .docname  .w{
+body.doctor  .headline .w{
   animation:in .9s cubic-bezier(.2,.7,.2,1) both;
   animation-delay:calc(var(--i) * 70ms + 200ms);
+}
+/* 두 단어뿐이라 같은 70ms 로는 티가 안 난다. 간격을 벌리고 사진이 자리잡은 뒤에 올린다 */
+body.doctor  .docname  .w{
+  animation:in .9s cubic-bezier(.2,.7,.2,1) both;
+  animation-delay:calc(var(--i) * 190ms + 500ms);
 }
 @keyframes in{
   from{ opacity:0; transform:translateY(.42em); filter:blur(10px); }
