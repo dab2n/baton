@@ -129,32 +129,22 @@ body.idle .cyan, body.fill .cyan, body.connecting .cyan{
 /* 살아있는 듯한 움직임 : transform 은 상태 전환이 쓰므로 개별 속성으로 분리.
    합성 순서상 translate 는 scale 바깥이라, 작을 때는 크게 배회하고 클 때는 은근하게 흐른다. */
 /* 배회는 idle 에서만. 원이 커진 뒤에는 멈추고 중앙에 정렬된다 */
-/* wander 는 위치, ripple 은 실루엣, spin 은 테두리 광택, bloom 은 발광.
+/* wander 는 위치, ripple 은 실루엣, sway 는 그라디언트 광, bloom 은 발광.
    주기가 서로 안 나누어떨어져 같은 모양이 반복되지 않는다. */
 body.idle .field{
   animation:wander 30s linear      infinite,
-            ripple  6s ease-in-out infinite;
+            ripple  6s ease-in-out infinite,
+            sway    7s ease-in-out infinite alternate;
 }
-/* 광택 : 콘익 그라디언트를 돌리면 밝은 구간이 테두리를 따라 흐른다.
-   ::after 라 idle 을 벗어날 때 opacity 로 부드럽게 걷힌다(그라디언트는 전환이 안 되니까). */
-.field::after{
-  content:''; position:absolute; inset:0; border-radius:inherit;
-  opacity:0; transition:opacity .8s ease;
-  background:conic-gradient(from 0deg,
-    #fffdf0 0deg, #ffe98f 55deg, #ffffff 115deg, #ffeba6 180deg,
-    #d9f0ff 240deg, #fff6c6 305deg, #fffdf0 360deg);
-}
-body.idle .field::after{ opacity:1; animation:spin 5s linear infinite; }
-/* 발광 링 : 구슬 밖으로 한 겹 밝은 테가 부풀었다 조인다 */
+/* 발광 링 : 구슬 바깥 테두리만 밝게. 안쪽 그라디언트는 원래대로 둔다 */
 .field::before{
-  content:''; position:absolute; inset:-7%; border-radius:inherit;
+  content:''; position:absolute; inset:-9%; border-radius:inherit;
   opacity:0; transition:opacity .8s ease;
   background:radial-gradient(circle closest-side,
-             transparent 58%, rgba(255,252,226,.95) 86%, transparent 100%);
+             transparent 68%, rgba(255,246,196,.9) 88%, transparent 100%);
 }
 body.idle .field::before{ opacity:1; animation:halo 3.4s ease-in-out infinite; }
 @keyframes halo{ 0%,100%{ scale:1; opacity:.65; } 50%{ scale:1.16; opacity:1; } }
-@keyframes spin{ to{ rotate:360deg; } }
 /* 숨 : 흐림 반경이 커졌다 작아지며 발광하듯 부풀었다 조인다 */
 body.idle .blur39{ animation:bloom 3.4s ease-in-out infinite; }
 @keyframes bloom{ 0%,100%{ filter:blur(15px); } 50%{ filter:blur(31px); } }
@@ -179,6 +169,7 @@ body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; bor
   93%  { translate:-22px  40px; scale:1    1;    animation-timing-function:cubic-bezier(.28,.86,.3,1); }
  100%  { translate:  0px   0px; scale:1    1;    }
 }
+@keyframes sway{ from{ rotate:-30deg; } to{ rotate:30deg; } }
 @keyframes ripple{
    0%,100%{ border-radius:50% 50% 50% 50% / 50% 50% 50% 50%; }
   20%     { border-radius:63% 37% 44% 56% / 41% 59% 41% 59%; }
