@@ -353,7 +353,7 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
 
     <img class="photo" src="doctor.png" alt="">
 
-    <p class="headline l-greet reveal">Hello, do you need any help?</p>
+    <p class="headline l-greet reveal">Hello, do you need help?</p>
     <p class="headline l-hi reveal">Hello, <em>Somi.</em></p>
     <p class="headline l-msg reveal">
       You had an appointment on <em>July&nbsp;20.</em><br>
@@ -401,6 +401,7 @@ addEventListener('resize', fit);
 fit();
 
 // 텍스트를 단어 단위로 쪼개고 DOM 순서대로 딜레이 부여
+const PAUSE = 7;   // 문장 경계에서 건너뛸 칸 수 (1칸 = 스태거 1단위)
 const split = el => {
   let i = 0;
   const walk = node => {
@@ -411,7 +412,9 @@ const split = el => {
           if (!part) continue;
           if (/^\s+$/.test(part)) { frag.append(part); continue; }
           const s = document.createElement('span');
-          s.className = 'w'; s.style.setProperty('--i', i++); s.textContent = part;
+          s.className = 'w'; s.style.setProperty('--i', i); s.textContent = part;
+          // 문장이 끊기는 자리에서 한 박자 쉰다 (약칭 Dr. 등은 제외)
+          i += /[,.?!]$/.test(part) && !/^(Dr|Mr|Ms|Mrs|St)\.$/.test(part) ? PAUSE : 1;
           frag.append(s);
         }
         child.replaceWith(frag);
