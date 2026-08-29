@@ -141,9 +141,9 @@ body.idle .field{
    대신 그 위의 파란 블롭(sheen/cyan)이 크게 흘러다니고,
    본문 텍스트가 color-burn 이라 지나갈 때마다 글자 색이 미묘하게 바뀐다. */
 body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; border-radius:50%; }
-.sheen{ animation:drift2 15s ease-in-out infinite alternate; }
-.core { animation:drift4 19s ease-in-out infinite alternate; }
-.cyan { animation:drift3 23s ease-in-out infinite alternate; }
+.sheen{ animation:drift2  9s ease-in-out infinite alternate; }
+.core { animation:drift4 11s ease-in-out infinite alternate; }
+.cyan { animation:drift3 13s ease-in-out infinite alternate; }
 /* 시선을 옮기는 생물처럼 : 짧고 빠르게 도약(7%) → 길게 머물며 미세하게 흔들림(18%).
    구간마다 timing-function 을 따로 줘서 도약은 튕겨나가듯, 체류는 거의 멈춘 듯 보이게 한다. */
 @keyframes wander{
@@ -166,9 +166,9 @@ body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; bor
   80%     { border-radius:42% 58% 62% 38% / 61% 42% 58% 39%; }
 }
 @keyframes sway{ from{ rotate:-34deg; } to{ rotate:34deg; } }
-@keyframes drift2{ to{ translate:-186px 268px; scale:1.55; } }
-@keyframes drift3{ to{ translate:148px 244px; rotate:14deg; scale:1.2; } }
-@keyframes drift4{ to{ translate:-66px 78px; scale:1.34; } }
+@keyframes drift2{ to{ translate:-252px 344px; scale:1.72; } }
+@keyframes drift3{ to{ translate:206px 322px; rotate:18deg; scale:1.28; } }
+@keyframes drift4{ to{ translate:-134px 168px; scale:1.62; } }
 
 
 /* ---------- connecting : 베젤 바로 안쪽이 숨쉬듯 일렁인다 (찾고 있는 상태) ---------- */
@@ -178,7 +178,9 @@ body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; bor
   box-shadow:inset 0 0 52px 8px rgba(255,250,214,.6);
 }
 /* 가장자리 안쪽이 숨쉬듯 밝아졌다 잦아든다 */
-body.connecting .rim{ opacity:1; animation:breathe 3.4s ease-in-out infinite; }
+body.connecting .rim,
+body.connected  .rim{ animation:breathe 3.4s ease-in-out infinite; }
+body.connecting .rim{ opacity:1; }
 @keyframes breathe{
   0%,100%{ box-shadow:inset 0 0 44px  4px rgba(255,250,214,.45); }
   50%    { box-shadow:inset 0 0 104px 30px rgba(255,250,214,.92); }
@@ -189,7 +191,9 @@ body.connecting .rim{ opacity:1; animation:breathe 3.4s ease-in-out infinite; }
   background:radial-gradient(circle at 50% 3%, rgba(255,255,255,.9), transparent 44%);
   filter:blur(44px); transition:opacity 1s ease;
 }
-body.connecting .rim::after{ opacity:1; animation:orbit 11s linear infinite; }
+body.connecting .rim::after,
+body.connected  .rim::after{ animation:orbit 11s linear infinite; }
+body.connecting .rim::after{ opacity:1; }
 @keyframes orbit{ to{ rotate:360deg; } }
 
 /* ---------- 병원 칩 : 스크린 상단에서 아래로 내려온다 ---------- */
@@ -200,7 +204,7 @@ body.connecting .rim::after{ opacity:1; animation:orbit 11s linear infinite; }
   opacity:0; translate:0 -30px;
   transition:opacity .5s ease, translate .8s cubic-bezier(.3,.9,.3,1);
 }
-body.connected .pill{ opacity:1; translate:0 0; }
+body.connected .pill{ opacity:1; translate:0 0; transition-delay:.35s; }
 
 .pbg{ position:absolute; inset:0; border-radius:inherit;
       background:rgba(255,248,190,.2); mix-blend-mode:color-burn; }
@@ -209,7 +213,7 @@ body.connected .pill{ opacity:1; translate:0 0; }
 
 .pc{ grid-area:1/1; display:flex; align-items:center; justify-content:center;
      opacity:0; white-space:nowrap; transition:opacity .4s ease; }
-body.connected .pc-hospital{ opacity:1; transition-delay:.25s; }
+body.connected .pc-hospital{ opacity:1; transition-delay:.6s; }
 .pc-hospital{ gap:12px; }
 .vial{
   width:33.35px; height:59.75px; flex:none;
@@ -225,8 +229,10 @@ body.connected .pc-hospital{ opacity:1; transition-delay:.25s; }
 .headline, .docname{
   position:absolute; left:50%; transform:translateX(-50%);
   margin:0; width:780px; text-align:center;
-  font-size:42px; font-weight:500; line-height:1.6; color:#3e3d0a;
-  mix-blend-mode:color-burn;
+  font-size:42px; font-weight:500; line-height:1.6; color:#4a4a1c;
+  /* color-burn 은 밝은 배경에서 형광으로 타버린다. multiply 라야 어둡게 깔리면서
+     뒤의 파란 블롭이 지나갈 때 색만 미묘하게 식는다. */
+  mix-blend-mode:multiply;
   transition:opacity .8s ease;
 }
 /* 줄 수와 무관하게 스크린 정중앙 (사진과 짝인 .docname 만 예외) */
@@ -258,7 +264,7 @@ body.message .l-msg   .w{
 /* 원이 화면을 다 채운 다음(transform 1.8s)에 이어서 올라온다 */
 body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
 /* 칩이 먼저 내려앉고(0.8s) 그 다음 문장 */
-body.connected .l-hi .w{ animation-delay:calc(var(--i) * 70ms + 1150ms); }
+body.connected .l-hi .w{ animation-delay:calc(var(--i) * 70ms + 1500ms); }
 /* 두 단어뿐이라 같은 70ms 로는 티가 안 난다. 간격을 벌리고 사진이 자리잡은 뒤에 올린다 */
 body.doctor  .docname  .w{
   animation:in .9s cubic-bezier(.2,.7,.2,1) both;
@@ -268,8 +274,8 @@ body.doctor  .docname  .w{
 .docmeta{
   position:absolute; left:50%; transform:translateX(-50%);
   margin:0; width:620px; top:calc(50% + 300px); text-align:center;
-  font-size:30px; font-weight:400; line-height:1.55; color:#3e3d0a;
-  mix-blend-mode:color-burn; opacity:0; transition:opacity .8s ease;
+  font-size:30px; font-weight:400; line-height:1.55; color:#4a4a1c;
+  mix-blend-mode:multiply; opacity:0; transition:opacity .8s ease;
 }
 .docmeta em{ font-style:normal; font-weight:600; }
 body.doctor .docmeta .w{
@@ -396,7 +402,7 @@ document.querySelectorAll('.reveal').forEach(split);
 // 시퀀스 : 한 번 누르면 끝까지 자동 진행, 다시 누르면 idle 로 리셋
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','doctor','guide'];
-const HOLD  = [0, 0, 4200, 6000, 6400, 7200, 0];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [0, 0, 4200, 4300, 6400, 7200, 0];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
