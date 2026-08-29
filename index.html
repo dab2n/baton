@@ -110,6 +110,7 @@ body.idle       .field{ transform:translate(1px,145.5px) scale(.167,.157); }
 body.fill       .field{ transform:translate(1px,145.5px) scale(1.14); }
 /* connecting : 중심 원은 작게 물러나고 가장자리 스캔이 주인공 */
 body.connecting .field{ transform:translate(1px,145.5px) scale(.58); }
+body.wave       .field,
 body.connected  .field,
 body.message    .field,
 body.doctor     .field,
@@ -118,11 +119,11 @@ body.guide      .field{ transform:translate(1px,145.5px) scale(1.14); }
 /* C : connecting 에서 켜지고 doctor 에서 꺼짐 */
 /* 노치가 작아져 상단이 드러난다 : idle 은 순수 블랙이어야 하므로 sheen 을 끈다 */
 body.idle .sheen{ opacity:0; }
-body.idle .core, body.fill .core{ transform:scale(.4); opacity:0; }
+body.idle .core, body.fill .core, body.wave .core{ transform:scale(.4); opacity:0; }
 body.connecting  .core{ transform:translate(9px,-29px); }
 
 /* D : 본문 장면에서만 크게 */
-body.idle .cyan, body.fill .cyan, body.connecting .cyan{
+body.idle .cyan, body.fill .cyan, body.wave .cyan, body.connecting .cyan{
   transform:translate(9px,172.5px) scale(.469); opacity:.09;
 }
 
@@ -139,7 +140,7 @@ body.idle .field{
 }
 /* 정적 장면 : 원은 화면보다 크므로(scale 1.14) 돌아도 검정이 드러나지 않는다.
    180deg 그라디언트가 같이 돌면서 흰↔노랑이 화면 위를 천천히 흐른다. */
-body.fill .field, body.connected .field, body.message .field,
+body.fill .field, body.wave .field, body.connected .field, body.message .field,
 body.doctor .field, body.guide .field{
   animation:sway 16s ease-in-out infinite alternate;
 }
@@ -175,6 +176,29 @@ body:not(.idle) .field{ translate:0 0; scale:1; border-radius:50%; }
 @keyframes drift3{ to{ translate:-72px 48px; rotate:12deg; scale:1.18; } }
 @keyframes drift4{ to{ translate:-66px 78px; scale:1.34; } }
 
+
+/* ---------- wave : 엄지척 직후, 화면 아래에서 빛의 파동이 밀려 올라온다 ----------
+   rise 가 위치를, ripple 이 마루의 실루엣을 흔들어 물결처럼 보이게 한다. */
+.swell{
+  position:absolute; left:-18%; width:136%; height:52%; top:100%;
+  border-radius:50%; z-index:1; pointer-events:none; opacity:0;
+  filter:blur(26px);
+  background:linear-gradient(0deg,
+    rgba(255,255,255,0)    0%,
+    rgba(255,255,255,.55) 38%,
+    rgba(255,255,255,.98) 78%,
+    rgba(205,240,255,.95) 100%);
+}
+body.wave .swell{
+  animation:rise   2.2s cubic-bezier(.35,0,.25,1) both,
+            ripple 2s   ease-in-out infinite;
+}
+@keyframes rise{
+   0%  { opacity:0; translate:0 4%;    }
+  10%  { opacity:1;                    }
+  86%  { opacity:1;                    }
+ 100%  { opacity:0; translate:0 -250%; }
+}
 
 /* ---------- connecting : 베젤 바로 안쪽이 일렁인다 (찾고 있는 상태) ----------
    중심 원은 작게 물러나고, 스크린 가장자리를 밝은 호가 완급을 두고 훑는다. */
@@ -307,7 +331,7 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
 
 @media (prefers-reduced-motion:reduce){
   .w{ animation:none; opacity:1; }
-  .field,.sheen,.core,.cyan,.rim,.rim::after{ animation:none; }
+  .field,.sheen,.core,.cyan,.rim,.rim::after,.swell{ animation:none; }
 }
 </style>
 </head>
@@ -336,6 +360,7 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
       <path fill="#8AFFF3" d="M916 401.141C916 493.216 717.924 628 569.426 628C420.927 628 200 353.907 200 261.832C200 169.756 393.505 207.78 542.004 207.78C690.503 207.78 916 309.065 916 401.141Z"/>
     </svg>
     <div class="rim"></div>
+    <div class="swell"></div>
 
     <img class="photo" src="doctor.png" alt="">
 
@@ -408,14 +433,14 @@ document.querySelectorAll('.reveal').forEach(split);
 
 // 시퀀스 : 한 번 누르면 끝까지 자동 진행, 다시 누르면 idle 로 리셋
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
-const STEPS = ['idle','fill','connecting','connected','message','doctor','guide'];
-const HOLD  = [0, 0, 3600, 4600, 4200, 5200, 0];   // 각 상태에 머무는 시간(ms)
+const STEPS = ['idle','fill','wave','connecting','connected','message','doctor','guide'];
+const HOLD  = [0, 0, 2200, 3600, 4600, 4200, 5200, 0];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
 const go = n => {
   clearTimeout(timer);
-  body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|doctor|guide)\b/, STEPS[n]);
+  body.className = body.className.replace(/\b(idle|fill|wave|connecting|connected|message|doctor|guide)\b/, STEPS[n]);
   if (HOLD[n]) timer = setTimeout(() => go(n + 1), HOLD[n]);
 };
 const step = () => STEPS.findIndex(s => body.classList.contains(s));
