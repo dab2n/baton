@@ -11,12 +11,22 @@
 
 | | 상태 | 화면 | 머무는 시간 |
 |---|---|---|---|
-| 1 | `idle` | 검정 + 중앙 원이 배회 | 탭 대기 |
-| 2 | `fill` | 원이 커져 화면을 채움 | 1.9s |
+| 1 | `idle` | 검정 + 중앙 원이 배회 | **얼굴 근접** 또는 탭 |
+| 2 | `fill` | 원이 커져 화면을 채움 + `Hello, do you need any help?` | **엄지척** 또는 탭 |
 | 3 | `connecting` | 하단 웜 글로우 + `Connecting` 필 | 2.6s |
-| 4 | `connected` | 필이 `A Hospital / B-19` 로 모핑 | 2.0s |
-| 5 | `message` | 본문 등장, 필은 아이콘만 남고 축소 | 4.2s |
-| 6 | `doctor` | 사진 페이드인 + `Dr. Sophia` | 유지 |
+| 4 | `connected` | 필이 `A Hospital / B-19` 로 모핑 | 3.4s |
+| 5 | `hello` | `Hello, Somi.` | 3.0s |
+| 6 | `message` | 본문 등장 | 4.2s |
+| 7 | `doctor` | 사진 페이드인 + `Dr. Sophia` | 유지 |
+
+`fill` 의 문장만 `mix-blend-mode:normal` 단색 — 엄지척 이전/이후를 시각적으로 구분한다.
+
+## 카메라 (MediaPipe Tasks Vision, CDN)
+
+`idle` 에서 FaceDetector, `fill` 에서 GestureRecognizer 를 10fps 로 번갈아 돌린다.
+근접 판정은 `얼굴 폭 ÷ 프레임 폭 ≥ NEAR`. 웹캠 화각마다 다르니 실기기에서 `NEAR`(기본 .34 ≈ 30cm)
+와 `HITS`(연속 프레임 수) 두 상수만 보정하면 된다. https 또는 localhost 필요.
+카메라/권한이 없으면 조용히 꺼지고 탭 조작만 남는다. 오른쪽 아래 작은 글씨가 인식 상태.
 
 타이밍은 `index.html` 하단의 `HOLD` 배열에서 조정한다.
 
