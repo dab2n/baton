@@ -70,7 +70,7 @@ body.kiosk .toggle{ display:none; }   /* #screen : 실기기에선 숨김 */
 /* ---------- 스크린 1080x1080 ---------- */
 .screen{
   position:absolute; inset:0; border-radius:50%;
-  background:#000; border:20px solid #000; overflow:hidden;
+  background:#000; overflow:hidden;
 }
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
         z-index:4; pointer-events:none; }
@@ -102,11 +102,13 @@ body.connecting .screen::after{ opacity:1; }
 }
 
 /* A : 중앙의 작은 원 → 화면을 채움 → 각 장면의 좌표로 흘러감 */
-body.idle       .field{ transform:translate(1.5px,146px)     scale(.167,.157); }
-body.fill       .field{ transform:translate(1.3px,100px)     scale(1.058,.996); }
-body.connecting .field{ transform:translate(1px,-112px); }
-body.connected  .field{ transform:translate(1px,30px); }
-/* body.message  : 기본 좌표 */
+body.idle       .field{ transform:translate(1px,145.5px) scale(.167,.157); }
+/* 1.14 = 1022x1053 타원이 지름 1080 원을 완전히 덮는 배율(블러 39px 여유 포함) */
+body.fill       .field{ transform:translate(1px,145.5px) scale(1.14); }
+body.connecting .field{ transform:translate(1px,145.5px) scale(1); }
+body.connected  .field,
+body.message    .field,
+body.doctor     .field{ transform:translate(1px,145.5px) scale(1.14); }
 
 /* C : connecting 에서 켜지고 doctor 에서 꺼짐 */
 /* 노치가 작아져 상단이 드러난다 : idle 은 순수 블랙이어야 하므로 sheen 을 끈다 */
