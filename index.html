@@ -107,14 +107,14 @@ body.kiosk .cam{ display:none; }
 /* A : 중앙의 작은 원 → 화면을 채움 → 각 장면의 좌표로 흘러감 */
 body.idle       .field{ transform:translate(1px,145.5px) scale(.167,.157); }
 /* 1.14 = 1022x1053 타원이 지름 1080 원을 완전히 덮는 배율(블러 39px 여유 포함) */
-body.fill       .field{ transform:translate(1px,145.5px) scale(1.14); }
+body.fill       .field{ transform:translate(1px,145.5px) scale(1.2); }
 /* connecting : 중심 원은 작게 물러나고 가장자리 스캔이 주인공 */
 body.connecting .field{ transform:translate(1px,145.5px) scale(.58); }
 body.wave       .field,
 body.connected  .field,
 body.message    .field,
 body.doctor     .field,
-body.guide      .field{ transform:translate(1px,145.5px) scale(1.14); }
+body.guide      .field{ transform:translate(1px,145.5px) scale(1.2); }
 
 /* C : connecting 에서 켜지고 doctor 에서 꺼짐 */
 /* 노치가 작아져 상단이 드러난다 : idle 은 순수 블랙이어야 하므로 sheen 을 끈다 */
@@ -138,18 +138,13 @@ body.idle .field{
             ripple  6s ease-in-out infinite,
             sway    7s ease-in-out infinite alternate;
 }
-/* 정적 장면 : 원은 화면보다 크므로(scale 1.14) 돌아도 검정이 드러나지 않는다.
-   180deg 그라디언트가 같이 돌면서 흰↔노랑이 화면 위를 천천히 흐른다. */
-body.fill .field, body.wave .field, body.connected .field, body.message .field,
-body.doctor .field, body.guide .field{
-  animation:sway 16s ease-in-out infinite alternate;
-}
-/* connecting : 중심 원은 조용히 물러나 있고 가장자리(.rim)만 일렁인다 */
-body.connecting .field{ animation:none; rotate:0deg; }
-body:not(.idle) .field{ translate:0 0; scale:1; border-radius:50%; }
-.sheen{ animation:drift2 13s ease-in-out infinite alternate; }
+/* 정적 장면에서 .field 를 움직이면 어떻게든 검정이 드러난다. 고정.
+   대신 그 위의 파란 블롭(sheen/cyan)이 크게 흘러다니고,
+   본문 텍스트가 color-burn 이라 지나갈 때마다 글자 색이 미묘하게 바뀐다. */
+body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; border-radius:50%; }
+.sheen{ animation:drift2 15s ease-in-out infinite alternate; }
 .core { animation:drift4 19s ease-in-out infinite alternate; }
-.cyan { animation:drift3 19s ease-in-out infinite alternate; }
+.cyan { animation:drift3 23s ease-in-out infinite alternate; }
 /* 시선을 옮기는 생물처럼 : 짧고 빠르게 도약(7%) → 길게 머물며 미세하게 흔들림(18%).
    구간마다 timing-function 을 따로 줘서 도약은 튕겨나가듯, 체류는 거의 멈춘 듯 보이게 한다. */
 @keyframes wander{
@@ -172,63 +167,53 @@ body:not(.idle) .field{ translate:0 0; scale:1; border-radius:50%; }
   80%     { border-radius:42% 58% 62% 38% / 61% 42% 58% 39%; }
 }
 @keyframes sway{ from{ rotate:-34deg; } to{ rotate:34deg; } }
-@keyframes drift2{ to{ translate:74px -62px; scale:1.4; } }
-@keyframes drift3{ to{ translate:-72px 48px; rotate:12deg; scale:1.18; } }
+@keyframes drift2{ to{ translate:-186px 268px; scale:1.55; } }
+@keyframes drift3{ to{ translate:148px 244px; rotate:14deg; scale:1.2; } }
 @keyframes drift4{ to{ translate:-66px 78px; scale:1.34; } }
 
 
-/* ---------- wave : 엄지척 직후, 화면 아래에서 빛의 파동이 밀려 올라온다 ----------
-   rise 가 위치를, ripple 이 마루의 실루엣을 흔들어 물결처럼 보이게 한다. */
-.swell{
-  position:absolute; left:-18%; width:136%; height:52%; top:100%;
-  border-radius:50%; z-index:1; pointer-events:none; opacity:0;
-  filter:blur(26px);
-  background:linear-gradient(0deg,
-    rgba(255,255,255,0)    0%,
-    rgba(255,255,255,.55) 38%,
-    rgba(255,255,255,.98) 78%,
-    rgba(205,240,255,.95) 100%);
+/* ---------- wave : 엄지척 직후, 기존 그래픽 자체가 물결친다 ----------
+   feTurbulence 노이즈를 feDisplacementMap 으로 SourceGraphic 에 먹인다.
+   노이즈를 위로 흘려(feOffset dy) 물결이 아래에서 위로 지나가고,
+   scale 이 0→최대→감쇠→0 이라 파문이 일었다 잦아든다. */
+/* 곧은 줄무늬를 feTurbulence 로 휘어 물결선으로 만들고, 그 줄무늬가 위로 흘러간다.
+   노이즈는 화면에 고정이라 줄이 지나가며 모양이 계속 바뀐다 = 물결. */
+.ripple{
+  position:absolute; inset:-30%; z-index:1; pointer-events:none; opacity:0;
+  background:repeating-linear-gradient(0deg,
+    rgba(255,255,255,0) 0px, rgba(255,255,255,.34) 22px, rgba(255,255,255,0) 56px);
+  filter:url(#warp) blur(5px);
 }
-body.wave .swell{
-  animation:rise   2.2s cubic-bezier(.35,0,.25,1) both,
-            ripple 2s   ease-in-out infinite;
+body.wave .ripple{ animation:swellup 2.6s cubic-bezier(.25,.6,.3,1) both; }
+@keyframes swellup{
+   0%  { opacity:0;  background-position:0 0;      }
+  16%  { opacity:1;                                }
+  72%  { opacity:.8;                               }
+ 100%  { opacity:0;  background-position:0 -430px; }
 }
-@keyframes rise{
-   0%  { opacity:0; translate:0 4%;    }
-  10%  { opacity:1;                    }
-  86%  { opacity:1;                    }
- 100%  { opacity:0; translate:0 -250%; }
-}
+.fx{ position:absolute; width:0; height:0; overflow:hidden; }
 
 /* ---------- connecting : 베젤 바로 안쪽이 일렁인다 (찾고 있는 상태) ----------
    중심 원은 작게 물러나고, 스크린 가장자리를 밝은 호가 완급을 두고 훑는다. */
 .rim{
   position:absolute; inset:0; border-radius:50%; z-index:1; pointer-events:none;
-  opacity:0; transition:opacity 1s ease; filter:blur(30px);
-  background:conic-gradient(from 0deg, transparent 0deg,
-             rgba(255,248,193,.95) 46deg, transparent 118deg, transparent 360deg);
-  -webkit-mask:radial-gradient(circle closest-side, transparent 62%, #000 88%);
-          mask:radial-gradient(circle closest-side, transparent 62%, #000 88%);
+  opacity:0; transition:opacity 1s ease;
+  box-shadow:inset 0 0 52px 8px rgba(255,250,214,.6);
 }
+/* 가장자리 안쪽이 숨쉬듯 밝아졌다 잦아든다 */
+body.connecting .rim{ opacity:1; animation:breathe 3.4s ease-in-out infinite; }
+@keyframes breathe{
+  0%,100%{ box-shadow:inset 0 0 44px  4px rgba(255,250,214,.45); }
+  50%    { box-shadow:inset 0 0 104px 30px rgba(255,250,214,.92); }
+}
+/* 밝은 구역 하나가 아주 느리게 둘레를 돈다 (등속이지만 11s + 큰 블러라 훑는 티가 안 난다) */
 .rim::after{
-  content:''; position:absolute; inset:0; border-radius:inherit;
-  background:conic-gradient(from 150deg, transparent 0deg,
-             rgba(206,240,255,.8) 62deg, transparent 140deg, transparent 360deg);
+  content:''; position:absolute; inset:0; border-radius:inherit; opacity:0;
+  background:radial-gradient(circle at 50% 3%, rgba(255,255,255,.9), transparent 44%);
+  filter:blur(44px); transition:opacity 1s ease;
 }
-body.connecting .rim{ opacity:1; animation:scan 3.6s ease-in-out infinite; }
-body.connecting .rim::after{ animation:scan2 5.4s ease-in-out infinite; }
-/* 훑다가 되돌아보는 리듬 : 등속 회전이면 기계처럼 보인다 */
-@keyframes scan{
-   0%  { rotate:  0deg; animation-timing-function:cubic-bezier(.3,0,.15,1); }
-  42%  { rotate:214deg; animation-timing-function:cubic-bezier(.5,0,.5,1);  }
-  58%  { rotate:176deg; animation-timing-function:cubic-bezier(.3,0,.15,1); }
- 100%  { rotate:360deg; }
-}
-@keyframes scan2{
-   0%  { rotate:  0deg; animation-timing-function:cubic-bezier(.4,0,.2,1); }
-  55%  { rotate:-186deg; animation-timing-function:cubic-bezier(.4,0,.2,1); }
- 100%  { rotate:-360deg; }
-}
+body.connecting .rim::after{ opacity:1; animation:orbit 11s linear infinite; }
+@keyframes orbit{ to{ rotate:360deg; } }
 
 /* ---------- 병원 칩 : 스크린 상단에서 아래로 내려온다 ---------- */
 .pill{
@@ -331,7 +316,7 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
 
 @media (prefers-reduced-motion:reduce){
   .w{ animation:none; opacity:1; }
-  .field,.sheen,.core,.cyan,.rim,.rim::after,.swell{ animation:none; }
+  .field,.sheen,.core,.cyan,.rim,.rim::after,.ripple{ animation:none; }
 }
 </style>
 </head>
@@ -349,6 +334,13 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
   <div class="camstat">카메라 준비 중…</div>
 </div>
 
+<svg class="fx" aria-hidden="true">
+  <filter id="warp" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.004 0.011" numOctaves="3" seed="9" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="70" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
 <div class="device">
   <div class="ring"></div>
 
@@ -360,12 +352,12 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
       <path fill="#8AFFF3" d="M916 401.141C916 493.216 717.924 628 569.426 628C420.927 628 200 353.907 200 261.832C200 169.756 393.505 207.78 542.004 207.78C690.503 207.78 916 309.065 916 401.141Z"/>
     </svg>
     <div class="rim"></div>
-    <div class="swell"></div>
+    <div class="ripple"></div>
 
     <img class="photo" src="doctor.png" alt="">
 
     <p class="headline l-greet reveal">Hello, do you need help?</p>
-    <p class="headline l-hi reveal">Hello, <em>Somi.</em></p>
+    <p class="headline l-hi reveal nopause">Hello, <em>Somi.</em></p>
     <p class="headline l-msg reveal">
       You had an appointment on <em>July&nbsp;20.</em><br>
       Today is your <em>2nd follow-up.</em>
@@ -407,6 +399,7 @@ fit();
 // 텍스트를 단어 단위로 쪼개고 DOM 순서대로 딜레이 부여
 const PAUSE = 7;   // 문장 경계에서 건너뛸 칸 수 (1칸 = 스태거 1단위)
 const split = el => {
+  const hold = el.classList.contains('nopause');   // 한 호흡으로 읽히는 문장
   let i = 0;
   const walk = node => {
     for (const child of [...node.childNodes]) {
@@ -418,7 +411,7 @@ const split = el => {
           const s = document.createElement('span');
           s.className = 'w'; s.style.setProperty('--i', i); s.textContent = part;
           // 문장이 끊기는 자리에서 한 박자 쉰다 (약칭 Dr. 등은 제외)
-          i += /[,.?!]$/.test(part) && !/^(Dr|Mr|Ms|Mrs|St)\.$/.test(part) ? PAUSE : 1;
+          i += !hold && /[,.?!]$/.test(part) && !/^(Dr|Mr|Ms|Mrs|St)\.$/.test(part) ? PAUSE : 1;
           frag.append(s);
         }
         child.replaceWith(frag);
@@ -434,7 +427,7 @@ document.querySelectorAll('.reveal').forEach(split);
 // 시퀀스 : 한 번 누르면 끝까지 자동 진행, 다시 누르면 idle 로 리셋
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','wave','connecting','connected','message','doctor','guide'];
-const HOLD  = [0, 0, 2200, 3600, 4600, 4200, 5200, 0];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [0, 0, 2600, 4200, 6000, 6400, 7200, 0];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
