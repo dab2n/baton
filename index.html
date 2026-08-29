@@ -258,7 +258,8 @@ body.connecting .pc-connecting b{
   mix-blend-mode:color-burn;
   transition:opacity .8s ease;
 }
-.headline{ top:calc(50% - 103px); }
+/* 줄 수와 무관하게 스크린 정중앙 (사진과 짝인 .docname 만 예외) */
+.headline{ top:50%; transform:translate(-50%,-50%); }
 .docname { top:calc(50% - 372px); }
 .headline em{ font-style:normal; font-weight:600; }
 
