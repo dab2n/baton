@@ -17,7 +17,8 @@
 | 4 | `connected` | 필이 `A Hospital / B-19` 로 모핑 | 3.4s |
 | 5 | `hello` | `Hello, Somi.` | 3.0s |
 | 6 | `message` | 본문 등장 | 4.2s |
-| 7 | `doctor` | 사진 페이드인 + `Dr. Sophia` | 유지 |
+| 7 | `doctor` | 사진 + `Dr. Sophia` + 예약시간/방문목적 | 5.2s |
+| 8 | `guide` | `I'll take you to the waiting area.` | 유지 |
 
 `fill` 의 문장만 `mix-blend-mode:normal` 단색 — 엄지척 이전/이후를 시각적으로 구분한다.
 

@@ -121,7 +121,8 @@ body.connecting .field{ transform:translate(1px,145.5px) scale(.84); }
 body.connected  .field{ transform:translate(1px,66px)    scale(.95); }
 body.hello      .field,
 body.message    .field,
-body.doctor     .field{ transform:translate(1px,145.5px) scale(1.14); }
+body.doctor     .field,
+body.guide      .field{ transform:translate(1px,145.5px) scale(1.14); }
 
 /* C : connecting 에서 켜지고 doctor 에서 꺼짐 */
 /* 노치가 작아져 상단이 드러난다 : idle 은 순수 블랙이어야 하므로 sheen 을 끈다 */
@@ -268,7 +269,9 @@ body.connecting .pc-connecting b{
 body.fill    .l-greet,
 body.hello   .l-hi,
 body.message .l-msg,
-body.doctor  .docname{ opacity:1; transition-duration:.15s; }
+body.guide   .l-guide,
+body.doctor  .docname,
+body.doctor  .docmeta{ opacity:1; transition-duration:.15s; }
 
 /* 엄지척 이전(=greet) : color-burn 의 투명감 없이 단색으로 */
 .l-greet{ mix-blend-mode:normal; }
@@ -277,6 +280,7 @@ body.doctor  .docname{ opacity:1; transition-duration:.15s; }
 .w{ display:inline-block; opacity:0; will-change:transform,opacity,filter; }
 body.fill    .l-greet .w,
 body.hello   .l-hi    .w,
+body.guide   .l-guide .w,
 body.message .l-msg   .w{
   animation:in .9s cubic-bezier(.2,.7,.2,1) both;
   animation-delay:calc(var(--i) * 70ms + 200ms);
@@ -287,6 +291,18 @@ body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
 body.doctor  .docname  .w{
   animation:in .9s cubic-bezier(.2,.7,.2,1) both;
   animation-delay:calc(var(--i) * 190ms + 500ms);
+}
+/* 예약 정보 : 사진 아래, 본문보다 한 단계 작게 */
+.docmeta{
+  position:absolute; left:50%; transform:translateX(-50%);
+  margin:0; width:620px; top:calc(50% + 300px); text-align:center;
+  font-size:30px; font-weight:400; line-height:1.55; color:#3e3d0a;
+  mix-blend-mode:color-burn; opacity:0; transition:opacity .8s ease;
+}
+.docmeta em{ font-style:normal; font-weight:600; }
+body.doctor .docmeta .w{
+  animation:in .9s cubic-bezier(.2,.7,.2,1) both;
+  animation-delay:calc(var(--i) * 90ms + 950ms);
 }
 @keyframes in{
   from{ opacity:0; transform:translateY(.42em); filter:blur(10px); }
@@ -344,6 +360,11 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
       Today is your <em>2nd follow-up.</em>
     </p>
     <p class="docname reveal">Dr. Sophia</p>
+    <p class="docmeta reveal"><em>10:30 AM</em><br>2nd follow-up consultation</p>
+    <p class="headline l-guide reveal">
+      I&rsquo;ll take you to the waiting area.<br>
+      Please follow me slowly.
+    </p>
 
 
     <div class="pill">
@@ -405,14 +426,14 @@ document.querySelectorAll('.reveal').forEach(split);
 
 // 시퀀스 : 한 번 누르면 끝까지 자동 진행, 다시 누르면 idle 로 리셋
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
-const STEPS = ['idle','fill','connecting','connected','hello','message','doctor'];
-const HOLD  = [0, 0, 2600, 3400, 3000, 4200, 0];   // 각 상태에 머무는 시간(ms)
+const STEPS = ['idle','fill','connecting','connected','hello','message','doctor','guide'];
+const HOLD  = [0, 0, 2600, 3400, 3000, 4200, 5200, 0];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
 const go = n => {
   clearTimeout(timer);
-  body.className = body.className.replace(/\b(idle|fill|connecting|connected|hello|message|doctor)\b/, STEPS[n]);
+  body.className = body.className.replace(/\b(idle|fill|connecting|connected|hello|message|doctor|guide)\b/, STEPS[n]);
   if (HOLD[n]) timer = setTimeout(() => go(n + 1), HOLD[n]);
 };
 const step = () => STEPS.findIndex(s => body.classList.contains(s));
