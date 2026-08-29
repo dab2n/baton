@@ -19,7 +19,7 @@
      D .cyan   Ellipse 60    시안 블롭
 */
 
-:root{ --fit: 1128; }          /* 미리보기 : 하우징 자리를 늘 비워둔다 (토글해도 크기 불변) */
+:root{ --fit: 1238; }          /* 미리보기 : 하우징 자리를 늘 비워둔다 (토글해도 크기 불변) */
 body.kiosk{ --fit: 1080; }     /* #screen : 실기기, 스크린이 화면을 꽉 채움 */
 
 *{ box-sizing: border-box; }
@@ -35,9 +35,13 @@ body{
 
 /* ---------- 제품 하우징 (피그마 그룹 = 임의 표현) ---------- */
 .ring{
-  position:absolute; inset:-24px; border-radius:50%;
-  background:linear-gradient(160deg,#f6efc6 0%,#ded5a0 38%,#f2ebc4 62%,#c9c087 100%);
+  position:absolute; inset:-78.8px; border-radius:50%;   /* 1237.6 */
+  background:#f3e682; filter:blur(6px);
   box-shadow:0 24px 70px rgba(0,0,0,.16);
+}
+.ring::before{                                            /* 1191.2 */
+  content:''; position:absolute; inset:23.2px; border-radius:50%;
+  background:radial-gradient(circle closest-side,#cdc47e 90.4%,#fff8c1 100%);
 }
 body.bare .ring{ display:none; }
 
@@ -68,6 +72,8 @@ body.kiosk .toggle{ display:none; }   /* #screen : 실기기에선 숨김 */
   position:absolute; inset:0; border-radius:50%;
   background:#000; border:20px solid #000; overflow:hidden;
 }
+.bezel{ position:absolute; inset:0; width:1080px; height:1080px;
+        z-index:4; pointer-events:none; }
 /* connecting 의 하단 웜 글로우 : inset 0 -81px 100px 30px rgba(248,241,207,.51) */
 .screen::after{
   content:''; position:absolute; inset:0; border-radius:inherit; z-index:1;
@@ -103,6 +109,8 @@ body.connected  .field{ transform:translate(1px,30px); }
 /* body.message  : 기본 좌표 */
 
 /* C : connecting 에서 켜지고 doctor 에서 꺼짐 */
+/* 노치가 작아져 상단이 드러난다 : idle 은 순수 블랙이어야 하므로 sheen 을 끈다 */
+body.idle .sheen{ opacity:0; }
 body.idle .core, body.fill .core{ transform:scale(.4); opacity:0; }
 body.connecting  .core{ transform:translate(9px,-29px); }
 
@@ -154,9 +162,6 @@ body:not(.idle) .field{
 @keyframes drift3{ to{ translate:-34px 20px; rotate:6deg; scale:1.08; } }
 @keyframes drift4{ to{ translate:-24px 30px; scale:1.14; } }
 
-/* ---------- 베젤과 이어지는 센서/카메라 영역 : 항상 순수 블랙 ---------- */
-.notch{ position:absolute; left:352px; top:-201px; width:336px; height:239px;
-        border-radius:50%; background:#000; z-index:2; }
 
 /* ---------- 하단 필 : 크기는 고정, 내용만 교체 ---------- */
 .pill{
@@ -297,7 +302,6 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
     </p>
     <p class="docname reveal">Dr. Sophia</p>
 
-    <div class="notch"></div>
 
     <div class="pill">
       <span class="pbg"></span>
@@ -311,13 +315,21 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
       <div class="pc pc-hospital"><i class="vial"></i><div><b>A Hospital</b><s>B-19</s></div></div>
     </div>
   </div>
+  <!-- 베젤 : 피그마 124:46/124:48 (바깥 원 1080 - 실디스플레이 1030.43x1022.68) -->
+  <svg class="bezel" viewBox="0 0 1080 1080" aria-hidden="true">
+    <mask id="aa" maskUnits="userSpaceOnUse" x="0" y="0" width="1080" height="1080">
+      <rect width="1080" height="1080" fill="#fff"/>
+      <path transform="translate(24.63 32.36)" d="M425.668 0.282314C364.691 11.0315 306.254 32.7253 253.095 64.1911C195.831 98.0022 145.798 142.562 105.538 195.331C65.2771 248.1 35.5702 308.295 18.1761 372.4C9.96763 402.888 4.49532 434.159 1.75916 465.624C0.586523 480.869 0.00020106 495.918 0.00020106 511.162C0.00020106 518.589 0.195639 526.015 0.586519 533.442C0.977398 540.673 1.56372 548.1 2.15004 555.331C8.01323 616.895 24.821 676.895 51.7917 732.595C80.9123 792.4 121.173 845.755 170.424 890.315C219.87 934.875 277.329 969.273 339.87 991.944C369.577 1002.69 400.261 1010.71 431.531 1015.79C446.58 1018.33 461.629 1020.09 476.873 1021.26C491.531 1022.43 506.385 1022.82 521.238 1022.63C583.192 1021.85 644.365 1009.92 702.215 987.449C763.974 963.409 820.652 927.449 868.925 881.911C917.199 836.178 956.287 781.65 984.039 721.064C997.134 692.334 1007.69 662.432 1015.31 631.748C1019.02 616.895 1021.95 602.041 1024.3 586.992C1026.65 572.334 1028.21 557.677 1029.19 543.019C1033.49 481.26 1026.65 419.11 1008.86 359.696C989.903 296.178 958.828 236.764 917.394 185.168C875.961 133.377 824.951 90.1846 767.297 57.937C739.935 42.4973 711.01 29.7937 681.303 19.6308C667.036 14.7448 652.378 10.4452 637.72 6.92725C630.489 5.1683 623.258 3.60478 616.026 2.04126C612.508 1.2595 608.795 0.673181 605.277 0.0868621C604.105 0.0868621 603.323 -0.108578 602.15 0.0868621C600.977 0.0868621 600 0.47776 599.023 0.868639C597.069 1.6504 595.31 3.01848 594.137 4.77743C575.961 30.1846 546.645 45.038 515.375 45.038C484.105 45.038 454.984 29.9892 436.613 4.77743C434.072 1.25952 429.968 -0.499445 425.668 0.282314Z"/>
+    </mask>
+    <circle cx="540" cy="540" r="540" fill="#000" mask="url(#aa)"/>
+  </svg>
 </div>
 
 <script>
 if (location.hash === '#screen') document.body.classList.add('bare','kiosk');
 
 // scale() 은 단위 없는 수만 받으므로 JS로 계산 (CSS calc 로는 px/숫자 → px 라 불가)
-const FILL = .86;   // 미리보기 여백. 실기기(#screen)는 항상 꽉 채움
+const FILL = .92;   // 미리보기 여백. 실기기(#screen)는 항상 꽉 채움
 const fit = () => document.documentElement.style.setProperty('--s',
   Math.min(innerWidth, innerHeight) * (document.body.classList.contains('kiosk') ? 1 : FILL) /
   parseFloat(getComputedStyle(document.body).getPropertyValue('--fit')));
