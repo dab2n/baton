@@ -13,12 +13,11 @@
 |---|---|---|---|
 | 1 | `idle` | 검정 + 중앙 원이 배회 | **얼굴 근접** 또는 탭 |
 | 2 | `fill` | 원이 커져 화면을 채움 + `Hello, do you need help?` | **엄지척** 또는 탭 |
-| 3 | `wave` | 기존 그래픽 위로 물결선이 흘러 지나감 | 2.6s |
-| 4 | `connecting` | 중심 원은 물러나고 가장자리가 숨쉬듯 밝아졌다 잦아듦 | 4.2s |
-| 5 | `connected` | `A Hospital / B-19` 칩이 상단에서 내려오고 → `Hello, Somi.` | 6.0s |
-| 6 | `message` | 본문 등장 | 6.4s |
-| 7 | `doctor` | 사진 + `Dr. Sophia` + 예약시간/방문목적 | 7.2s |
-| 8 | `guide` | `I'll take you to the waiting area.` | 유지 |
+| 3 | `connecting` | 중심 원은 물러나고 가장자리가 숨쉬듯 밝아졌다 잦아듦 | 4.2s |
+| 4 | `connected` | `A Hospital / B-19` 칩이 상단에서 내려오고 → `Hello, Somi.` | 6.0s |
+| 5 | `message` | 본문 등장 | 6.4s |
+| 6 | `doctor` | 사진 + `Dr. Sophia` + 예약시간/방문목적 | 7.2s |
+| 7 | `guide` | `I'll take you to the waiting area.` | 유지 |
 
 `fill` 의 문장만 `mix-blend-mode:normal` 단색 — 엄지척 이전/이후를 시각적으로 구분한다.
 

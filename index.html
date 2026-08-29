@@ -110,7 +110,6 @@ body.idle       .field{ transform:translate(1px,145.5px) scale(.167,.157); }
 body.fill       .field{ transform:translate(1px,145.5px) scale(1.2); }
 /* connecting : 중심 원은 작게 물러나고 가장자리 스캔이 주인공 */
 body.connecting .field{ transform:translate(1px,145.5px) scale(.58); }
-body.wave       .field,
 body.connected  .field,
 body.message    .field,
 body.doctor     .field,
@@ -119,11 +118,11 @@ body.guide      .field{ transform:translate(1px,145.5px) scale(1.2); }
 /* C : connecting 에서 켜지고 doctor 에서 꺼짐 */
 /* 노치가 작아져 상단이 드러난다 : idle 은 순수 블랙이어야 하므로 sheen 을 끈다 */
 body.idle .sheen{ opacity:0; }
-body.idle .core, body.fill .core, body.wave .core{ transform:scale(.4); opacity:0; }
+body.idle .core, body.fill .core{ transform:scale(.4); opacity:0; }
 body.connecting  .core{ transform:translate(9px,-29px); }
 
 /* D : 본문 장면에서만 크게 */
-body.idle .cyan, body.fill .cyan, body.wave .cyan, body.connecting .cyan{
+body.idle .cyan, body.fill .cyan, body.connecting .cyan{
   transform:translate(9px,172.5px) scale(.469); opacity:.09;
 }
 
@@ -172,29 +171,7 @@ body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; bor
 @keyframes drift4{ to{ translate:-66px 78px; scale:1.34; } }
 
 
-/* ---------- wave : 엄지척 직후, 기존 그래픽 자체가 물결친다 ----------
-   feTurbulence 노이즈를 feDisplacementMap 으로 SourceGraphic 에 먹인다.
-   노이즈를 위로 흘려(feOffset dy) 물결이 아래에서 위로 지나가고,
-   scale 이 0→최대→감쇠→0 이라 파문이 일었다 잦아든다. */
-/* 곧은 줄무늬를 feTurbulence 로 휘어 물결선으로 만들고, 그 줄무늬가 위로 흘러간다.
-   노이즈는 화면에 고정이라 줄이 지나가며 모양이 계속 바뀐다 = 물결. */
-.ripple{
-  position:absolute; inset:-30%; z-index:1; pointer-events:none; opacity:0;
-  background:repeating-linear-gradient(0deg,
-    rgba(255,255,255,0) 0px, rgba(255,255,255,.34) 22px, rgba(255,255,255,0) 56px);
-  filter:url(#warp) blur(5px);
-}
-body.wave .ripple{ animation:swellup 2.6s cubic-bezier(.25,.6,.3,1) both; }
-@keyframes swellup{
-   0%  { opacity:0;  background-position:0 0;      }
-  16%  { opacity:1;                                }
-  72%  { opacity:.8;                               }
- 100%  { opacity:0;  background-position:0 -430px; }
-}
-.fx{ position:absolute; width:0; height:0; overflow:hidden; }
-
-/* ---------- connecting : 베젤 바로 안쪽이 일렁인다 (찾고 있는 상태) ----------
-   중심 원은 작게 물러나고, 스크린 가장자리를 밝은 호가 완급을 두고 훑는다. */
+/* ---------- connecting : 베젤 바로 안쪽이 숨쉬듯 일렁인다 (찾고 있는 상태) ---------- */
 .rim{
   position:absolute; inset:0; border-radius:50%; z-index:1; pointer-events:none;
   opacity:0; transition:opacity 1s ease;
@@ -316,7 +293,7 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
 
 @media (prefers-reduced-motion:reduce){
   .w{ animation:none; opacity:1; }
-  .field,.sheen,.core,.cyan,.rim,.rim::after,.ripple{ animation:none; }
+  .field,.sheen,.core,.cyan,.rim,.rim::after{ animation:none; }
 }
 </style>
 </head>
@@ -334,13 +311,6 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
   <div class="camstat">카메라 준비 중…</div>
 </div>
 
-<svg class="fx" aria-hidden="true">
-  <filter id="warp" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
-    <feTurbulence type="fractalNoise" baseFrequency="0.004 0.011" numOctaves="3" seed="9" result="n"/>
-    <feDisplacementMap in="SourceGraphic" in2="n" scale="70" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
-
 <div class="device">
   <div class="ring"></div>
 
@@ -352,7 +322,6 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
       <path fill="#8AFFF3" d="M916 401.141C916 493.216 717.924 628 569.426 628C420.927 628 200 353.907 200 261.832C200 169.756 393.505 207.78 542.004 207.78C690.503 207.78 916 309.065 916 401.141Z"/>
     </svg>
     <div class="rim"></div>
-    <div class="ripple"></div>
 
     <img class="photo" src="doctor.png" alt="">
 
@@ -426,14 +395,14 @@ document.querySelectorAll('.reveal').forEach(split);
 
 // 시퀀스 : 한 번 누르면 끝까지 자동 진행, 다시 누르면 idle 로 리셋
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
-const STEPS = ['idle','fill','wave','connecting','connected','message','doctor','guide'];
-const HOLD  = [0, 0, 2600, 4200, 6000, 6400, 7200, 0];   // 각 상태에 머무는 시간(ms)
+const STEPS = ['idle','fill','connecting','connected','message','doctor','guide'];
+const HOLD  = [0, 0, 4200, 6000, 6400, 7200, 0];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
 const go = n => {
   clearTimeout(timer);
-  body.className = body.className.replace(/\b(idle|fill|wave|connecting|connected|message|doctor|guide)\b/, STEPS[n]);
+  body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|doctor|guide)\b/, STEPS[n]);
   if (HOLD[n]) timer = setTimeout(() => go(n + 1), HOLD[n]);
 };
 const step = () => STEPS.findIndex(s => body.classList.contains(s));
