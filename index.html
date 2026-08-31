@@ -20,7 +20,8 @@
 */
 
 :root{ --fit: 1238; }          /* 미리보기 : 하우징 자리를 늘 비워둔다 (토글해도 크기 불변) */
-body.kiosk{ --fit: 1080; }     /* #screen : 실기기, 스크린이 화면을 꽉 채움 */
+/* 실기기(7" 원형) : 베젤은 진짜 유리가 대신하므로 실제 표시영역 1022.68 을 기준으로 꽉 채운다 */
+body.kiosk{ --fit: 1023; }
 
 *{ box-sizing: border-box; }
 html,body{ height:100%; margin:0; overflow:hidden; background:#fff; }
@@ -65,7 +66,9 @@ body.bare .ring{ display:none; }
 }
 body.bare .toggle .sw{ background:#d6d6d6; }
 body.bare .toggle .sw::after{ transform:none; }
-body.kiosk .toggle{ display:none; }   /* #screen : 실기기에선 숨김 */
+body.kiosk .toggle{ display:none; }   /* 전체화면 : 실기기에선 숨김 */
+body.kiosk{ cursor:none; background:#000; }   /* 터치/마우스 없는 스크린 */
+body.kiosk .bezel{ display:none; }            /* 그려진 베젤·노치는 실기기에선 픽셀 낭비 */
 
 /* 카메라 모니터 (테스트용) */
 .cam{ position:fixed; right:16px; bottom:16px; z-index:10; width:240px; }
@@ -381,6 +384,23 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
 </div>
 
 <script>
+// 접속하면 바로 전체화면. 제스처 없이 거절되면 첫 입력에서 다시 시도한다.
+// #cam : 카메라 테스트용 미리보기 (전체화면·자동진행 없음)
+const CAM = location.hash === '#cam';
+const full = () => document.documentElement.requestFullscreen?.().catch(() => {});
+if (!CAM) {
+  full();
+  // 첫 입력은 전체화면 전환에만 쓰고 시퀀스로 흘려보내지 않는다
+  addEventListener('pointerdown', e => { full(); e.stopPropagation(); }, { once: true, capture: true });
+  addEventListener('keydown', full, { once: true });
+}
+// 전체화면일 때만 하우징/카메라를 감추고 스크린이 화면을 꽉 채운다
+addEventListener('fullscreenchange', () => {
+  const on = !!document.fullscreenElement;
+  document.body.classList.toggle('bare', on);
+  document.body.classList.toggle('kiosk', on);
+  fit();
+});
 if (location.hash === '#screen') document.body.classList.add('bare','kiosk');
 
 // scale() 은 단위 없는 수만 받으므로 JS로 계산 (CSS calc 로는 px/숫자 → px 라 불가)
@@ -422,19 +442,21 @@ document.querySelectorAll('.reveal').forEach(split);
 // 시퀀스 : 한 번 누르면 끝까지 자동 진행, 다시 누르면 idle 로 리셋
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','doctor','guide'];
-const HOLD  = [0, 0, 4200, 4300, 6400, 7200, 0];   // 각 상태에 머무는 시간(ms)
+// 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
+const HOLD  = [3400, 3200, 4200, 4300, 6400, 7200, 7600];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
 const go = n => {
   clearTimeout(timer);
   body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|doctor|guide)\b/, STEPS[n]);
-  if (HOLD[n]) timer = setTimeout(() => go(n + 1), HOLD[n]);
+  if (HOLD[n]) timer = setTimeout(() => go((n + 1) % STEPS.length), HOLD[n]);
 };
 const step = () => STEPS.findIndex(s => body.classList.contains(s));
 // 카메라가 없을 때의 수동 진행 : 한 단계씩, 마지막에서 리셋
 const tap = () => { const n = step(); go(n < 0 || n === STEPS.length - 1 ? 0 : n + 1); };
 window.__go = go; window.__step = step;
+go(0);   // 접속하자마자 자동 시퀀스 시작
 
 // 목업 테두리 토글 : --fit 이 바뀌므로 fit() 재계산
 const toggle = document.querySelector('.toggle');
@@ -514,7 +536,9 @@ const loop = () => {
   if (wants && hits >= HITS) { hits = 0; window.__go(n + 1); }
 };
 
-try {
+// 지금은 쓰지 않는다 : #cam 일 때만 켠다
+if (location.hash !== '#cam') document.querySelector('.cam').remove();
+else try {
   const { FilesetResolver, FaceDetector, GestureRecognizer } = await import(V + '/vision_bundle.mjs');
   const vision = await FilesetResolver.forVisionTasks(V + '/wasm');
   [fd, gr] = await Promise.all([
