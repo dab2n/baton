@@ -93,7 +93,10 @@ body.kiosk .cam{ display:none; }
 
 /* ---------- 배경 레이어 : 기본값 = message(본문) 상태 ---------- */
 /* blur 는 래퍼에 : 자식을 scale() 해도 흐림 반경이 같이 커지지 않게 */
-.blur39{ position:absolute; inset:0; filter:blur(39px); transition:filter .8s ease; }
+/* 블러는 구슬 가장자리가 보이는 장면(idle/connecting)에만.
+   꽉 찬 장면에선 가장자리가 화면 밖이라 흐릴 게 없고, 블러 계단만 잔물결처럼 남는다.
+   지연 1s : 끌 때만 늦춰서 구슬이 다 커진 뒤에 사라지게 (켤 때는 즉시) */
+.blur39{ position:absolute; inset:0; filter:none; transition:filter .8s ease 1s; }
 .field{ position:absolute; left:28px; top:-132px; width:1022px; height:1053px;
         border-radius:50%; background:linear-gradient(180deg,#fff 23.89%,#f6e280 100%); }
 .sheen{ position:absolute; left:413px; top:-72px; width:424px; height:420px;
@@ -164,7 +167,8 @@ body.idle .field::before{ opacity:1; animation:gleam 9s ease-in-out infinite; }
  100%  { rotate:360deg; opacity:.5;  }
 }
 /* 39px 로는 구슬에 가장자리가 안 생겨 광택이 그려질 데가 없다 */
-body.idle .blur39{ filter:blur(17px); }
+body.idle       .blur39{ filter:blur(17px); transition-delay:0s; }
+body.connecting .blur39{ filter:blur(39px); transition-delay:0s; }
 /* 정적 장면에서 .field 를 움직이면 어떻게든 검정이 드러난다. 고정.
    대신 그 위의 파란 블롭(sheen/cyan)이 크게 흘러다니고,
    본문 텍스트가 color-burn 이라 지나갈 때마다 글자 색이 미묘하게 바뀐다. */
@@ -440,7 +444,7 @@ document.querySelectorAll('.reveal').forEach(split);
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','doctor','guide'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 3200, 4200, 4300, 6400, 7200, 7600];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 4200, 4300, 5000, 7200, 7600];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
