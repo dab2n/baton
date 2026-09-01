@@ -397,20 +397,25 @@ if (!CAM) {
   addEventListener('pointerdown', e => { full(); e.stopPropagation(); }, { once: true, capture: true });
   addEventListener('keydown', full, { once: true });
 }
-// 전체화면일 때만 하우징/카메라를 감추고 스크린이 화면을 꽉 채운다
-addEventListener('fullscreenchange', () => {
-  document.body.classList.toggle('kiosk', !!document.fullscreenElement);
+// 전체화면일 때만 하우징/카메라/토글을 감추고 스크린이 화면을 꽉 채운다.
+// F11·맥 초록버튼 전체화면은 fullscreenchange 가 안 오므로 display-mode 도 같이 본다.
+const SCREEN = location.hash === '#screen';
+const fs = matchMedia('(display-mode: fullscreen)');
+const kiosk = () => {
+  document.body.classList.toggle('kiosk', SCREEN || !!document.fullscreenElement || fs.matches);
   fit();
-});
-if (location.hash === '#screen') document.body.classList.add('bare','kiosk');
+};
+addEventListener('fullscreenchange', kiosk);
+fs.addEventListener('change', kiosk);
+if (SCREEN) document.body.classList.add('bare');
 
 // scale() 은 단위 없는 수만 받으므로 JS로 계산 (CSS calc 로는 px/숫자 → px 라 불가)
 const FILL = .92;   // 미리보기 여백. 실기기(#screen)는 항상 꽉 채움
 const fit = () => document.documentElement.style.setProperty('--s',
   Math.min(innerWidth, innerHeight) * (document.body.classList.contains('kiosk') ? 1 : FILL) /
   parseFloat(getComputedStyle(document.body).getPropertyValue('--fit')));
-addEventListener('resize', fit);
-fit();
+addEventListener('resize', kiosk);   // display-mode change 가 안 오는 브라우저 대비
+kiosk();
 
 // 텍스트를 단어 단위로 쪼개고 DOM 순서대로 딜레이 부여
 const PAUSE = 7;   // 문장 경계에서 건너뛸 칸 수 (1칸 = 스태거 1단위)
