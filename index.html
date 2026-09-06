@@ -132,15 +132,29 @@ body.follow     .field{ transform:translate(1px,145.5px) scale(1.2); }
 /* doctor : 검은 화면에 계란형 빛 한 덩이만 (피그마 3070:737) */
 body.follow .core{ opacity:0; }   /* 이 프레임엔 없는 레이어. 가운데가 하얘지면 화살표가 묻힌다 */
 /* 배경 레이어는 전부 물러난다 : 이 장면은 .dlight 한 장이 전부 그린다 */
-body.doctor .field,
-body.doctor .sheen,
-body.doctor .core,
-body.doctor .cyan{ opacity:0; }
+body.doctor .field,   body.hospital .field,
+body.doctor .sheen,   body.hospital .sheen,
+body.doctor .core,    body.hospital .core,
+body.doctor .cyan,    body.hospital .cyan{ opacity:0; }
 /* 피그마 export(02 · Detected · Call.svg) 를 그대로 인라인.
    계란형이 위쪽으로 갈수록 좁고 오른쪽으로 기울어 있어 타원으로는 안 맞는다 */
 .dlight{ position:absolute; inset:0; width:1080px; height:1080px;
          opacity:0; transition:opacity 1.1s ease; }
-body.doctor .dlight{ opacity:1; }
+body.doctor .dlight, body.hospital .dlight{ opacity:1; }
+/* 계란형 가장자리 일렁임 : 제어점을 조금씩 밀어 둔 세 벌을 오간다.
+   (블러 40px 위라 12~18px 만 밀어도 테두리가 천천히 흐른다) */
+.dlight .egg{ animation:eggwob 13s ease-in-out infinite; }
+@keyframes eggwob{
+  0%,100%{ d:path("M847.582 534.719C847.582 712.286 691.188 891 509.762 891C328.337 891 190.582 712.286 190.582 534.719C190.582 357.151 429.47 162 610.895 162C792.321 162 847.582 357.151 847.582 534.719Z"); }
+  34%    { d:path("M843 530C843 714 688 902 505 902C325 902 172 716 172 530C172 352 428 158 615 158C796 158 843 352 843 530Z"); }
+  67%    { d:path("M861 540C861 708 696 882 515 882C333 882 202 706 202 540C202 362 433 168 606 168C790 168 861 362 861 540Z"); }
+}
+/* 뒤쪽 노란 호는 위상을 어긋나게 : 두 겹이 다른 주기로 흘러야 결이 안 생긴다 */
+.dlight .arc{ transform-origin:540px 540px; animation:arcwob 19s ease-in-out infinite alternate; }
+@keyframes arcwob{
+  from{ transform:rotate(-2.2deg) scale(1.015,.985); }
+  to  { transform:rotate(2.6deg)  scale(.982,1.02);  }
+}
 
 /* C : connecting 에서 켜지고 doctor 에서 꺼짐 */
 /* 노치가 작아져 상단이 드러난다 : idle 은 순수 블랙이어야 하므로 sheen 을 끈다 */
@@ -276,31 +290,23 @@ body.connected .pc-hospital{ opacity:1; transition-delay:.6s; }
        display:block; text-decoration:none; }
 
 /* ---------- 본문 ---------- */
-.headline, .docname{
+.headline{
   position:absolute; left:50%; transform:translateX(-50%);
   margin:0; width:780px; text-align:center;
   font-size:42px; font-weight:500; line-height:1.6; color:#614409;
   mix-blend-mode:color-burn;
   transition:opacity .8s ease;
 }
-/* 줄 수와 무관하게 스크린 정중앙 (사진과 짝인 .docname 만 예외) */
+/* 줄 수와 무관하게 스크린 정중앙 */
 .headline{ top:50%; transform:translate(-50%,-50%); }
-/* 이름표 : 사진 아래. 글자에만 좌→우 금색→흰색 그라디언트 */
-.docname{
-  top:888px; width:auto; white-space:nowrap; font-size:32px;
-  mix-blend-mode:normal;
-  background:linear-gradient(90deg,#a69c60,#fff);
-  -webkit-background-clip:text; background-clip:text; color:transparent;
-}
 .headline em{ font-style:normal; font-weight:600; }
 
 /* 장면당 한 문장. 들어올 때는 즉시, 나갈 때만 천천히 사라진다 */
-.headline, .docname{ opacity:0; }
+.headline{ opacity:0; }
 body.fill    .l-greet,
 body.connected .l-hi,
 body.message .l-msg,
-body.guide   .l-guide,
-body.doctor  .docname{ opacity:1; transition-duration:.15s; }
+body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 
 /* 엄지척 이전(=greet) : color-burn 의 투명감 없이 단색으로 */
 .l-greet{ mix-blend-mode:normal; }
@@ -318,21 +324,6 @@ body.message .l-msg   .w{
 body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
 /* 칩이 먼저 내려앉고(0.8s) 그 다음 문장 */
 body.connected .l-hi .w{ animation-delay:calc(var(--i) * 70ms + 1500ms); }
-/* 이름은 단어로 쪼개지 않는다 : background-clip:text 가 자식 레이어마다
-   배경을 원점에서 다시 그려 글자가 겹쳐 버린다. transform 대신 translate 로
-   올려야 base 의 translateX(-50%) 가 살아남는다 */
-body.doctor .docname{ animation:inup .9s cubic-bezier(.2,.7,.2,1) both .6s; }
-/* 예약 날짜·시각 : 이름 아래 한 줄 */
-.docmeta{
-  position:absolute; left:50%; top:946px; transform:translateX(-50%);
-  margin:0; white-space:nowrap; font-size:22px; font-weight:400; line-height:1.6;
-  color:#a69c60; opacity:0;
-}
-body.doctor .docmeta{ animation:inup .9s cubic-bezier(.2,.7,.2,1) both .85s; }
-@keyframes inup{
-  from{ opacity:0; translate:0 .42em; }
-  to  { opacity:1; translate:0 0;     }
-}
 @keyframes in{
   from{ opacity:0; transform:translateY(.42em); filter:blur(10px); }
   to  { opacity:1; transform:none;              filter:blur(0);    }
@@ -359,6 +350,18 @@ body.doctor .docmeta{ animation:inup .9s cubic-bezier(.2,.7,.2,1) both .85s; }
 .photo .b3{ filter:blur(18px); --m:linear-gradient(180deg,transparent 66%,#000 80%); }
 .photo .b4{ filter:blur(36px); --m:linear-gradient(180deg,transparent 80%,#000 94%); }
 body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
+
+/* ---------- 병원 외경 (피그마 3075:815) ---------- */
+/* 마스크 : Ellipse 31232 의 radialGradient. 반지름 352, 이미지 기준 중심 (368.4,314.1) */
+.hosp{
+  position:absolute; left:135.1px; top:227px; width:908.5px; height:625px;
+  opacity:0; transform:scale(.94);
+  transition:opacity .9s ease, transform 1.1s cubic-bezier(.3,.9,.3,1);
+  -webkit-mask:radial-gradient(352px 352px at 368.4px 314.1px,#000 49.8%,transparent 100%) no-repeat;
+          mask:radial-gradient(352px 352px at 368.4px 314.1px,#000 49.8%,transparent 100%) no-repeat;
+}
+.hosp img{ width:100%; height:100%; object-fit:cover; display:block; }
+body.hospital .hosp{ opacity:1; transform:scale(1); transition-delay:.15s; }
 
 /* ---------- follow : 길안내 (피그마 3070:700) ---------- */
 .nav{ position:absolute; inset:0; pointer-events:none; }
@@ -440,8 +443,8 @@ body.follow .navarrow circle{ animation:pop .42s cubic-bezier(.2,1.6,.4,1) both 
         <linearGradient id="dlG1" x1="311.707" y1="340.096" x2="746.196" y2="780.09" gradientUnits="userSpaceOnUse">
           <stop offset="0.745368" stop-color="#999" stop-opacity="0"/><stop offset="1" stop-color="#FFED84"/></linearGradient>
       </defs>
-      <g filter="url(#dlA)"><path fill="url(#dlG0)" d="M847.582 534.719C847.582 712.286 691.188 891 509.762 891C328.337 891 190.582 712.286 190.582 534.719C190.582 357.151 429.47 162 610.895 162C792.321 162 847.582 357.151 847.582 534.719Z"/></g>
-      <g opacity="0.39" filter="url(#dlB)"><path fill="url(#dlG1)" d="M271.613 732.097C337.174 897.236 548.541 1005.72 717.192 938.767C885.843 871.811 947.914 654.768 882.353 489.63C816.792 324.491 522.671 231.162 354.02 298.118C185.369 365.073 206.052 566.959 271.613 732.097Z"/></g>
+      <g filter="url(#dlA)"><path class="egg" fill="url(#dlG0)" d="M847.582 534.719C847.582 712.286 691.188 891 509.762 891C328.337 891 190.582 712.286 190.582 534.719C190.582 357.151 429.47 162 610.895 162C792.321 162 847.582 357.151 847.582 534.719Z"/></g>
+      <g class="arc" opacity="0.39" filter="url(#dlB)"><path fill="url(#dlG1)" d="M271.613 732.097C337.174 897.236 548.541 1005.72 717.192 938.767C885.843 871.811 947.914 654.768 882.353 489.63C816.792 324.491 522.671 231.162 354.02 298.118C185.369 365.073 206.052 566.959 271.613 732.097Z"/></g>
       <g filter="url(#dlC)"><ellipse cx="645" cy="158" rx="212" ry="210" fill="#DEF2FF"/></g>
       <g opacity="0.27" filter="url(#dlD)"><path fill="#8AFFF3" d="M813 384.461C813 427.702 720.048 491 650.362 491C580.675 491 477 362.279 477 319.038C477 275.797 567.807 293.654 637.494 293.654C707.18 293.654 813 341.22 813 384.461Z"/></g>
     </svg>
@@ -449,6 +452,8 @@ body.follow .navarrow circle{ animation:pop .42s cubic-bezier(.2,1.6,.4,1) both 
     <div class="core"></div>
     <div class="cyan"></div>
     <div class="rim"></div>
+
+    <div class="hosp"><img src="hospital.webp" alt="Hospital"></div>
 
     <div class="photo">
       <img src="doctor.webp" alt="Dr. James Bennett">
@@ -464,8 +469,6 @@ body.follow .navarrow circle{ animation:pop .42s cubic-bezier(.2,1.6,.4,1) both 
       You had an appointment on <em>July&nbsp;20.</em><br>
       Today is your <em>2nd follow-up.</em>
     </p>
-    <p class="docname">Dr. James Bennett</p>
-    <p class="docmeta"></p>
     <p class="headline l-guide reveal">
       I&rsquo;ll take you to the waiting area.<br>
       Please follow me slowly.
@@ -554,18 +557,6 @@ const split = el => {
   walk(el);
 };
 document.querySelectorAll('.reveal').forEach(split);
-
-// 예약 날짜·시각 : 실시간을 30분 단위로 올려 다듬는다 (11:22 PM -> 11:30 PM)
-const docmeta = document.querySelector('.docmeta');
-const setSlot = () => {
-  const d = new Date();
-  d.setSeconds(0, 0);
-  d.setMinutes(Math.ceil(d.getMinutes() / 30) * 30);   // 60 이 되면 다음 시로 넘어간다
-  docmeta.textContent =
-    d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-    + '   ·   ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-};
-setSlot();
 
 // ---------- follow : 길안내 ----------
 const NAV = document.querySelector('.nav');
@@ -657,17 +648,16 @@ const navRun = () => {
 
 // 시퀀스 : 한 번 누르면 끝까지 자동 진행, 다시 누르면 idle 로 리셋
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
-const STEPS = ['idle','fill','connecting','connected','message','doctor','guide','follow'];
+const STEPS = ['idle','fill','connecting','connected','hospital','doctor','message','guide','follow'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 4200, 4300, 5000, 7200, 7600, 20000];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 4200, 4300, 4600, 5200, 5000, 7600, 20000];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
 const go = n => {
   clearTimeout(timer);
-  body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|doctor|guide|follow)\b/, STEPS[n]);
+  body.className = body.className.replace(/\b(idle|fill|connecting|connected|hospital|doctor|message|guide|follow)\b/, STEPS[n]);
   if (STEPS[n] === 'follow') navRun(); else cancelAnimationFrame(navRAF);
-  if (STEPS[n] === 'doctor') setSlot();   // 장면에 들어갈 때마다 현재 시각으로
   if (HOLD[n]) timer = setTimeout(() => go((n + 1) % STEPS.length), HOLD[n]);
 };
 const step = () => STEPS.findIndex(s => body.classList.contains(s));
