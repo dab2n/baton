@@ -122,7 +122,8 @@ body.connecting .field{ transform:translate(1px,145.5px) scale(.58); }
 body.connected  .field,
 body.message    .field,
 body.doctor     .field,
-body.guide      .field{ transform:translate(1px,145.5px) scale(1.2); }
+body.guide      .field,
+body.follow     .field{ transform:translate(1px,145.5px) scale(1.2); }
 
 /* C : connecting 에서 켜지고 doctor 에서 꺼짐 */
 /* 노치가 작아져 상단이 드러난다 : idle 은 순수 블랙이어야 하므로 sheen 을 끈다 */
@@ -327,6 +328,46 @@ body.doctor .docmeta .w{
 }
 body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
 
+/* ---------- follow : 길안내 (피그마 3070:700) ---------- */
+.nav{ position:absolute; inset:0; pointer-events:none; }
+/* 페이드는 자식마다 : .nav 에 z-index/opacity 를 주면 스태킹 컨텍스트가 생겨
+   color-burn 이 뒤 배경까지 닿지 않는다 (.headline 과 같은 방식) */
+.nav > *{ opacity:0; transition:opacity .5s ease; }
+body.follow .nav > *{ opacity:1; }
+.navgauge, .navarrow, .navdigits{ position:absolute; inset:0; width:1080px; height:1080px; }
+
+/* 게이지 : 화면 중심(540,540) 반지름 475 원호. 좌하단 → 우측 목적지 */
+.navgauge{ fill:none; stroke-linecap:round; }
+.gtrack{ stroke:rgba(255,255,255,.55); stroke-width:30; }
+.gfill { stroke:#fff; stroke-width:26; stroke-dasharray:100; stroke-dashoffset:100; }
+
+/* 화살표 도트 : 그룹째 회전한다 (다리가 바뀔 때 부드럽게) */
+.navarrow{ transform-origin:540px 538.5px; transition:rotate 1.4s cubic-bezier(.4,0,.2,1); }
+.navarrow circle{ fill:#fff; opacity:0; transform-box:fill-box; transform-origin:50% 50%; }
+/* 첫 등장 : 순서와 간격을 흩어 다다닥 튀어나오게 (--d 는 JS 가 뿌린다) */
+body.follow .navarrow circle{ animation:pop .42s cubic-bezier(.2,1.6,.4,1) both var(--d); }
+@keyframes pop{ from{ opacity:0; scale:.2; } to{ opacity:var(--o); scale:1; } }
+
+/* 남은 거리 : NDOT 47 대신 같은 도트로 직접 그린다 */
+.navdigits circle{ fill:#614409; }
+.navdigits, .navm, .navto, .navdest{ mix-blend-mode:color-burn; }
+.navm { position:absolute; left:205px; top:502px; font-size:55px; font-weight:700;
+        line-height:1; color:#614409; }
+.navto{ position:absolute; left:75px; top:566px; font-size:28px; line-height:1.04;
+        color:#32651b; white-space:nowrap; transition:font-size .5s ease, top .5s ease; }
+.navdest{ position:absolute; right:40px; top:546px; translate:0 -50%;
+          display:flex; align-items:center; gap:7px;
+          font-size:28px; line-height:1.04; text-align:right; color:#3e3d0a; }
+.navpin{ width:41.9px; height:48px; flex:none; }
+
+/* 도착 : 거리는 지우고 문구만 크게, 핀이 뛴다 */
+.nav.arrived .navdigits,
+.nav.arrived .navm,
+.nav.arrived .navarrow{ opacity:0; transition:opacity .4s ease; }
+.nav.arrived .navto{ font-size:46px; top:508px; }
+.nav.arrived .navpin{ animation:pinpulse 1.2s ease-in-out infinite; }
+@keyframes pinpulse{ 0%,100%{ scale:1; } 50%{ scale:1.18; } }
+
 @media (prefers-reduced-motion:reduce){
   .w{ animation:none; opacity:1; }
   .field,.sheen,.core,.cyan,.rim,.rim::after{ animation:none; }
@@ -374,6 +415,20 @@ body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
       Please follow me slowly.
     </p>
 
+
+    <div class="nav">
+      <svg class="navgauge" viewBox="0 0 1080 1080" aria-hidden="true">
+        <path class="gtrack" d="M179.9 849.8A475 475 0 0 0 1011.2 600.4"/>
+        <path class="gfill"  d="M179.9 849.8A475 475 0 0 0 1011.2 600.4" pathLength="100"/>
+      </svg>
+      <svg class="navarrow"  viewBox="0 0 1080 1080" aria-hidden="true"></svg>
+      <svg class="navdigits" viewBox="0 0 1080 1080" aria-hidden="true"></svg>
+      <span class="navm">m</span>
+      <span class="navto">to Elevator</span>
+      <div class="navdest"><span>Rehabilitation<br>Center</span>
+        <svg class="navpin" viewBox="0 0 41.897 48.0068" aria-hidden="true"><path fill="#E1B742" fill-opacity=".75" d="M20.9485 0C32.4961 0.000150891 41.8967 9.39648 41.8967 20.9385C41.975 37.8193 23.253 46.9338 22.467 47.5098C22.022 47.8499 21.4721 48.0068 20.9485 48.0068C20.4249 48.0068 19.875 47.8237 19.4299 47.5098C18.6444 46.934 -0.0779867 37.8195 0.000244478 20.9385C0.000244478 9.39638 9.40076 0 20.9485 0ZM20.467 9.44141C14.382 9.44141 9.44849 14.3749 9.44849 20.46C9.44871 26.5448 14.3821 31.4775 20.467 31.4775C26.5519 31.4774 31.4844 26.5448 31.4846 20.46C31.4846 14.375 26.552 9.44153 20.467 9.44141Z"/></svg>
+      </div>
+    </div>
 
     <div class="pill">
       <span class="pbg"></span>
@@ -445,17 +500,105 @@ const split = el => {
 };
 document.querySelectorAll('.reveal').forEach(split);
 
+// ---------- follow : 길안내 ----------
+const NAV = document.querySelector('.nav');
+const NS  = 'http://www.w3.org/2000/svg';
+const dot = (x, y, r, o) => {
+  const c = document.createElementNS(NS, 'circle');
+  c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', r);
+  if (o != null) c.style.setProperty('--o', o);
+  return c;
+};
+const arrowSvg  = NAV.querySelector('.navarrow');
+const digitsSvg = NAV.querySelector('.navdigits');
+const gfill = NAV.querySelector('.gfill');
+const navm  = NAV.querySelector('.navm');
+const navto = NAV.querySelector('.navto');
+
+// 화살표 : 5열 x 6행, 간격 63.4, 중심 (540,538.5). 아래로 갈수록 옅어진다
+{
+  const OP = [1, .92, .85, .72, .62, .55];
+  const cells = [];
+  ['..X..', '.XXX.', 'XXXXX', '.XXX.', '.XXX.', '.XXX.'].forEach((row, r) =>
+    [...row].forEach((ch, c) => {
+      if (ch === 'X') cells.push(dot(540 + (c - 2) * 63.4, 380 + r * 63.4, 25.5, OP[r]));
+    }));
+  // 등장 순서와 간격을 흩는다 : 규칙적으로 번지지 않고 다다닥 튀어나오게
+  cells.map(c => [Math.random(), c]).sort((a, b) => a[0] - b[0])
+    .forEach(([, c], i) => c.style.setProperty('--d', (350 + i * 26 + Math.random() * 55 | 0) + 'ms'));
+  arrowSvg.append(...cells);
+}
+
+// 5x7 도트 숫자 (NDOT 47 대용)
+const GLYPH = {
+  0: '01110,10001,10011,10101,11001,10001,01110',
+  1: '00100,01100,00100,00100,00100,00100,01110',
+  2: '01110,10001,00001,00010,00100,01000,11111',
+  3: '11111,00010,00100,00010,00001,10001,01110',
+  4: '00010,00110,01010,10010,11111,00010,00010',
+  5: '11111,10000,11110,00001,00001,10001,01110',
+  6: '00110,01000,10000,11110,10001,10001,01110',
+  7: '11111,00001,00010,00100,01000,01000,01000',
+  8: '01110,10001,10001,01110,10001,10001,01110',
+  9: '01110,10001,10001,01111,00001,00010,01100',
+};
+let shown = -1;
+const setDist = n => {
+  if (n === shown) return;
+  shown = n;
+  const t = String(n);
+  digitsSvg.replaceChildren();
+  [...t].forEach((ch, i) => GLYPH[ch].split(',').forEach((row, r) =>
+    [...row].forEach((b, c) => {
+      if (b === '1') digitsSvg.append(dot(79 + i * 61 + c * 13, 480 + r * 13, 5.2));
+    })));
+  navm.style.left = (79 + t.length * 61 + 4) + 'px';
+};
+
+// 구간 : 직진 50m 뒤 대각선으로 꺾었다가 다시 직진
+const LEGS = [
+  { m: 50, to: 'to Elevator',      deg:  0 },
+  { m: 18, to: 'Turn right',       deg: 45 },
+  { m: 14, to: 'to Rehab. Center', deg:  0 },
+];
+const TOTAL = LEGS.reduce((s, l) => s + l.m, 0);
+const WALK  = 16000;   // 전 구간을 걷는 시간(ms). 게이지가 목적지에 닿으면 도착
+let navRAF;
+const navRun = () => {
+  cancelAnimationFrame(navRAF);
+  NAV.classList.remove('arrived');
+  shown = -1;
+  const t0 = performance.now();
+  const tick = () => {
+    const p = Math.min(1, (performance.now() - t0) / WALK);
+    gfill.style.strokeDashoffset = 100 - p * 100;
+    let d = p * TOTAL, i = 0;
+    while (i < LEGS.length - 1 && d >= LEGS[i].m) d -= LEGS[i++].m;
+    arrowSvg.style.rotate = LEGS[i].deg + 'deg';
+    if (p < 1) {
+      setDist(Math.max(1, Math.ceil(LEGS[i].m - d)));
+      navto.textContent = LEGS[i].to;
+      navRAF = requestAnimationFrame(tick);
+    } else {
+      NAV.classList.add('arrived');
+      navto.textContent = 'Arrived';
+    }
+  };
+  tick();
+};
+
 // 시퀀스 : 한 번 누르면 끝까지 자동 진행, 다시 누르면 idle 로 리셋
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
-const STEPS = ['idle','fill','connecting','connected','message','doctor','guide'];
+const STEPS = ['idle','fill','connecting','connected','message','doctor','guide','follow'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 4200, 4300, 5000, 7200, 7600];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 4200, 4300, 5000, 7200, 7600, 20000];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
 const go = n => {
   clearTimeout(timer);
-  body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|doctor|guide)\b/, STEPS[n]);
+  body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|doctor|guide|follow)\b/, STEPS[n]);
+  if (STEPS[n] === 'follow') navRun(); else cancelAnimationFrame(navRAF);
   if (HOLD[n]) timer = setTimeout(() => go((n + 1) % STEPS.length), HOLD[n]);
 };
 const step = () => STEPS.findIndex(s => body.classList.contains(s));
