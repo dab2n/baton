@@ -125,6 +125,23 @@ body.doctor     .field,
 body.guide      .field,
 body.follow     .field{ transform:translate(1px,145.5px) scale(1.2); }
 
+/* doctor : 검은 화면에 계란형 빛 한 덩이만 (피그마 3070:737) */
+body.doctor .field,
+body.doctor .sheen,
+body.doctor .core,
+body.doctor .cyan{ opacity:0; }
+.dlight{
+  position:absolute; left:191px; top:162px; width:657px; height:729px;
+  border-radius:50%; opacity:0; transition:opacity 1.1s ease;
+  background:
+    radial-gradient(120% 62% at 50% 6%, #d7edff 0%, rgba(215,237,255,0) 60%),
+    linear-gradient(180deg,#fff 20%,#f6e280 100%);
+  /* 가장자리를 흐릿하게 : filter:blur 는 밴딩이 남아서 마스크로 페이드 */
+  -webkit-mask:radial-gradient(closest-side,#000 46%,transparent 100%);
+          mask:radial-gradient(closest-side,#000 46%,transparent 100%);
+}
+body.doctor .dlight{ opacity:1; }
+
 /* C : connecting 에서 켜지고 doctor 에서 꺼짐 */
 /* 노치가 작아져 상단이 드러난다 : idle 은 순수 블랙이어야 하므로 sheen 을 끈다 */
 body.idle .sheen{ opacity:0; }
@@ -268,7 +285,13 @@ body.connected .pc-hospital{ opacity:1; transition-delay:.6s; }
 }
 /* 줄 수와 무관하게 스크린 정중앙 (사진과 짝인 .docname 만 예외) */
 .headline{ top:50%; transform:translate(-50%,-50%); }
-.docname { top:calc(50% - 372px); }
+/* 이름표 : 사진 아래. 글자에만 좌→우 금색→흰색 그라디언트 */
+.docname{
+  top:888px; width:auto; white-space:nowrap; font-size:32px;
+  mix-blend-mode:normal;
+  background:linear-gradient(90deg,#a69c60,#fff);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
 .headline em{ font-style:normal; font-weight:600; }
 
 /* 장면당 한 문장. 들어올 때는 즉시, 나갈 때만 천천히 사라진다 */
@@ -277,8 +300,7 @@ body.fill    .l-greet,
 body.connected .l-hi,
 body.message .l-msg,
 body.guide   .l-guide,
-body.doctor  .docname,
-body.doctor  .docmeta{ opacity:1; transition-duration:.15s; }
+body.doctor  .docname{ opacity:1; transition-duration:.15s; }
 
 /* 엄지척 이전(=greet) : color-burn 의 투명감 없이 단색으로 */
 .l-greet{ mix-blend-mode:normal; }
@@ -296,22 +318,13 @@ body.message .l-msg   .w{
 body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
 /* 칩이 먼저 내려앉고(0.8s) 그 다음 문장 */
 body.connected .l-hi .w{ animation-delay:calc(var(--i) * 70ms + 1500ms); }
-/* 두 단어뿐이라 같은 70ms 로는 티가 안 난다. 간격을 벌리고 사진이 자리잡은 뒤에 올린다 */
-body.doctor  .docname  .w{
-  animation:in .9s cubic-bezier(.2,.7,.2,1) both;
-  animation-delay:calc(var(--i) * 190ms + 500ms);
-}
-/* 예약 정보 : 사진 아래, 본문보다 한 단계 작게 */
-.docmeta{
-  position:absolute; left:50%; transform:translateX(-50%);
-  margin:0; width:620px; top:calc(50% + 300px); text-align:center;
-  font-size:30px; font-weight:400; line-height:1.55; color:#3e3d0a;
-  mix-blend-mode:color-burn; opacity:0; transition:opacity .8s ease;
-}
-.docmeta em{ font-style:normal; font-weight:600; }
-body.doctor .docmeta .w{
-  animation:in .9s cubic-bezier(.2,.7,.2,1) both;
-  animation-delay:calc(var(--i) * 90ms + 950ms);
+/* 이름은 단어로 쪼개지 않는다 : background-clip:text 가 자식 레이어마다
+   배경을 원점에서 다시 그려 글자가 겹쳐 버린다. transform 대신 translate 로
+   올려야 base 의 translateX(-50%) 가 살아남는다 */
+body.doctor .docname{ animation:inup .9s cubic-bezier(.2,.7,.2,1) both .6s; }
+@keyframes inup{
+  from{ opacity:0; translate:0 .42em; }
+  to  { opacity:1; translate:0 0;     }
 }
 @keyframes in{
   from{ opacity:0; transform:translateY(.42em); filter:blur(10px); }
@@ -320,11 +333,12 @@ body.doctor .docmeta .w{
 
 /* ---------- 의료진 사진 ---------- */
 .photo{
-  position:absolute; left:245px; top:245px; width:590px; height:590px;
-  object-fit:cover; opacity:0; transform:scale(.92);
+  position:absolute; left:329.5px; top:279.7px; width:450.8px; height:677.4px;
+  object-fit:cover; opacity:0; transform:scale(.94);
   transition:opacity .9s ease, transform 1.1s cubic-bezier(.3,.9,.3,1);
-  -webkit-mask:radial-gradient(circle closest-side,#000 49.8%,transparent 100%);
-          mask:radial-gradient(circle closest-side,#000 49.8%,transparent 100%);
+  /* 피그마 Mask group : 반지름 334, 중심은 사진 기준 (225,297), 49.8% 부터 페이드 */
+  -webkit-mask:radial-gradient(334px 334px at 225px 297px,#000 49.8%,transparent 100%);
+          mask:radial-gradient(334px 334px at 225px 297px,#000 49.8%,transparent 100%);
 }
 body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
 
@@ -399,8 +413,9 @@ body.follow .navarrow circle{ animation:pop .42s cubic-bezier(.2,1.6,.4,1) both 
       <path fill="#8AFFF3" d="M916 401.141C916 493.216 717.924 628 569.426 628C420.927 628 200 353.907 200 261.832C200 169.756 393.505 207.78 542.004 207.78C690.503 207.78 916 309.065 916 401.141Z"/>
     </svg>
     <div class="rim"></div>
+    <div class="dlight"></div>
 
-    <img class="photo" src="doctor.png" alt="">
+    <img class="photo" src="doctor.webp" alt="">
 
     <p class="headline l-greet reveal">Hello, do you need help?</p>
     <p class="headline l-hi reveal nopause">Hello, <em>Somi.</em></p>
@@ -408,8 +423,7 @@ body.follow .navarrow circle{ animation:pop .42s cubic-bezier(.2,1.6,.4,1) both 
       You had an appointment on <em>July&nbsp;20.</em><br>
       Today is your <em>2nd follow-up.</em>
     </p>
-    <p class="docname reveal">Dr. Sophia</p>
-    <p class="docmeta reveal"><em>10:30 AM</em><br>2nd follow-up consultation</p>
+    <p class="docname">Dr. James Bennett</p>
     <p class="headline l-guide reveal">
       I&rsquo;ll take you to the waiting area.<br>
       Please follow me slowly.
