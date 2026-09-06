@@ -345,11 +345,19 @@ body.doctor .docmeta{ animation:inup .9s cubic-bezier(.2,.7,.2,1) both .85s; }
   transition:opacity .9s ease, transform 1.1s cubic-bezier(.3,.9,.3,1);
   /* 피그마 Mask group : 반지름 334, 중심은 사진 기준 (225,297), 49.8% 부터 페이드 */
   -webkit-mask:radial-gradient(334px 334px at 225px 297px,#000 49.8%,transparent 100%);
-          mask:radial-gradient(334px 334px at 225px 297px,#000 49.8%,transparent 100%);
+          mask:radial-gradient(334px 334px at 225px 297px,#000 49.8%,transparent 100%) no-repeat;
 }
-/* 원본은 마스크 그룹 통째로 blur 10.5 (feGaussianBlur stdDeviation) */
-.photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
-            filter:blur(10.5px); }
+/* 하단으로 갈수록 흐려지는 progressive blur.
+   피그마의 Progressive blur 는 SVG 로 내보내면 균일 feGaussianBlur 로 납작해지므로
+   export 값(10.5)을 그대로 쓰면 얼굴까지 뭉갠다. 흐린 판을 네 장 겹치고
+   각각 조금씩 아래에서부터 드러내 단계적으로 흐려지게 한다 */
+.photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.photo .b1, .photo .b2, .photo .b3, .photo .b4{
+  -webkit-mask:var(--m) no-repeat; mask:var(--m) no-repeat; }
+.photo .b1{ filter:blur(3px);  --m:linear-gradient(180deg,transparent 38%,#000 52%); }
+.photo .b2{ filter:blur(8px);  --m:linear-gradient(180deg,transparent 52%,#000 66%); }
+.photo .b3{ filter:blur(18px); --m:linear-gradient(180deg,transparent 66%,#000 80%); }
+.photo .b4{ filter:blur(36px); --m:linear-gradient(180deg,transparent 80%,#000 94%); }
 body.doctor .photo{ opacity:1; transform:scale(1); transition-delay:.15s; }
 
 /* ---------- follow : 길안내 (피그마 3070:700) ---------- */
@@ -442,7 +450,13 @@ body.follow .navarrow circle{ animation:pop .42s cubic-bezier(.2,1.6,.4,1) both 
     <div class="cyan"></div>
     <div class="rim"></div>
 
-    <div class="photo"><img src="doctor.webp" alt="Dr. James Bennett"></div>
+    <div class="photo">
+      <img src="doctor.webp" alt="Dr. James Bennett">
+      <img class="b1" src="doctor.webp" alt="" aria-hidden="true">
+      <img class="b2" src="doctor.webp" alt="" aria-hidden="true">
+      <img class="b3" src="doctor.webp" alt="" aria-hidden="true">
+      <img class="b4" src="doctor.webp" alt="" aria-hidden="true">
+    </div>
 
     <p class="headline l-greet reveal">Hello, do you need help?</p>
     <p class="headline l-hi reveal nopause">Hello, <em>Somi.</em></p>
