@@ -95,27 +95,30 @@ body.kiosk .cam{ display:none; }
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
         z-index:4; pointer-events:none; }
 
-/* ---------- connecting : 하프톤이 가운데서 바깥으로 퍼진다 ----------
-   진짜 하프톤(점 크기가 밝기를 따라감)을 만드는 방법 :
-   1) .htsrc  퍼져 나가는 흰 원 (밝기 = 원본)
-   2) .htdot  칸마다 가운데가 밝은 격자를 multiply → 밝을수록 넓은 영역이 살아남는다
-   3) contrast 로 0.5 에서 잘라 이진화 → 밝기에 비례하는 크기의 흰 점
-   4) .httint 를 multiply 해서 노랑으로, .ht 는 plus-lighter 라 검은 부분은 사라진다 */
-.ht{ position:absolute; inset:0; opacity:0; pointer-events:none;
-     isolation:isolate; mix-blend-mode:plus-lighter; }
-.htcut{ position:absolute; inset:0; filter:contrast(26); background:#000; }
-.htsrc{ position:absolute; inset:0; transform:scale(.05);
-        background:radial-gradient(circle closest-side at 50% 50%,#fff 0 8%,#000 100%); }
-.htdot{ position:absolute; inset:0; mix-blend-mode:multiply;
-        background:radial-gradient(circle at 50% 50%,#fff 0 20%,#000 66%) 0 0/12px 12px; }
-.httint{ position:absolute; inset:0; mix-blend-mode:multiply; background:#f6e280; }
-body.connecting .ht   { animation:htfade 3s linear both; }
-body.connecting .htsrc{ animation:htgrow 1.9s cubic-bezier(.2,.75,.3,1) both; }
-/* 병원·의사는 같은 트랜지션을 짧게 : 하프톤이 훑고 지나가면 사진이 남는다 */
-body.hospital .ht,    body.doctor .ht   { animation:htfade 1.3s linear both; }
-body.hospital .htsrc, body.doctor .htsrc{ animation:htgrow 1s cubic-bezier(.2,.75,.3,1) both; }
-@keyframes htgrow{ from{ transform:scale(.05); } to{ transform:scale(1.6); } }
-@keyframes htfade{ 0%{ opacity:0 } 7%{ opacity:1 } 62%{ opacity:1 } 100%{ opacity:0 } }
+/* ---------- connecting : 가운데서 파장이 번져 나간다 ----------
+   블러 대신 그라디언트 정지점만으로 고리를 그린다 (블러는 밴딩이 남는다) */
+.wave{ position:absolute; left:0; top:0; width:1080px; height:1080px; z-index:2;
+       border-radius:50%; opacity:0; pointer-events:none;
+       /* 고리 하나 : 마루(밝은 띠) 양쪽에 골(어두운 띠)을 둬야 밝은 배경 위에서도
+          파장으로 읽힌다. 안쪽은 따뜻하고 바깥 날은 푸르다 (첨부 이미지의 결) */
+       background:radial-gradient(circle closest-side,
+         rgba(0,0,0,0)         34%,
+         rgba(0,0,0,.26)       40%,
+         rgba(255,250,214,.95) 46%,
+         rgba(198,240,255,.80) 51%,
+         rgba(0,0,0,.22)       57%,
+         rgba(0,0,0,0)         63%); }
+body.connecting .wave{ animation:wavering 3s cubic-bezier(.16,.62,.3,1) infinite; }
+.wave.w2{ animation-delay:.6s; }
+.wave.w3{ animation-delay:1.2s; }
+.wave.w4{ animation-delay:1.8s; }
+.wave.w5{ animation-delay:2.4s; }
+@keyframes wavering{
+  0%  { transform:scale(.10); opacity:0;  }
+  16% {                       opacity:.8; }
+  100%{ transform:scale(1.6); opacity:0;  }
+}
+
 
 /* ---------- 배경 레이어 : 기본값 = message(본문) 상태 ---------- */
 /* blur 는 래퍼에 : 자식을 scale() 해도 흐림 반경이 같이 커지지 않게 */
@@ -159,10 +162,10 @@ body.follow     .field{ transform:translate(1px,145.5px) scale(1.2); }
 /* doctor : 검은 화면에 계란형 빛 한 덩이만 (피그마 3070:737) */
 body.follow .core{ opacity:0; }   /* 이 프레임엔 없는 레이어. 가운데가 하얘지면 화살표가 묻힌다 */
 /* 배경 레이어는 전부 물러난다 : 이 장면은 .dlight 한 장이 전부 그린다 */
-body.doctor .field,   body.hospital .field,   body.connecting .field,
-body.doctor .sheen,   body.hospital .sheen,   body.connecting .sheen,
-body.doctor .core,    body.hospital .core,    body.connecting .core,
-body.doctor .cyan,    body.hospital .cyan,    body.connecting .cyan{ opacity:0; }
+body.doctor .field,   body.hospital .field,
+body.doctor .sheen,   body.hospital .sheen,
+body.doctor .core,    body.hospital .core,
+body.doctor .cyan,    body.hospital .cyan{ opacity:0; }
 /* 피그마 export(02 · Detected · Call.svg) 를 그대로 인라인.
    계란형이 위쪽으로 갈수록 좁고 오른쪽으로 기울어 있어 타원으로는 안 맞는다 */
 .dlight{ position:absolute; inset:0; width:1080px; height:1080px;
@@ -197,7 +200,7 @@ body.idle .core, body.fill .core{ transform:scale(.4); opacity:0; }
 body.connecting  .core{ transform:translate(9px,-29px); }
 
 /* D : 본문 장면에서만 크게 */
-body.idle .cyan, body.fill .cyan{
+body.idle .cyan, body.fill .cyan, body.connecting .cyan{
   transform:translate(9px,172.5px) scale(.469); opacity:.09;
 }
 
@@ -239,6 +242,11 @@ body.connecting .blur39{ filter:blur(39px); transition-delay:0s; }
    대신 그 위의 파란 블롭(sheen/cyan)이 크게 흘러다니고,
    본문 텍스트가 color-burn 이라 지나갈 때마다 글자 색이 미묘하게 바뀐다. */
 body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; border-radius:50%; }
+/* 글자만 있는 장면에서는 배경을 아예 멈춘다 : 아주 작은 움직임도
+   화면 오류처럼 잔물결로 보인다 */
+body:not(.idle):not(.connecting) .sheen,
+body:not(.idle):not(.connecting) .core,
+body:not(.idle):not(.connecting) .cyan{ animation:none !important; }
 .sheen{ animation:drift2 14s ease-in-out infinite alternate; }
 .core { animation:drift4 17s ease-in-out infinite alternate; }
 .cyan { animation:drift3 21s ease-in-out infinite alternate; }
@@ -278,6 +286,7 @@ body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; bor
 /* 가장자리 안쪽이 숨쉬듯 밝아졌다 잦아든다 */
 body.connecting .rim,
 body.connected  .rim{ animation:breathe 3.4s ease-in-out infinite; }
+body.connecting .rim{ opacity:1; }
 @keyframes breathe{
   0%,100%{ box-shadow:inset 0 0 44px  4px rgba(255,250,214,.45); }
   50%    { box-shadow:inset 0 0 104px 30px rgba(255,250,214,.92); }
@@ -290,6 +299,7 @@ body.connected  .rim{ animation:breathe 3.4s ease-in-out infinite; }
 }
 body.connecting .rim::after,
 body.connected  .rim::after{ animation:orbit 11s linear infinite; }
+body.connecting .rim::after{ opacity:1; }
 @keyframes orbit{ to{ rotate:360deg; } }
 
 /* ---------- 병원 칩 : 스크린 상단에서 아래로 내려온다 ---------- */
@@ -300,12 +310,7 @@ body.connected  .rim::after{ animation:orbit 11s linear infinite; }
   opacity:0; translate:0 -30px;
   transition:opacity .5s ease, translate .8s cubic-bezier(.3,.9,.3,1);
 }
-body.connecting .pill, body.hospital .pill,
-body.doctor    .pill, body.connected .pill{ opacity:1; translate:0 0; transition-delay:.35s; }
-/* 새카만 connecting 에서만 : color-burn 이면 칩이 통째로 검어진다 */
-body.connecting .pbg{ background:rgba(22,20,9,.72); mix-blend-mode:normal; }
-body.connecting .pc b{ color:#fbf3c8; }
-body.connecting .pc s{ color:rgba(251,243,200,.62); }
+body.hospital .pill, body.doctor .pill{ opacity:1; translate:0 0; transition-delay:.35s; }
 
 .pbg{ position:absolute; inset:0; border-radius:inherit;
       background:rgba(255,248,190,.2); mix-blend-mode:color-burn; }
@@ -314,8 +319,7 @@ body.connecting .pc s{ color:rgba(251,243,200,.62); }
 
 .pc{ grid-area:1/1; display:flex; align-items:center; justify-content:center;
      opacity:0; white-space:nowrap; transition:opacity .4s ease; }
-body.connecting .pc-hospital, body.hospital .pc-hospital,
-body.doctor    .pc-hospital, body.connected .pc-hospital{ opacity:1; transition-delay:.6s; }
+body.hospital .pc-hospital, body.doctor .pc-hospital{ opacity:1; transition-delay:.6s; }
 .pc-hospital{ gap:12px; }
 .vial{
   width:33.35px; height:59.75px; flex:none;
@@ -328,14 +332,19 @@ body.doctor    .pc-hospital, body.connected .pc-hospital{ opacity:1; transition-
        display:block; text-decoration:none; }
 
 /* ---------- 오버뷰 하단 정보 ---------- */
-.cap{ position:absolute; left:50%; top:945px; transform:translateX(-50%);
+.cap{ position:absolute; left:50%; top:806px; transform:translateX(-50%);
       margin:0; text-align:center; white-space:nowrap;
-      opacity:0; transition:opacity .6s ease; color:#f2e6ae; }
+      opacity:0; transition:opacity .8s ease;
+      color:#614409; mix-blend-mode:color-burn; }
 .cap b{ display:block; font-size:30px; font-weight:500; line-height:1.35; }
 .cap s{ display:block; font-size:19px; font-weight:400; line-height:1.7;
-        text-decoration:none; color:rgba(242,230,174,.6); }
+        text-decoration:none; opacity:.68; }
 body.hospital .cap-h,
-body.doctor   .cap-d{ opacity:1; transition-delay:.55s; }
+body.doctor   .cap-d{ opacity:1; transition-duration:.15s; }
+/* 등장은 본문 문장과 같은 방식 : 단어 단위로 흐릿하게 올라온다 */
+body.hospital .cap-h .w,
+body.doctor   .cap-d .w{ animation:in .9s cubic-bezier(.2,.7,.2,1) both;
+                         animation-delay:calc(var(--i) * 70ms + 420ms); }
 
 /* ---------- 본문 ---------- */
 .headline{
@@ -440,7 +449,7 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 .navm { position:absolute; left:205px; top:502px; font-size:55px; font-weight:700;
         line-height:1; color:#614409; }
 .navto{ position:absolute; left:75px; top:566px; font-size:28px; line-height:1.04;
-        white-space:nowrap; transition:font-size .5s ease, top .5s ease; }
+        white-space:nowrap; }
 .navdest{ position:absolute; right:89px; top:517px; font-size:28px; line-height:1.04;
           text-align:right; white-space:nowrap; }
 .navpin{ position:absolute; right:40px; top:522px; width:41.9px; height:48px; }
@@ -449,7 +458,6 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 .nav.arrived .navdigits,
 .nav.arrived .navm,
 .nav.arrived .navarrow{ opacity:0; transition:opacity .4s ease; }
-.nav.arrived .navto{ font-size:46px; top:508px; }
 
 @media (prefers-reduced-motion:reduce){
   .w{ animation:none; opacity:1; }
@@ -476,6 +484,7 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 
   <div class="screen">
     <div class="blur39"><div class="field"></div></div>
+    <div class="wave"></div><div class="wave w2"></div><div class="wave w3"></div><div class="wave w4"></div><div class="wave w5"></div>
     <!-- 의사 장면 배경 : 피그마 export 를 그대로 옮겼다 (경로·필터·그라디언트 동일) -->
     <svg class="dlight" viewBox="0 0 1080 1080" aria-hidden="true">
       <defs>
@@ -529,13 +538,8 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
       <img class="b4" src="doctor.webp" alt="" aria-hidden="true">
     </div>
 
-    <div class="ht">
-      <div class="htcut"><div class="htsrc"></div><div class="htdot"></div></div>
-      <div class="httint"></div>
-    </div>
-
-    <p class="cap cap-h"><b>Northgate Medical Center</b><s>Records &middot; last visit Jul&nbsp;20</s></p>
-    <p class="cap cap-d"><b>Dr. James Bennett</b><s>Rehabilitation Medicine</s></p>
+    <p class="cap cap-h reveal"><b>Northgate Medical Center</b><s>Records &middot; last visit Jul&nbsp;20</s></p>
+    <p class="cap cap-d reveal"><b>Dr. James Bennett</b><s>Rehabilitation Medicine</s></p>
 
     <p class="headline l-greet reveal">Hello, do you need help?</p>
     <p class="headline l-hi reveal nopause">Hello, <em>Somi.</em></p>
@@ -741,7 +745,7 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','hospital','doctor','connected','message','guide','follow'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 5200, 3000, 3400, 4300, 5000, 7600, 16500];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 5200, 3400, 3800, 4300, 5000, 7600, 16500];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
