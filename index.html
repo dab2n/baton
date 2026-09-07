@@ -95,6 +95,25 @@ body.kiosk .cam{ display:none; }
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
         z-index:4; pointer-events:none; }
 
+/* ---------- fill : 엄지 인식 뒤 하프톤이 가운데서 바깥으로 퍼진다 ----------
+   진짜 하프톤(점 크기가 밝기를 따라감)을 만드는 방법 :
+   1) .htsrc  퍼져 나가는 흰 원 (밝기 = 원본)
+   2) .htdot  칸마다 가운데가 밝은 격자를 multiply → 밝을수록 넓은 영역이 살아남는다
+   3) contrast 로 0.5 에서 잘라 이진화 → 밝기에 비례하는 크기의 흰 점
+   4) .httint 를 multiply 해서 노랑으로, .ht 는 plus-lighter 라 검은 부분은 사라진다 */
+.ht{ position:absolute; inset:0; opacity:0; pointer-events:none;
+     isolation:isolate; mix-blend-mode:plus-lighter; }
+.htcut{ position:absolute; inset:0; filter:contrast(26); background:#000; }
+.htsrc{ position:absolute; inset:0; transform:scale(.05);
+        background:radial-gradient(circle closest-side at 50% 50%,#fff 0 8%,#000 100%); }
+.htdot{ position:absolute; inset:0; mix-blend-mode:multiply;
+        background:radial-gradient(circle at 50% 50%,#fff 0 20%,#000 66%) 0 0/22px 22px; }
+.httint{ position:absolute; inset:0; mix-blend-mode:multiply; background:#f6e280; }
+body.fill .ht   { animation:htfade 2.4s linear both; }
+body.fill .htsrc{ animation:htgrow 1.6s cubic-bezier(.2,.75,.3,1) both; }
+@keyframes htgrow{ from{ transform:scale(.05); } to{ transform:scale(1.6); } }
+@keyframes htfade{ 0%{ opacity:0 } 8%{ opacity:1 } 66%{ opacity:1 } 100%{ opacity:0 } }
+
 /* ---------- 배경 레이어 : 기본값 = message(본문) 상태 ---------- */
 /* blur 는 래퍼에 : 자식을 scale() 해도 흐림 반경이 같이 커지지 않게 */
 /* 블러는 구슬 가장자리가 보이는 장면(idle/connecting)에만.
@@ -124,7 +143,9 @@ body.kiosk .cam{ display:none; }
 /* A : 중앙의 작은 원 → 화면을 채움 → 각 장면의 좌표로 흘러감 */
 body.idle       .field{ transform:translate(1px,145.5px) scale(.22); }
 /* 1.14 = 1022x1053 타원이 지름 1080 원을 완전히 덮는 배율(블러 39px 여유 포함) */
-body.fill       .field{ transform:translate(1px,145.5px) scale(1.2); }
+/* 하프톤이 먼저 퍼지고, 그 뒤에 그라디언트가 자리를 잡는다 */
+body.fill       .field{ transform:translate(1px,145.5px) scale(1.2); transition-delay:.9s; }
+body.fill .sheen, body.fill .cyan{ transition-delay:.9s; }
 /* connecting : 중심 원은 작게 물러나고 가장자리 스캔이 주인공 */
 body.connecting .field{ transform:translate(1px,145.5px) scale(.58); }
 body.connected  .field,
@@ -333,7 +354,7 @@ body.message .l-msg   .w{
   animation-delay:calc(var(--i) * 70ms + 200ms);
 }
 /* 원이 화면을 다 채운 다음(transform 1.8s)에 이어서 올라온다 */
-body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
+body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 2600ms); }
 /* 칩이 먼저 내려앉고(0.8s) 그 다음 문장 */
 body.connected .l-hi .w{ animation-delay:calc(var(--i) * 70ms + 1500ms); }
 @keyframes in{
@@ -440,6 +461,10 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 
   <div class="screen">
     <div class="blur39"><div class="field"></div></div>
+    <div class="ht">
+      <div class="htcut"><div class="htsrc"></div><div class="htdot"></div></div>
+      <div class="httint"></div>
+    </div>
     <!-- 의사 장면 배경 : 피그마 export 를 그대로 옮겼다 (경로·필터·그라디언트 동일) -->
     <svg class="dlight" viewBox="0 0 1080 1080" aria-hidden="true">
       <defs>
@@ -689,7 +714,7 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','hospital','doctor','connected','message','guide','follow'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 4200, 3000, 3400, 4300, 5000, 7600, 16500];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 6000, 4200, 3000, 3400, 4300, 5000, 7600, 16500];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
