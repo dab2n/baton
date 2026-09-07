@@ -111,6 +111,9 @@ body.kiosk .cam{ display:none; }
 .httint{ position:absolute; inset:0; mix-blend-mode:multiply; background:#f6e280; }
 body.connecting .ht   { animation:htfade 3s linear both; }
 body.connecting .htsrc{ animation:htgrow 1.9s cubic-bezier(.2,.75,.3,1) both; }
+/* 병원·의사는 같은 트랜지션을 짧게 : 하프톤이 훑고 지나가면 사진이 남는다 */
+body.hospital .ht,    body.doctor .ht   { animation:htfade 1.3s linear both; }
+body.hospital .htsrc, body.doctor .htsrc{ animation:htgrow 1s cubic-bezier(.2,.75,.3,1) both; }
 @keyframes htgrow{ from{ transform:scale(.05); } to{ transform:scale(1.6); } }
 @keyframes htfade{ 0%{ opacity:0 } 7%{ opacity:1 } 62%{ opacity:1 } 100%{ opacity:0 } }
 
@@ -156,10 +159,10 @@ body.follow     .field{ transform:translate(1px,145.5px) scale(1.2); }
 /* doctor : 검은 화면에 계란형 빛 한 덩이만 (피그마 3070:737) */
 body.follow .core{ opacity:0; }   /* 이 프레임엔 없는 레이어. 가운데가 하얘지면 화살표가 묻힌다 */
 /* 배경 레이어는 전부 물러난다 : 이 장면은 .dlight 한 장이 전부 그린다 */
-body.doctor .field,   body.hospital .field,
-body.doctor .sheen,   body.hospital .sheen,
-body.doctor .core,    body.hospital .core,
-body.doctor .cyan,    body.hospital .cyan{ opacity:0; }
+body.doctor .field,   body.hospital .field,   body.connecting .field,
+body.doctor .sheen,   body.hospital .sheen,   body.connecting .sheen,
+body.doctor .core,    body.hospital .core,    body.connecting .core,
+body.doctor .cyan,    body.hospital .cyan,    body.connecting .cyan{ opacity:0; }
 /* 피그마 export(02 · Detected · Call.svg) 를 그대로 인라인.
    계란형이 위쪽으로 갈수록 좁고 오른쪽으로 기울어 있어 타원으로는 안 맞는다 */
 .dlight{ position:absolute; inset:0; width:1080px; height:1080px;
@@ -194,7 +197,7 @@ body.idle .core, body.fill .core{ transform:scale(.4); opacity:0; }
 body.connecting  .core{ transform:translate(9px,-29px); }
 
 /* D : 본문 장면에서만 크게 */
-body.idle .cyan, body.fill .cyan, body.connecting .cyan{
+body.idle .cyan, body.fill .cyan{
   transform:translate(9px,172.5px) scale(.469); opacity:.09;
 }
 
@@ -275,7 +278,6 @@ body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; bor
 /* 가장자리 안쪽이 숨쉬듯 밝아졌다 잦아든다 */
 body.connecting .rim,
 body.connected  .rim{ animation:breathe 3.4s ease-in-out infinite; }
-body.connecting .rim{ opacity:1; }
 @keyframes breathe{
   0%,100%{ box-shadow:inset 0 0 44px  4px rgba(255,250,214,.45); }
   50%    { box-shadow:inset 0 0 104px 30px rgba(255,250,214,.92); }
@@ -288,7 +290,6 @@ body.connecting .rim{ opacity:1; }
 }
 body.connecting .rim::after,
 body.connected  .rim::after{ animation:orbit 11s linear infinite; }
-body.connecting .rim::after{ opacity:1; }
 @keyframes orbit{ to{ rotate:360deg; } }
 
 /* ---------- 병원 칩 : 스크린 상단에서 아래로 내려온다 ---------- */
@@ -299,7 +300,12 @@ body.connecting .rim::after{ opacity:1; }
   opacity:0; translate:0 -30px;
   transition:opacity .5s ease, translate .8s cubic-bezier(.3,.9,.3,1);
 }
-body.connected .pill{ opacity:1; translate:0 0; transition-delay:.35s; }
+body.connecting .pill, body.hospital .pill,
+body.doctor    .pill, body.connected .pill{ opacity:1; translate:0 0; transition-delay:.35s; }
+/* 새카만 connecting 에서만 : color-burn 이면 칩이 통째로 검어진다 */
+body.connecting .pbg{ background:rgba(22,20,9,.72); mix-blend-mode:normal; }
+body.connecting .pc b{ color:#fbf3c8; }
+body.connecting .pc s{ color:rgba(251,243,200,.62); }
 
 .pbg{ position:absolute; inset:0; border-radius:inherit;
       background:rgba(255,248,190,.2); mix-blend-mode:color-burn; }
@@ -308,7 +314,8 @@ body.connected .pill{ opacity:1; translate:0 0; transition-delay:.35s; }
 
 .pc{ grid-area:1/1; display:flex; align-items:center; justify-content:center;
      opacity:0; white-space:nowrap; transition:opacity .4s ease; }
-body.connected .pc-hospital{ opacity:1; transition-delay:.6s; }
+body.connecting .pc-hospital, body.hospital .pc-hospital,
+body.doctor    .pc-hospital, body.connected .pc-hospital{ opacity:1; transition-delay:.6s; }
 .pc-hospital{ gap:12px; }
 .vial{
   width:33.35px; height:59.75px; flex:none;
@@ -319,6 +326,16 @@ body.connected .pc-hospital{ opacity:1; transition-delay:.6s; }
 .pc b{ font-weight:500; font-size:20px; line-height:1.5; color:#2e2e0c; display:block; }
 .pc s{ font-weight:500; font-size:14px; line-height:1.5; color:rgba(46,46,12,.62);
        display:block; text-decoration:none; }
+
+/* ---------- 오버뷰 하단 정보 ---------- */
+.cap{ position:absolute; left:50%; top:945px; transform:translateX(-50%);
+      margin:0; text-align:center; white-space:nowrap;
+      opacity:0; transition:opacity .6s ease; color:#f2e6ae; }
+.cap b{ display:block; font-size:30px; font-weight:500; line-height:1.35; }
+.cap s{ display:block; font-size:19px; font-weight:400; line-height:1.7;
+        text-decoration:none; color:rgba(242,230,174,.6); }
+body.hospital .cap-h,
+body.doctor   .cap-d{ opacity:1; transition-delay:.55s; }
 
 /* ---------- 본문 ---------- */
 .headline{
@@ -459,10 +476,6 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 
   <div class="screen">
     <div class="blur39"><div class="field"></div></div>
-    <div class="ht">
-      <div class="htcut"><div class="htsrc"></div><div class="htdot"></div></div>
-      <div class="httint"></div>
-    </div>
     <!-- 의사 장면 배경 : 피그마 export 를 그대로 옮겼다 (경로·필터·그라디언트 동일) -->
     <svg class="dlight" viewBox="0 0 1080 1080" aria-hidden="true">
       <defs>
@@ -516,6 +529,14 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
       <img class="b4" src="doctor.webp" alt="" aria-hidden="true">
     </div>
 
+    <div class="ht">
+      <div class="htcut"><div class="htsrc"></div><div class="htdot"></div></div>
+      <div class="httint"></div>
+    </div>
+
+    <p class="cap cap-h"><b>Northgate Medical Center</b><s>Records &middot; last visit Jul&nbsp;20</s></p>
+    <p class="cap cap-d"><b>Dr. James Bennett</b><s>Rehabilitation Medicine</s></p>
+
     <p class="headline l-greet reveal">Hello, do you need help?</p>
     <p class="headline l-hi reveal nopause">Hello, <em>Somi.</em></p>
     <p class="headline l-msg reveal">
@@ -543,7 +564,7 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 
     <div class="pill">
       <span class="pbg"></span>
-      <div class="pc pc-hospital"><i class="vial"></i><div><b>A Hospital</b><s>B-19</s></div></div>
+      <div class="pc pc-hospital"><i class="vial"></i><div><b>Northgate Medical Center</b><s>B-19</s></div></div>
     </div>
     <!-- 카메라 노치 : .screen 안에 두어 같은 clip-path 로 잘리게 한다 (경계에 흰 선이 안 남음) -->
     <svg class="bezel" viewBox="0 0 1080 1080" aria-hidden="true">
@@ -684,8 +705,16 @@ for (let v = TOTAL; v >= 1.4; v *= 0.86) {
   if (SEQ[SEQ.length - 1] !== n) SEQ.push(n);
 }
 if (SEQ[SEQ.length - 1] !== 1) SEQ.push(1);
+// 50 → 43 은 한 번에 뛰지 않고 49 48 …로 빠르게 굴러 내려간다
+let roll;
+const rollTo = n => {
+  clearInterval(roll);
+  if (shown < 0) return setDist(n);
+  roll = setInterval(() => { shown <= n ? clearInterval(roll) : setDist(shown - 1); }, 45);
+};
 let navRAF;
 const navRun = () => {
+  clearInterval(roll);
   clearTimeout(navRAF);
   NAV.classList.remove('arrived');
   shown = -1;
@@ -702,7 +731,7 @@ const navRun = () => {
     gfill.style.strokeDashoffset = 100 * n / TOTAL;
     arrowSvg.style.rotate = leg.deg + 'deg';
     navto.textContent = leg.to;
-    setDist(n);
+    rollTo(n);
     navRAF = setTimeout(tick, STEP);
   };
   tick();
@@ -719,7 +748,7 @@ let timer;
 const go = n => {
   clearTimeout(timer);
   body.className = body.className.replace(/\b(idle|fill|connecting|hospital|doctor|connected|message|guide|follow)\b/, STEPS[n]);
-  if (STEPS[n] === 'follow') navRun(); else clearTimeout(navRAF);
+  if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
   if (HOLD[n]) timer = setTimeout(() => go((n + 1) % STEPS.length), HOLD[n]);
 };
 const step = () => STEPS.findIndex(s => body.classList.contains(s));
