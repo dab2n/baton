@@ -388,9 +388,6 @@ body.follow .nav > *{ opacity:1; }
 .gtrack{ stroke:rgba(255,255,255,.55); stroke-width:30; }
 .gfill { stroke:#fff; stroke-width:26; stroke-dasharray:100; stroke-dashoffset:100;
           transition:stroke-dashoffset .5s cubic-bezier(.3,.9,.3,1); }
-.navdigits g{ animation:numdrop .3s cubic-bezier(.2,.8,.3,1) both;
-              transform-box:fill-box; transform-origin:left center; }
-@keyframes numdrop{ from{ opacity:0; scale:1.22; } to{ opacity:1; scale:1; } }
 
 /* 화살표 도트 : 그룹째 회전한다 (다리가 바뀔 때 부드럽게) */
 .navarrow{ transform-origin:540px 538.5px; transition:rotate 1.4s cubic-bezier(.4,0,.2,1); }
@@ -644,7 +641,7 @@ const setDist = n => {
     [...row].forEach((b, c) => {
       if (b === '1') g.append(dot(79 + i * 61 + c * 13, 480 + r * 13, 5.2));
     })));
-  digitsSvg.replaceChildren(g);   // 새로 만든 <g> 라 numdrop 이 매번 다시 돈다
+  digitsSvg.replaceChildren(g);
   navm.style.left = (79 + t.length * 61 + 4) + 'px';
 };
 
