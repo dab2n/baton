@@ -140,7 +140,11 @@ body.guide      .field,
 body.follow     .field{ transform:translate(1px,145.5px) scale(1.2); }
 
 /* doctor : 검은 화면에 계란형 빛 한 덩이만 (피그마 3070:737) */
-body.follow .core{ opacity:0; }   /* 이 프레임엔 없는 레이어. 가운데가 하얘지면 화살표가 묻힌다 */
+/* .core 는 이 프레임들에 없는 레이어다. 가운데가 하얗게 날아가 글자가 묻힌다 */
+body.connected .core,
+body.message   .core,
+body.guide     .core,
+body.follow    .core{ opacity:0; }
 /* 배경 레이어는 전부 물러난다 : 이 장면은 .dlight 한 장이 전부 그린다 */
 body.doctor .field,   body.hospital .field,
 body.doctor .sheen,   body.hospital .sheen,
@@ -307,7 +311,7 @@ body.doctor   .cap-d .w{ animation:in .9s cubic-bezier(.2,.7,.2,1) both;
 }
 /* 줄 수와 무관하게 스크린 정중앙 */
 .headline{ top:50%; transform:translate(-50%,-50%); }
-.headline em{ font-style:normal; font-weight:600; }
+.headline em{ font-style:normal; font-weight:600; color:#26250A; }
 
 /* 장면당 한 문장. 들어올 때는 즉시, 나갈 때만 천천히 사라진다 */
 .headline{ opacity:0; }
@@ -409,6 +413,8 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 .nav.arrived .navdigits,
 .nav.arrived .navm,
 .nav.arrived .navarrow{ opacity:0; transition:opacity .4s ease; }
+/* 숫자와 화살표가 사라지면 Arrived 가 아래에 혼자 남는다 : 목적지와 같은 중심선(546)으로 */
+.nav.arrived .navto{ top:531px; }
 
 @media (prefers-reduced-motion:reduce){
   .w{ animation:none; opacity:1; }
