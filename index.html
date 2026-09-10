@@ -20,8 +20,12 @@
 */
 
 :root{ --fit: 1238; }                    /* 제품 목업 켰을 때만 하우징 자리를 비운다 */
-/* 기본·실기기 : 베젤은 진짜 유리가 대신하므로 실제 표시영역 1022.68 을 꽉 채운다 */
-body.bare, body.kiosk{ --fit: 1023; }
+/* 목업 끈 웹 화면 : 피그마 프레임(1080, 20px 검은 베젤 포함) 을 그대로 보여준다 */
+body.bare{ --fit: 1080; }
+/* 실기기 : 베젤은 진짜 유리가 대신하므로 실제 표시영역 1022.68 을 꽉 채운다 */
+body.kiosk{ --fit: 1023; }
+/* ?s=N 이미지 내보내기 : 피그마 프레임 1080 을 1:1 로 */
+body.shot{ --fit: 1080; }
 
 *{ box-sizing: border-box; }
 html,body{ height:100%; margin:0; overflow:hidden; background:#fff; }
@@ -70,7 +74,7 @@ body.bare .ring{ display:none; }
 }
 body.bare .toggle .sw{ background:#d6d6d6; }
 body.bare .toggle .sw::after{ transform:none; }
-body.kiosk .toggle{ display:none; }   /* 전체화면 : 실기기에선 숨김 */
+body.kiosk .toggle, body.shot .toggle{ display:none; }   /* 전체화면·내보내기에선 숨김 */
 body.kiosk{ cursor:none; background:#fff; }   /* 터치/마우스 없는 스크린 */
 body.kiosk .ring{ display:none; }             /* 전체화면 : 목업은 항상 숨김 */
 
@@ -87,19 +91,16 @@ body.kiosk .cam{ display:none; }
 /* ---------- 스크린 1080x1080 ---------- */
 .screen{
   position:absolute; inset:0; border-radius:50%;
-  /* 피그마 3124:17775 : 위는 감청, 가운데 순검정, 아래 끝만 살짝 밝다 */
-  background:linear-gradient(180deg,#0F1627 8.7868%,#000 33.115%,#000 80.176%,#3D3D3D 98.493%);
+  /* 피그마 3124:17775 : 위는 감청, 가운데 순검정, 아래 끝만 살짝 밝다.
+     정지점 %는 20px 테두리 안쪽(1040) 기준이라 배경 박스를 그만큼 잡아준다 */
+  background:linear-gradient(180deg,#0F1627 8.7868%,#000 33.115%,#000 80.176%,#3D3D3D 98.493%)
+             no-repeat 0 20px / 100% 1040px, #000;
   overflow:hidden;
-  /* 실디스플레이 1030.43x1022.68 로 잘라낸다 : 검은 베젤 링이 남지 않게
-     (자식 좌표는 그대로 두려고 inset 대신 clip-path) */
-  clip-path:ellipse(515.2px 511.34px at 539.85px 543.7px);
+  /* 피그마 프레임은 border:20px solid #000 : 표시영역은 20px 안쪽 원 */
+  clip-path:circle(520px at 540px 540px);
 }
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
         z-index:4; pointer-events:none; }
-
-  16% {                       opacity:.8; }
-  100%{ transform:scale(1.6); opacity:0;  }
-}
 
 
 /* ---------- 배경 레이어 : 기본값 = message(본문) 상태 ---------- */
@@ -318,11 +319,23 @@ body.connecting .star{ opacity:1; }
 body.message .rec{ opacity:1; transform:scale(1); transition-delay:.45s; }
 .rec-img{ position:absolute; left:-24px; top:-12px; width:841px; height:576px;
           object-fit:cover; }
-/* 아래쪽 유리막 : 뒤를 흐리고 남청→연청 그라디언트를 얹는다 */
+/* 배경 블러는 progressive : 피그마 Progressive layer blur 는 코드젠에서
+   균일 backdrop-blur(16.8px) 로 납작해진다. 흐린 판 네 장을 아래에서부터
+   드러내 위는 선명하고 아래로 갈수록 풀리게 만든다 (최대 17 ≈ 16.8) */
+.rec-b1, .rec-b2, .rec-b3, .rec-b4{ -webkit-mask:var(--m) no-repeat; mask:var(--m) no-repeat; }
+.rec-b1{ filter:blur(4px);  --m:linear-gradient(180deg,transparent 58%,#000 66%); }
+.rec-b2{ filter:blur(9px);  --m:linear-gradient(180deg,transparent 67%,#000 74%); }
+.rec-b3{ filter:blur(15px); --m:linear-gradient(180deg,transparent 76%,#000 83%); }
+.rec-b4{ filter:blur(22px); --m:linear-gradient(180deg,transparent 85%,#000 93%); }
+/* 유리막 색 : 남청(투명) → 연청 0.83 → 연청 0.39 */
 .rec-veil{ position:absolute; left:-14px; top:235px; width:833px; height:329px;
-           -webkit-backdrop-filter:blur(16.8px); backdrop-filter:blur(16.8px);
-           background:linear-gradient(180deg,rgba(10,24,63,0) 0%,
-                      rgba(125,143,193,.83) 61.773%,rgba(125,143,193,.39) 89.423%); }
+           background:linear-gradient(180deg,
+                      rgba(10,24,63,0)         0%,
+                      rgba(39,54,96,.2075)     15.443%,
+                      rgba(68,84,128,.415)     30.887%,
+                      rgba(96,113,161,.6225)   46.330%,
+                      rgba(125,143,193,.83)    61.773%,
+                      rgba(125,143,193,.39)    89.423%); }
 .rec-row{ position:absolute; left:50px; bottom:50.88px; width:694px;
           display:flex; align-items:flex-end; justify-content:space-between; }
 .rec-txt{ display:flex; flex-direction:column; gap:4px; line-height:1.6; }
@@ -418,6 +431,10 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
     <!-- 기록 카드 (피그마 3142:299) -->
     <div class="rec">
       <img class="rec-img" src="card-hospital.webp" alt="Northgate Medical Center">
+      <img class="rec-img rec-b1" src="card-hospital.webp" alt="" aria-hidden="true">
+      <img class="rec-img rec-b2" src="card-hospital.webp" alt="" aria-hidden="true">
+      <img class="rec-img rec-b3" src="card-hospital.webp" alt="" aria-hidden="true">
+      <img class="rec-img rec-b4" src="card-hospital.webp" alt="" aria-hidden="true">
       <div class="rec-veil"></div>
       <div class="rec-row">
         <div class="rec-txt">
@@ -479,7 +496,8 @@ if (SCREEN) document.body.classList.add('bare');
 // scale() 은 단위 없는 수만 받으므로 JS로 계산 (CSS calc 로는 px/숫자 → px 라 불가)
 const FILL = .92;   // 미리보기 여백. 실기기(#screen)는 항상 꽉 채움
 const fit = () => document.documentElement.style.setProperty('--s',
-  Math.min(innerWidth, innerHeight) * (document.body.classList.contains('kiosk') ? 1 : FILL) /
+  Math.min(innerWidth, innerHeight) *
+  (document.body.classList.contains('kiosk') || document.body.classList.contains('shot') ? 1 : FILL) /
   parseFloat(getComputedStyle(document.body).getPropertyValue('--fit')));
 addEventListener('resize', kiosk);   // display-mode change 가 안 오는 브라우저 대비
 kiosk();
@@ -640,7 +658,7 @@ const tap = () => { const n = step(); go(n < 0 || n === STEPS.length - 1 ? 0 : n
 window.__go = go; window.__step = step;
 // ?s=N : 그 장면 하나만 정지 (이미지 내보내기용)
 const SOLO = new URLSearchParams(location.search).get('s');
-if (SOLO !== null) { body.classList.add('bare','kiosk'); fit(); go(+SOLO); clearTimeout(timer); }
+if (SOLO !== null) { body.classList.add('bare','shot'); fit(); go(+SOLO); clearTimeout(timer); }
 else go(0);   // 접속하자마자 자동 시퀀스 시작
 
 // 목업 테두리 토글 : --fit 이 바뀌므로 fit() 재계산
