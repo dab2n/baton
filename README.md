@@ -84,6 +84,10 @@ spark.svg    Connecting 아이콘
   - 이 저장소의 `star.webm` / `star.mp4` 는 위 파일을 `crop=1080:1080:10:0` (구가 중앙에 오도록) 한 것
   - 자잘한 타이밍·색 수정은 aep 에서 하고 다시 내보내 같은 crop 으로 갈아끼운다
 - 기본 화면 키 비주얼 : 피그마 `node-id=3124-17775`
+- Hello! Somi : 피그마 `node-id=3139-207`
+- 기록 카드(병원·의사·"You had-" 통합) : 피그마 `node-id=3142-299`
+  - `card-hospital.webp` / `card-doctor.webp` 는 그 프레임의 이미지 애셋
+- `star.*` 는 `pad=1920:1092:0:12,crop=1080:1080:30:6,transpose=2` — 구를 정중앙에 놓고 좌회전 90도
 
 ## 로컬 확인
 
