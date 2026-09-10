@@ -76,3 +76,16 @@ index.html   전체 (CSS·JS·아이콘 마스크 인라인)
 doctor.png   의료진 사진
 spark.svg    Connecting 아이콘
 ```
+
+## 모션 원본
+
+- 연결 인식 모션(`connecting`)의 별 애니메이션 : After Effects `~/Desktop/grad_motion1.aep`
+  - 내보낸 것 : `~/Desktop/grad_motion.aep_AME/별.mp4` (1920x1080)
+  - 이 저장소의 `star.webm` / `star.mp4` 는 위 파일을 `crop=1080:1080:10:0` (구가 중앙에 오도록) 한 것
+  - 자잘한 타이밍·색 수정은 aep 에서 하고 다시 내보내 같은 crop 으로 갈아끼운다
+- 기본 화면 키 비주얼 : 피그마 `node-id=3124-17775`
+
+## 로컬 확인
+
+`python -m http.server` 는 Range 요청을 200 으로 답해서 크롬이 영상을 못 읽는다.
+Range 를 지원하는 서버로 띄워야 `star.*` 가 재생된다.
