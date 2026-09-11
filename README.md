@@ -127,3 +127,11 @@ Apple SF Pro KR 은 재배포할 수 없는 라이선스라 **공개 저장소�
 - `card-samsung.webp` 는 피그마처럼 **늘려 채운다(object-fit: fill)**. 코드젠에 `object-cover` 가 빠져 있는 게 실제 디자인이다 (PNG 대조 오차 0.8/255, cover 로는 21.4)
 - 카드 글자는 알파벳이 무작위 순서로 다다닥, 그 중간에 의사 사진이 제자리에서 나타난다
 - 강조어 글리밍 : 같은 글자를 #FEFFF9 로 한 겹 더, 오른쪽으로 갈수록 흐리게 (피그마 progressive blur 를 코드젠이 균일 blur 5.95 로 내보냄)
+
+## 폰트
+
+- 영문 Delight 는 이 맥에 설치된 폰트, 한글 SF Pro KR 은 `fonts/` (Apple 라이선스라 공개 저장소에 올리지 않음)
+- 배포 링크를 다른 컴퓨터에서 열어 둘 중 하나가 없으면 그 글자만 Pretendard 로 바뀐다 (`html.fb-en` / `html.fb-ko`)
+  - `pretendard/` : Pretendard 1.3.9 KS X 1001 서브셋 woff2 (400/500/600/700), SIL OFL 1.1 (`pretendard/LICENSE.txt`)
+  - 자간은 화면에 쓰는 실제 문구의 폭을 원래 폰트와 재서 굵기·크기마다 보정 (한글 −0.054em, 영문 −0.014 ~ +0.014em)
+  - 이 맥에서 확인할 땐 `?fb=ko,en` (또는 `?fb=ko`, `?fb=en`) 으로 강제

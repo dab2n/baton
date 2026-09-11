@@ -40,7 +40,8 @@ body.shot{ --fit: 1080; }
 html,body{ height:100%; margin:0; overflow:hidden; background:#fff; }
 body{
   display:flex; align-items:center; justify-content:center;
-  font-family:'Delight','SF Pro KR','Pretendard','Inter',system-ui,sans-serif;
+  /* 영문 Delight(이 맥에 설치) · 한글 SF Pro KR(fonts/, 공개 저장소엔 없음). 없는 쪽만 Pretendard 로 (아래 fb-en / fb-ko) */
+  font-family:var(--ff-en,'Delight'), var(--ff-ko,'SF Pro KR'), 'Pretendard Web', system-ui, sans-serif;
 
   -webkit-font-smoothing:antialiased;
   cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none;
@@ -48,6 +49,33 @@ body{
 /* 자간 -1% : letter-spacing 은 계산된 px 로 상속돼서 body 에만 주면
    글자 크기가 다른 곳에서 비율이 어긋난다. 요소마다 em 을 다시 풀어준다 */
 .device, .device *{ letter-spacing:-0.01em; }
+
+/* ---------- 폰트 대체 : 배포 링크를 다른 컴퓨터에서 열 때 ----------
+   Delight(영문)나 SF Pro KR(한글)이 없으면 JS 가 html 에 fb-en / fb-ko 를 달고 그 글자만 Pretendard 로.
+   Pretendard 는 OFL 이라 pretendard/ 에 KS X 1001 서브셋을 둔다 (필요한 굵기만 받는다).
+   자간은 실제 문구 폭을 원래 폰트와 재서 맞춘다 : 보정 = (원래 폭 − Pretendard 폭) ÷ (글자 수 × 크기).
+   확인용 ?fb=ko,en 로 강제할 수 있다 */
+@font-face{ font-family:'Pretendard Web'; font-weight:400; font-display:swap;
+  src:local('Pretendard Regular'), local('Pretendard-Regular'), url('pretendard/Pretendard-Regular.subset.woff2') format('woff2'); }
+@font-face{ font-family:'Pretendard Web'; font-weight:500; font-display:swap;
+  src:local('Pretendard Medium'), local('Pretendard-Medium'), url('pretendard/Pretendard-Medium.subset.woff2') format('woff2'); }
+@font-face{ font-family:'Pretendard Web'; font-weight:600; font-display:swap;
+  src:local('Pretendard SemiBold'), local('Pretendard-SemiBold'), url('pretendard/Pretendard-SemiBold.subset.woff2') format('woff2'); }
+@font-face{ font-family:'Pretendard Web'; font-weight:700; font-display:swap;
+  src:local('Pretendard Bold'), local('Pretendard-Bold'), url('pretendard/Pretendard-Bold.subset.woff2') format('woff2'); }
+html.fb-ko{ --ff-ko:'Pretendard Web'; }
+html.fb-en{ --ff-en:var(--ff-ko,'SF Pro KR'); }   /* 영문만 없으면 한글은 SF Pro KR 그대로, 둘 다 없으면 Pretendard */
+/* 한글 600 48px : Pretendard 가 7.6% 넓다 → −0.054em */
+html.fb-ko .l-greet, html.fb-ko .l-greet *{ letter-spacing:-0.064em; }
+/* 영문 : 굵기·크기마다 Delight 와 폭 차이가 달라 따로 (괄호 안이 보정값) */
+html.fb-en .headline:not(.l-greet), html.fb-en .headline:not(.l-greet) *{ letter-spacing:-0.0144em; }   /* 500 42 (−0.0044) */
+html.fb-en .headline:not(.l-greet) em, html.fb-en .headline:not(.l-greet) em *{ letter-spacing:-0.0034em; }   /* 600 42 (+0.0066) */
+html.fb-en .headline.l-hi, html.fb-en .headline.l-hi *{ letter-spacing:0em; }   /* 600 48 (+0.0100) */
+html.fb-en .rec-txt b, html.fb-en .rec-txt b *{ letter-spacing:-0.0034em; }   /* 600 42 (+0.0066) */
+html.fb-en .rec-txt s, html.fb-en .rec-txt s *{ letter-spacing:-0.0235em; }   /* 400 31.4 (−0.0135) */
+html.fb-en .navm{ letter-spacing:-0.0117em; }   /* 700 42 (−0.0017) */
+html.fb-en .navto, html.fb-en .navto *{ letter-spacing:-0.0152em; }   /* 400 24 (−0.0052) */
+html.fb-en .navdest, html.fb-en .navdest *{ letter-spacing:0.0037em; }   /* 600 28 (+0.0137) */
 
 .device{ position:relative; width:1080px; height:1080px; flex:none; transform:scale(var(--s,1)); }
 
@@ -688,6 +716,18 @@ kiosk();
 
 // 텍스트를 단어 단위로 쪼개고 DOM 순서대로 딜레이 부여
 const PAUSE = 7;   // 문장 경계에서 건너뛸 칸 수 (1칸 = 스태거 1단위)
+// 폰트 대체 판별 : Delight 는 설치 폰트라 폭으로, SF Pro KR 은 파일을 실제로 불러와 본다. ?fb=ko,en 로 강제
+{
+  const q = new URLSearchParams(location.search).get('fb');
+  const root = document.documentElement.classList;
+  const cx = document.createElement('canvas').getContext('2d');
+  const w = f => (cx.font = f, cx.measureText('Good Afternoon 0123').width);
+  if (q !== null ? q.includes('en') : w('500 40px Delight, monospace') === w('500 40px monospace')) root.add('fb-en');
+  const noKo = () => root.add('fb-ko');
+  if (q !== null) { if (q.includes('ko')) noKo(); }
+  else document.fonts.load('600 48px "SF Pro KR"', '가').then(f => { if (!f.length) noKo(); }, noKo);
+}
+
 const split = el => {
   const hold = el.classList.contains('nopause');   // 한 호흡으로 읽히는 문장
   let i = 0;
