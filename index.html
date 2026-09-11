@@ -328,7 +328,7 @@ body.message .l-msg   .w{
 }
 /* 원이 화면을 다 채운 다음(transform 1.8s)에 이어서 올라온다 */
 body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
-/* fill 에서 4초마다 문구가 바뀐다 (JS askRun). 다음 문구부터는 원이 이미 차 있으니 바로 올라오고,
+/* fill 에서 6초마다 문구가 바뀐다 (JS askRun). 다음 문구부터는 원이 이미 차 있으니 바로 올라오고,
    바뀌기 전 0.5s 동안 흐려지며 살짝 올라가 사라진다. out 이 cyc 보다 뒤에 있어야 지연 0 이 이긴다 */
 body.fill .l-greet.cyc .w{ animation-delay:calc(var(--i) * 70ms + 150ms); }
 body.fill .l-greet.out .w{ animation:out .5s cubic-bezier(.4,0,.6,1) both; }
@@ -525,13 +525,15 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
         line-height:1; color:#fff; }
 .navto{ position:absolute; left:75px; top:592px; font-size:24px; line-height:1.04;   /* 숫자 아래 약 28px 띄움 */
         white-space:nowrap; color:#E7E7E7; }
-.navdest{ position:absolute; right:89px; top:517px; font-size:28px; line-height:1.04;
+.navdest{ position:absolute; right:93px; top:517px; font-size:28px; line-height:1.04;
           text-align:right; white-space:nowrap; color:#fff; font-weight:600; }
 /* 문구는 다른 장면과 같은 단어 등장. navto 는 바뀔 때마다 새로 쪼개 다시 올라온다 */
 body.follow .navto .w, body.follow .navdest .w{
   animation:in .9s cubic-bezier(.2,.7,.2,1) both;
   animation-delay:calc(var(--i) * 70ms + 200ms); }
-.navpin{ position:absolute; right:40px; top:522px; width:41.9px; height:48px; }
+/* 핀 중심을 게이지 호 중심선(반지름 475) 위에 : 핀 높이(y≈543)에서 호의 x = 540 + √(475² − 3²) ≈ 1015.
+   핀 중심 = left + 20.95 → right 44. 목적지 문구도 같은 간격(7px)을 두고 4px 왼쪽으로 */
+.navpin{ position:absolute; right:44px; top:522px; width:41.9px; height:48px; }
 
 /* 도착 : 거리는 지우고 문구만 크게, 핀이 뛴다 */
 .nav.arrived .navdigits,
@@ -851,7 +853,7 @@ const HOLD  = [6000, 5200, 6800, 1600, 5400, 4600, 4000, 14000];   // 각 상태
 const body = document.body;
 let timer, strokeTimer;
 
-// fill : 엄지척 전까지 4초 간격으로 문구가 바뀐다. | 는 줄바꿈
+// fill : 엄지척 전까지 6초 간격으로 문구가 바뀐다. | 는 줄바꿈
 const greet = document.querySelector('.l-greet');
 const ASK = ['도움이 필요하신가요?', '찾고 계신 장소나|오늘의 일정을 말해주세요', '접수를 도와드릴까요?', '진료 예약을|확인해 드릴까요?'];
 let ask = 0, askTimer;
@@ -868,16 +870,16 @@ const askRun = on => {
   greet.classList.remove('out', 'cyc');
   if (!on) return;
   setAsk(ask = 0);
-  // 첫 문구는 원이 차는 1.75s 뒤에 올라오므로 조금 더 오래. 이후 4초마다 : 0.5s 사라지고 다음 문구
+  // 첫 문구는 원이 차는 1.75s 뒤에 올라오므로 조금 더 오래. 이후 6초마다 : 0.5s 사라지고 다음 문구
   const next = delay => { askTimer = setTimeout(() => {
     greet.classList.add('out');
     askTimer = setTimeout(() => {
       greet.classList.replace('out', 'cyc');
       setAsk(ask = (ask + 1) % ASK.length);
-      next(3500);
+      next(5500);
     }, 500);
   }, delay); };
-  next(5200);
+  next(7200);
 };
 
 const go = n => {
