@@ -82,6 +82,8 @@ spark.svg    Connecting 아이콘
 - 연결 인식 모션(`connecting`)의 별 애니메이션 : After Effects `~/Desktop/grad_motion1.aep`
   - 내보낸 것 : `~/Desktop/grad_motion.aep_AME/별.mp4` (1920x1080)
   - 이 저장소의 `star.webm` / `star.mp4` 는 위 파일을 `crop=1080:1080:10:0` (구가 중앙에 오도록) 한 것
+  - 인코딩 : VP9 `-crf 14 -b:v 0 -aq-mode 2` / H.264 `-crf 14 -preset slow -x264-params aq-mode=3`.
+    화면 대부분이 검정이라 전체 PSNR 은 높게 나와도 어두운 글로우가 먼저 깨진다. 비트레이트를 아끼지 말 것
   - 자잘한 타이밍·색 수정은 aep 에서 하고 다시 내보내 같은 crop 으로 갈아끼운다
 - 기본 화면 키 비주얼 : 피그마 `node-id=3124-17775`
 - Hello! Somi : 피그마 `node-id=3139-207`
