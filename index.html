@@ -265,11 +265,11 @@ body.connected  .rim::after{ animation:orbit 11s linear infinite; }
 .headline em{ font-style:normal; font-weight:600; text-shadow:0 0 12px rgba(254,255,249,.9); }
 /* message : 카드 위 한 줄 */
 .l-msg{ width:auto; white-space:nowrap; top:188px; transform:translateX(-50%); }
-/* 처음엔 스크린 가운데서 단어가 올라오고(~1.45s), 다 뜨면 제자리(top 188)로 올라간다.
+/* 스크린 가운데서 단어가 올라오기 시작하고, 0.8s 부터 제자리(top 188)로 올라간다.
    320px = 화면 중심 540 - 문구 박스 중심 220 */
-body.message .l-msg{ animation:msgUp 2.6s cubic-bezier(.65,0,.25,1) both; }
+body.message .l-msg{ animation:msgUp 1.6s cubic-bezier(.65,0,.25,1) both; }
 @keyframes msgUp{
-  0%, 62% { translate:0 320px; }
+  0%, 50% { translate:0 320px; }
   100%    { translate:0 0; }
 }
 
@@ -289,6 +289,9 @@ body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 .l-greet, .l-hi{ font-size:56px; line-height:1.4; }   /* 두 줄 : 한국어·영어가 줄끼리 겹친다 */
 /* 두 문구의 박스를 같은 폭으로 : 지우개 경계가 화면 같은 x 를 지나가게 */
 .l-greet, .l-hi{ width:780px; }
+/* 한국어는 한 줄뿐 : 둘째 줄 자리를 비워 두고 두 문구를 반 줄(56×1.4÷2) 내린다.
+   한국어가 정중앙, 영어 윗줄(Good Afternoon!)도 정확히 같은 자리에 겹친다 */
+.l-greet, .l-hi{ top:calc(50% + 39.2px); }
 .l-greet .w, .l-hi .w{ background:linear-gradient(180deg,#E5E5E5 71.017%,#353046 89.851%);
                        -webkit-background-clip:text; background-clip:text; color:transparent; }
 
@@ -306,44 +309,42 @@ body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
   from{ opacity:0; transform:translateY(.42em); filter:blur(10px); }
   to  { opacity:1; transform:none;              filter:blur(0);    }
 }
-/* 인사 전환 (connecting 7400ms) : 글자는 제자리. 움직이는 건 마스크 경계와 투명도
-     0 ~  500  한국어가 사라진다 (별 모션 시작)
-   500 ~ 3300  글자 없음 : 별만
-  3300 ~ 3900  한국어가 그 자리에 다시 나타난다
-  4400 ~ 6200  윗줄 : 흐린 경계가 왼→오로 천천히 지나가며 한국어를 지우고,
-               동시에 한국어가 점점 투명해진다 (바뀌는 순간을 길게 보여준다)
-  4700 ~ 5900  윗줄 : 같은 경계가 300ms 늦게 출발해 영어를 드러낸다. 한국어보다 빨라
-               중간부터는 반투명한 한국어 위로 영어가 겹쳐 보인다
-  +500ms       아랫줄은 같은 동작을 0.5초 늦게 : 위→아래 순서로 바뀐다
+/* 인사 전환 (connecting 5600ms) : 글자는 제자리. 움직이는 건 마스크 경계와 투명도
+     0 ~  500  한국어가 사라진다 (엄지척 → 구 모션 0.8~2.4s)
+   500 ~ 2600  글자 없음 : 구만
+  2600 ~ 3100  한국어가 그 자리에 다시 나타난다
+  3400 ~ 5200  윗줄 : 흐린 경계가 왼→오로 천천히 지나가며 한국어를 지우고 점점 투명해진다
+  3700 ~ 4900  윗줄 : 같은 경계가 300ms 늦게, 더 빠르게 영어를 드러낸다 (반투명한 한국어 위로 겹침)
+  +500ms       아랫줄(Somi.)은 0.5초 늦게 : 위→아래 순서
    마스크는 줄(.ln)마다. 폭 300% 그라디언트(가운데 10% 가 흐린 경계)를 85%→15% 로 민다 */
 .l-greet .ln, .l-hi .ln{ display:block; }
 body.connecting .l-greet .w,
 body.connecting .l-hi .w,
 body.connected  .l-hi .w{ opacity:1; }
-body.connecting .l-greet{ animation:deScene 7400ms linear both; }
+body.connecting .l-greet{ animation:deScene 5600ms linear both; }
 body.connecting .l-greet .ln{
   -webkit-mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
-  animation:deLine 7400ms linear both; }
+  animation:deLine 5600ms linear both; }
 body.connecting .l-hi .ln{
   -webkit-mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
-  animation:enLine 7400ms linear both; }
+  animation:enLine 5600ms linear both; }
 body.connecting .l-greet .ln + .ln,
 body.connecting .l-hi .ln + .ln{ animation-delay:500ms; }
 @keyframes deScene{
-  0%           { opacity:1; }
-  6.76%, 44.59%{ opacity:0; }
-  52.70%, 100% { opacity:1; }
+  0%            { opacity:1; }
+  8.93%, 46.43% { opacity:0; }
+  55.36%, 100%  { opacity:1; }
 }
 @keyframes deLine{
-  0%, 59.46%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
-  67.57%       { opacity:.45; animation-timing-function:ease-out; }
-  83.78%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }
+  0%, 60.71%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  71.43%       { opacity:.45; animation-timing-function:ease-out; }
+  92.86%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
 @keyframes enLine{
-  0%, 63.51%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
-  79.73%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
+  0%, 66.07%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  87.50%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
 /* connected 로 넘어갈 때 마스크가 풀리며 한국어가 비치지 않게 즉시 끈다 */
 body.connected .l-greet{ transition:none; }
@@ -353,15 +354,19 @@ body.connected .l-greet{ transition:none; }
 .star{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover;
        opacity:0; transition:opacity .45s ease; mix-blend-mode:screen; pointer-events:none; }
 body.connecting .star{ opacity:1; }
+/* connected · message : 스크린 가장자리를 도는 스트로크 (링 반지름 465, 가장자리 520) */
+.stroke{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover;
+         opacity:0; transition:opacity .6s ease; mix-blend-mode:screen; pointer-events:none; }
+body.connected .stroke, body.message .stroke{ opacity:1; }
 
 /* ---------- message : 기록 카드 (피그마 3142:299) ---------- */
 .rec{ position:absolute; left:143px; top:317px; width:794px; height:545.875px;
       border-radius:119.1px; background:#fff; overflow:hidden;
       opacity:0; transform:translateY(160px);
       transition:opacity .8s ease, transform 1.1s cubic-bezier(.2,.8,.2,1); }
-/* 문구가 거의 다 올라간 뒤(2.2s, 문구 중심 약 300) 카드가 아래에서 밀려 올라온다.
+/* 문구가 거의 다 올라간 뒤 카드가 아래에서 밀려 올라온다.
    같이 출발하면 카드가 문구를 따라잡아 덮는다 */
-body.message .rec{ opacity:1; transform:none; transition-delay:2.2s; }
+body.message .rec{ opacity:1; transform:none; transition-delay:1.3s; }
 .rec-img{ position:absolute; left:-24px; top:-12px; width:841px; height:576px;
           object-fit:cover; }
 /* 배경 블러는 progressive : 피그마 Progressive layer blur 는 코드젠에서
@@ -467,8 +472,14 @@ body.follow .navto .w, body.follow .navdest .w{
     <!-- 연결 인식 모션. 원본 AE : ~/Desktop/grad_motion1.aep
          내보낸 별.mp4(1920x1080)를 구가 중앙에 오도록 crop=1080:1080:10:0 해서 넣었다 -->
     <video class="star" muted playsinline preload="auto" aria-hidden="true">
-      <source src="star.webm?v=3" type="video/webm">
-      <source src="star.mp4?v=3"  type="video/mp4">
+      <source src="star.webm?v=4" type="video/webm">
+      <source src="star.mp4?v=4"  type="video/mp4">
+    </video>
+    <!-- 글자 뒤 스트로크 : 별_3.mp4 의 3.9s~ 구간. 인트로 한 번 뒤 4.5s~ 구간을 역재생·정재생으로
+         세 번 왕복시켜 이어 붙였다 (21s). 이음매가 같은 프레임이라 끊김이 없다 -->
+    <video class="stroke" muted playsinline preload="auto" aria-hidden="true">
+      <source src="stroke.webm?v=1" type="video/webm">
+      <source src="stroke.mp4?v=1"  type="video/mp4">
     </video>
     <!-- 의사 장면 배경 : 피그마 export 를 그대로 옮겼다 (경로·필터·그라디언트 동일) -->
     <div class="sheen"></div>
@@ -479,7 +490,7 @@ body.follow .navto .w, body.follow .navdest .w{
 
 
 
-    <p class="headline l-greet reveal nopause"><span class="ln">좋은 오후예요.</span><span class="ln">무엇을 도와드릴까요?</span></p>
+    <p class="headline l-greet reveal nopause"><span class="ln">좋은 오후예요.</span><span class="ln">&nbsp;</span></p>
     <p class="headline l-hi reveal nopause"><span class="ln">Good Afternoon!</span><span class="ln">Somi.</span></p>
     <p class="headline l-msg reveal">You had an appointment on <em>July&nbsp;20.</em></p>
 
@@ -589,6 +600,7 @@ document.querySelectorAll('.reveal').forEach(split);
 
 // ---------- follow : 길안내 ----------
 const star = document.querySelector('.star');
+const stroke = document.querySelector('.stroke');
 const NAV = document.querySelector('.nav');
 const NS  = 'http://www.w3.org/2000/svg';
 const dot = (x, y, r, o) => {
@@ -703,7 +715,7 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','guide','follow'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 7400, 4300, 7600, 7600, 16500];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 5600, 2000, 7600, 7600, 16500];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
@@ -713,6 +725,10 @@ const go = n => {
   if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); }
   else star.pause();
+  // 스트로크 : Hello Somi 에서 처음부터, 병원 카드 장면까지 끊지 않고 이어서
+  if (STEPS[n] === 'connected') stroke.currentTime = 0;
+  if (STEPS[n] === 'connected' || STEPS[n] === 'message') stroke.play().catch(() => {});
+  else stroke.pause();
   // fill 은 엄지척만이 다음으로 보낸다 : 별 모션은 반드시 엄지척이 인식된 뒤에만 재생
   if (HOLD[n] && STEPS[n] !== 'fill') timer = setTimeout(() => go((n + 1) % STEPS.length), HOLD[n]);
 };
