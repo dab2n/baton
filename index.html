@@ -280,6 +280,8 @@ body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 .l-greet, .l-hi{ width:auto; white-space:nowrap;
                   font-size:67.319px; font-weight:600; line-height:1.5; }
 .l-greet, .l-hi{ font-size:56px; line-height:1.4; }   /* 두 줄 : 독일어·영어가 줄끼리 겹친다 */
+/* 두 문구의 박스를 같은 폭으로 : 지우개 경계가 화면 같은 x 를 지나가게 */
+.l-greet, .l-hi{ width:780px; }
 .l-greet .w, .l-hi .w{ background:linear-gradient(180deg,#E5E5E5 71.017%,#353046 89.851%);
                        -webkit-background-clip:text; background-clip:text; color:transparent; }
 
@@ -297,31 +299,39 @@ body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
   from{ opacity:0; transform:translateY(.42em); filter:blur(10px); }
   to  { opacity:1; transform:none;              filter:blur(0);    }
 }
-/* 인사 전환 (connecting, 6600ms 한 장면을 키프레임 하나로)
-     0 ~  500  독일어가 흐려지며 사라진다 (별 모션 시작)
+/* 인사 전환 (connecting 6600ms) : 글자는 제자리. 움직이는 건 마스크 경계뿐
+     0 ~  500  독일어가 사라진다 (별 모션 시작)
    500 ~ 3300  글자 없음 : 별만
-  3300 ~ 3900  독일어가 다시 떠오른다
-  3900 ~ 4600  잠깐 머문다
-  4600 ~ 5200  독일어가 흐려지며 빠지고, 250ms 늦게 같은 줄에 영어가 올라온다
-   줄(--l) 마다 350ms, 줄 안 단어(--j) 마다 60ms 늦춘다 : n번째 줄끼리 짝지어 바뀐다 */
-body.connecting .l-greet .w{
-  animation:langDe 6600ms ease both;
-  animation-delay:calc(var(--l) * 350ms + var(--j) * 60ms); }
-body.connecting .l-hi .w{
-  animation:langEn 6600ms cubic-bezier(.2,.7,.2,1) both;
-  animation-delay:calc(var(--l) * 350ms + var(--j) * 60ms + 250ms); }
-@keyframes langDe{
-  0%          { opacity:1; filter:blur(0); }
-  7.6%, 50%   { opacity:0; filter:blur(12px); }
-  59.1%, 69.7%{ opacity:1; filter:blur(0); }
-  78.8%, 100% { opacity:0; filter:blur(12px); }
+  3300 ~ 3900  독일어가 그 자리에 다시 나타난다
+  4400 ~ 5600  부드러운 경계가 왼→오로 지나가며 독일어를 지운다
+  4500 ~ 5700  같은 속도·곡선으로 100ms 늦게 뒤따르며 같은 자리의 영어를 드러낸다
+               (흐린 경계 폭 30% 안에서 두 경계가 늘 겹친다 : 지워지는 자리에서 바로 영어가 보인다)
+   마스크는 폭 300% 그라디언트(가운데 10% 가 흐린 경계). 경계가 글자 박스 안을
+   지나는 구간은 position 82.5%→17.5% 뿐이라 85%→15% 만 민다 (밖에서 헛도는 시간 제거) */
+body.connecting .l-greet .w,
+body.connecting .l-hi .w,
+body.connected  .l-hi .w{ opacity:1; }
+body.connecting .l-greet{
+  -webkit-mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
+          mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
+  animation:deWipe 6600ms linear both; }
+body.connecting .l-hi{
+  -webkit-mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
+          mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
+  animation:enWipe 6600ms linear both; }
+@keyframes deWipe{
+  0%           { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; }
+  7.6%, 50%    { opacity:0; }
+  59.1%        { opacity:1; }
+  66.67%       { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  84.85%, 100% { opacity:1; -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
-@keyframes langEn{
-  0%, 69.7%   { opacity:0; transform:translateY(.42em); filter:blur(10px); }
-  83.3%, 100% { opacity:1; transform:none;              filter:blur(0); }
+@keyframes enWipe{
+  0%, 68.18%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  86.36%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
-/* connected : 이미 올라와 있는 영어를 그대로 둔다 */
-body.connected .l-hi .w{ opacity:1; }
+/* connected 로 넘어갈 때 마스크가 풀리며 독일어가 비치지 않게 즉시 끈다 */
+body.connected .l-greet{ transition:none; }
 
 /* ---------- connecting : AE 별 모션 ----------
    검정 위에 얹으므로 screen : 영상의 검은 부분은 배경 그라디언트가 그대로 비친다 */
@@ -558,14 +568,7 @@ const split = el => {
   walk(el);
 };
 document.querySelectorAll('.reveal').forEach(split);
-// 인사 두 문구 : 줄(--l)·줄 안 순서(--j) 를 매겨 독일어 n번째 줄 ↔ 영어 n번째 줄로 박자를 맞춘다
-document.querySelectorAll('.l-greet, .l-hi').forEach(p => {
-  let l = 0, j = 0;
-  for (const n of p.childNodes) {
-    if (n.nodeName === 'BR') { l++; j = 0; }
-    else if (n.classList?.contains('w')) { n.style.setProperty('--l', l); n.style.setProperty('--j', j++); }
-  }
-});
+
 
 // ---------- follow : 길안내 ----------
 const star = document.querySelector('.star');
