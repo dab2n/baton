@@ -299,36 +299,44 @@ body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
   from{ opacity:0; transform:translateY(.42em); filter:blur(10px); }
   to  { opacity:1; transform:none;              filter:blur(0);    }
 }
-/* 인사 전환 (connecting 6600ms) : 글자는 제자리. 움직이는 건 마스크 경계뿐
+/* 인사 전환 (connecting 7400ms) : 글자는 제자리. 움직이는 건 마스크 경계와 투명도
      0 ~  500  독일어가 사라진다 (별 모션 시작)
    500 ~ 3300  글자 없음 : 별만
   3300 ~ 3900  독일어가 그 자리에 다시 나타난다
-  4400 ~ 5600  부드러운 경계가 왼→오로 지나가며 독일어를 지운다
-  4500 ~ 5700  같은 속도·곡선으로 100ms 늦게 뒤따르며 같은 자리의 영어를 드러낸다
-               (흐린 경계 폭 30% 안에서 두 경계가 늘 겹친다 : 지워지는 자리에서 바로 영어가 보인다)
-   마스크는 폭 300% 그라디언트(가운데 10% 가 흐린 경계). 경계가 글자 박스 안을
-   지나는 구간은 position 82.5%→17.5% 뿐이라 85%→15% 만 민다 (밖에서 헛도는 시간 제거) */
+  4400 ~ 6200  윗줄 : 흐린 경계가 왼→오로 천천히 지나가며 독일어를 지우고,
+               동시에 독일어가 점점 투명해진다 (바뀌는 순간을 길게 보여준다)
+  4700 ~ 5900  윗줄 : 같은 경계가 300ms 늦게 출발해 영어를 드러낸다. 독일어보다 빨라
+               중간부터는 반투명한 독일어 위로 영어가 겹쳐 보인다
+  +500ms       아랫줄은 같은 동작을 0.5초 늦게 : 위→아래 순서로 바뀐다
+   마스크는 줄(.ln)마다. 폭 300% 그라디언트(가운데 10% 가 흐린 경계)를 85%→15% 로 민다 */
+.l-greet .ln, .l-hi .ln{ display:block; }
 body.connecting .l-greet .w,
 body.connecting .l-hi .w,
 body.connected  .l-hi .w{ opacity:1; }
-body.connecting .l-greet{
+body.connecting .l-greet{ animation:deScene 7400ms linear both; }
+body.connecting .l-greet .ln{
   -webkit-mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
-  animation:deWipe 6600ms linear both; }
-body.connecting .l-hi{
+  animation:deLine 7400ms linear both; }
+body.connecting .l-hi .ln{
   -webkit-mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
-  animation:enWipe 6600ms linear both; }
-@keyframes deWipe{
-  0%           { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; }
-  7.6%, 50%    { opacity:0; }
-  59.1%        { opacity:1; }
-  66.67%       { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
-  84.85%, 100% { opacity:1; -webkit-mask-position:15% 0; mask-position:15% 0; }
+  animation:enLine 7400ms linear both; }
+body.connecting .l-greet .ln + .ln,
+body.connecting .l-hi .ln + .ln{ animation-delay:500ms; }
+@keyframes deScene{
+  0%           { opacity:1; }
+  6.76%, 44.59%{ opacity:0; }
+  52.70%, 100% { opacity:1; }
 }
-@keyframes enWipe{
-  0%, 68.18%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
-  86.36%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
+@keyframes deLine{
+  0%, 59.46%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  67.57%       { opacity:.45; animation-timing-function:ease-out; }
+  83.78%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }
+}
+@keyframes enLine{
+  0%, 63.51%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  79.73%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
 /* connected 로 넘어갈 때 마스크가 풀리며 독일어가 비치지 않게 즉시 끈다 */
 body.connected .l-greet{ transition:none; }
@@ -462,8 +470,8 @@ body.follow .navto .w, body.follow .navdest .w{
 
 
 
-    <p class="headline l-greet reveal nopause">Guten Tag!<br>Wie kann ich Ihnen helfen?</p>
-    <p class="headline l-hi reveal nopause">Good Afternoon!<br>Somi.</p>
+    <p class="headline l-greet reveal nopause"><span class="ln">Guten Tag!</span><span class="ln">Wie kann ich Ihnen helfen?</span></p>
+    <p class="headline l-hi reveal nopause"><span class="ln">Good Afternoon!</span><span class="ln">Somi.</span></p>
     <p class="headline l-msg reveal">You had an appointment on <em>July&nbsp;20.</em></p>
 
     <!-- 기록 카드 (피그마 3142:299) -->
@@ -686,7 +694,7 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','guide','follow'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 6600, 4300, 6400, 7600, 16500];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 7400, 4300, 6400, 7600, 16500];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer;
 
