@@ -296,6 +296,7 @@ body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 .l-greet, .l-hi{ width:auto; white-space:nowrap;
                   font-size:67.319px; font-weight:600; line-height:1.5; }
 .l-greet, .l-hi{ font-size:48px; line-height:1.4; }   /* 두 줄 : 한국어·영어가 줄끼리 겹친다 */
+.l-greet{ line-height:1.22; }   /* 한글은 행간을 좁게 (윗줄이 영어 윗줄보다 약 5px 아래에 겹친다) */
 /* 두 문구의 박스를 같은 폭으로 : 지우개 경계가 화면 같은 x 를 지나가게 */
 .l-greet, .l-hi{ width:780px; }
 .l-greet .w, .l-hi .w{ background:linear-gradient(180deg,#E5E5E5 71.017%,#353046 89.851%);
@@ -324,7 +325,10 @@ body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
   +400ms       아랫줄은 0.4초 늦게 : 위→아래 순서
    마스크는 줄(.ln)마다. 폭 300% 그라디언트(가운데 10% 가 흐린 경계)를 85%→15% 로 민다 */
 .l-greet .ln, .l-hi .ln{ display:block; }
-/* 번짐이 줄 박스(마스크 영역) 위아래에서 잘리지 않게 여유를 준다. 배치는 그대로 */
+/* 번짐이 줄 박스(마스크 영역) 위아래에서 잘리지 않게 여유를 준다. 배치는 그대로.
+   블록끼리는 줄 사이 음수 여백이 겹쳐(margin collapse) 18px 이 한 번만 빠져 줄 간격이 벌어진다 →
+   flex 세로 배치로 겹침을 막아 위아래 여백이 정확히 상쇄되게 */
+.l-greet, .l-hi{ display:flex; flex-direction:column; }   /* stretch : 줄 폭 780 유지 (마스크 경계 정렬) */
 .l-greet .ln, .l-hi .ln{ padding:18px 0; margin:-18px 0; }
 body.connecting .l-greet .w,
 body.connecting .l-hi .w,
@@ -499,8 +503,8 @@ body.follow .navto .w, body.follow .navdest .w{
     <!-- 연결 인식 모션. 원본 AE : ~/Desktop/grad_motion1.aep
          내보낸 별.mp4(1920x1080)를 구가 중앙에 오도록 crop=1080:1080:10:0 해서 넣었다 -->
     <video class="star" muted playsinline preload="auto" aria-hidden="true">
-      <source src="star.webm?v=4" type="video/webm">
-      <source src="star.mp4?v=4"  type="video/mp4">
+      <source src="star.webm?v=5" type="video/webm">
+      <source src="star.mp4?v=5"  type="video/mp4">
     </video>
     <!-- 글자 뒤 스트로크 : 별_3.mp4 의 3.9s~ 구간. 인트로 한 번 뒤 4.5s~ 구간을 역재생·정재생으로
          세 번 왕복시켜 이어 붙였다 (21s). 이음매가 같은 프레임이라 끊김이 없다 -->
@@ -518,7 +522,7 @@ body.follow .navto .w, body.follow .navdest .w{
 
 
 
-    <p class="headline l-greet reveal nopause"><span class="ln">어디로 가시나요?</span><span class="ln">제가 안내해 드릴게요</span></p>
+    <p class="headline l-greet reveal nopause"><span class="ln">도움이 필요하신가요?</span><span class="ln">제가 안내해 드릴게요</span></p>
     <p class="headline l-hi reveal nopause"><span class="ln">Good Afternoon!</span><span class="ln">Somi.</span></p>
     <p class="headline l-msg reveal">You had an appointment on <em>July&nbsp;20.</em></p>
 

@@ -82,7 +82,7 @@ spark.svg    Connecting 아이콘
 - 연결 인식 모션(`connecting`)의 별 애니메이션 : After Effects `~/Desktop/grad_motion1.aep`
   - 엄지척 구 : `~/Desktop/grad_motion.aep_AME/별_3.mp4` 0~2.6s
   - 스트로크 : `~/Desktop/grad_motion.aep_AME/별_2.mp4` (27s, AE 프로젝트명 별_4)
-  - `star.*` : 0~2.6s 를 `scale=2076:1168,crop=1080:1080:514:38` (절정 글로우 중심 (975,535)·약 888 → 960, 정중앙)
+  - `star.*` : 0~2.6s 를 `scale=2248:1264,crop=1080:1080:602:94` (절정 글로우 약 888 → 1034, 스크린 지름 1040 을 거의 채움. 실측 중심 541,541)
   - `stroke.*` : 별_2.mp4 를 0.9s 부터 `scale=2322:1306,crop=1080:1080:628:104`
     (링 중심 (965.5,532.3)·안쪽 경계 413.6 → 500. 밝은 띠 505~517 이 스크린 가장자리 520 에 붙는다.
     27s 라 왕복 없이 connecting 2.9s 부터 기록 카드 장면까지 한 번에 재생)
