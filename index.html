@@ -27,11 +27,20 @@ body.kiosk{ --fit: 1023; }
 /* ?s=N 이미지 내보내기 : 피그마 프레임 1080 을 1:1 로 */
 body.shot{ --fit: 1080; }
 
+/* 한국어 : SF Pro KR. 재배포 불가 라이선스라 fonts/ 는 저장소에 올리지 않는다(.gitignore).
+   파일이 없으면(배포본) Pretendard 로 떨어진다. 한글·한글 문장부호만 이 폰트로 */
+@font-face{ font-family:'SF Pro KR'; font-weight:600; font-display:block;
+  src:url('fonts/SFProKR-Semibold.otf') format('opentype');
+  unicode-range:U+1100-11FF, U+3130-318F, U+AC00-D7A3; }
+@font-face{ font-family:'SF Pro KR'; font-weight:700; font-display:block;
+  src:url('fonts/SFProKR-Bold.otf') format('opentype');
+  unicode-range:U+1100-11FF, U+3130-318F, U+AC00-D7A3; }
+
 *{ box-sizing: border-box; }
 html,body{ height:100%; margin:0; overflow:hidden; background:#fff; }
 body{
   display:flex; align-items:center; justify-content:center;
-  font-family:'Delight','Pretendard','Inter',system-ui,sans-serif;
+  font-family:'Delight','SF Pro KR','Pretendard','Inter',system-ui,sans-serif;
 
   -webkit-font-smoothing:antialiased;
   cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none;
@@ -315,6 +324,8 @@ body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
   +400ms       아랫줄은 0.4초 늦게 : 위→아래 순서
    마스크는 줄(.ln)마다. 폭 300% 그라디언트(가운데 10% 가 흐린 경계)를 85%→15% 로 민다 */
 .l-greet .ln, .l-hi .ln{ display:block; }
+/* 번짐이 줄 박스(마스크 영역) 위아래에서 잘리지 않게 여유를 준다. 배치는 그대로 */
+.l-greet .ln, .l-hi .ln{ padding:18px 0; margin:-18px 0; }
 body.connecting .l-greet .w,
 body.connecting .l-hi .w,
 body.connected  .l-hi .w{ opacity:1; }
@@ -329,13 +340,20 @@ body.connecting .l-hi .ln{
 body.connecting .l-greet .ln + .ln,
 body.connecting .l-hi .ln + .ln{ animation-delay:400ms; }
 @keyframes deLine{
-  0%, 46.43%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
-  57.14%       { opacity:.5; }
-  67.86%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }
+  0%, 46.43%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out;
+                 filter:blur(0) drop-shadow(0 0 0 rgba(255,255,255,0)); }
+  57.14%       { opacity:.5; filter:blur(1.5px) drop-shadow(0 0 14px rgba(255,255,255,.55)); }
+  67.86%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0;
+                 filter:blur(4px) drop-shadow(0 0 18px rgba(255,255,255,0)); }
 }
 @keyframes enLine{
-  0%, 52.86%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
-  74.29%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
+  0%, 52.86%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out;
+                 filter:blur(6px) drop-shadow(0 0 0 rgba(255,255,255,0)); }
+  63.57%       { filter:blur(1.5px) drop-shadow(0 0 16px rgba(255,255,255,.6)); }
+  74.29%       { -webkit-mask-position:15% 0; mask-position:15% 0;
+                 filter:blur(0) drop-shadow(0 0 6px rgba(255,255,255,.18)); }
+  85%, 100%    { -webkit-mask-position:15% 0; mask-position:15% 0;
+                 filter:blur(0) drop-shadow(0 0 0 rgba(255,255,255,0)); }
 }
 /* connected 로 넘어갈 때 마스크가 풀리며 한국어가 비치지 않게 즉시 끈다 */
 body.connected .l-greet{ transition:none; }
@@ -366,6 +384,7 @@ body.connecting .ripple{ animation:rippleUp 1.5s cubic-bezier(.45,0,.25,1) .45s 
 .stroke{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover;
          opacity:0; transition:opacity .6s ease; mix-blend-mode:screen; pointer-events:none; }
 body.connected .stroke, body.message .stroke{ opacity:1; }
+body.connecting .stroke{ opacity:1; transition-delay:2.9s; }   /* 영어 윗줄이 드러나는 시점 */
 
 /* ---------- message : 기록 카드 (피그마 3142:299) ---------- */
 .rec{ position:absolute; left:143px; top:317px; width:794px; height:545.875px;
@@ -486,8 +505,8 @@ body.follow .navto .w, body.follow .navdest .w{
     <!-- 글자 뒤 스트로크 : 별_3.mp4 의 3.9s~ 구간. 인트로 한 번 뒤 4.5s~ 구간을 역재생·정재생으로
          세 번 왕복시켜 이어 붙였다 (21s). 이음매가 같은 프레임이라 끊김이 없다 -->
     <video class="stroke" muted playsinline preload="auto" aria-hidden="true">
-      <source src="stroke.webm?v=3" type="video/webm">
-      <source src="stroke.mp4?v=3"  type="video/mp4">
+      <source src="stroke.webm?v=4" type="video/webm">
+      <source src="stroke.mp4?v=4"  type="video/mp4">
     </video>
     <div class="ripple" aria-hidden="true"></div>
     <!-- 의사 장면 배경 : 피그마 export 를 그대로 옮겼다 (경로·필터·그라디언트 동일) -->
@@ -726,7 +745,7 @@ const STEPS = ['idle','fill','connecting','connected','message','guide','follow'
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
 const HOLD  = [6000, 5200, 5600, 2000, 7600, 7600, 16500];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
-let timer;
+let timer, strokeTimer;
 
 const go = n => {
   clearTimeout(timer);
@@ -735,8 +754,11 @@ const go = n => {
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); }
   else star.pause();
   // 스트로크 : Hello Somi 에서 처음부터, 병원 카드 장면까지 끊지 않고 이어서
-  if (STEPS[n] === 'connected') stroke.currentTime = 0;
-  if (STEPS[n] === 'connected' || STEPS[n] === 'message') stroke.play().catch(() => {});
+  // 스트로크 : 엄지척 뒤 영어가 드러나는 2.9s 에 처음부터 재생해 병원 카드 장면까지 끊지 않고
+  clearTimeout(strokeTimer);
+  if (STEPS[n] === 'connecting')
+    strokeTimer = setTimeout(() => { stroke.currentTime = 0; stroke.play().catch(() => {}); }, 2900);
+  else if (STEPS[n] === 'connected' || STEPS[n] === 'message') stroke.play().catch(() => {});
   else stroke.pause();
   // fill 은 엄지척만이 다음으로 보낸다 : 별 모션은 반드시 엄지척이 인식된 뒤에만 재생
   if (HOLD[n] && STEPS[n] !== 'fill') timer = setTimeout(() => go((n + 1) % STEPS.length), HOLD[n]);

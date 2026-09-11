@@ -80,12 +80,12 @@ spark.svg    Connecting 아이콘
 ## 모션 원본
 
 - 연결 인식 모션(`connecting`)의 별 애니메이션 : After Effects `~/Desktop/grad_motion1.aep`
-  - 내보낸 것 : `~/Desktop/grad_motion.aep_AME/별_3.mp4` (1920x1080, 7.43s) — 엄지척 구(0.8~2.4s) + 글자 뒤 스트로크(3.9s~)가 이어진 한 영상
+  - 엄지척 구 : `~/Desktop/grad_motion.aep_AME/별_3.mp4` 0~2.6s
+  - 스트로크 : `~/Desktop/grad_motion.aep_AME/별_2.mp4` (27s, AE 프로젝트명 별_4)
   - `star.*` : 0~2.6s 를 `scale=2076:1168,crop=1080:1080:514:38` (절정 글로우 중심 (975,535)·약 888 → 960, 정중앙)
-  - `stroke.*` : 3.9~7.433s 를 `scale=2906:1634,crop=1080:1080:920:266` (링 안쪽 경계 330 → 500, 실측 중심 (964.8,532.4) → 정중앙.
-    가장 밝은 선이 약 518 로 스크린 가장자리 520 에 붙고 바깥 글로우는 잘린다. 기록 장면 문구와 여백 30px),
-    `colorlevels` 로 16/255 이하를 0 (안쪽 원판이 screen 합성에서 비치지 않게),
-    인트로 한 번 + 4.5s~ 구간을 역재생·정재생 세 번 왕복으로 이어 붙여 21s. 이음매 프레임 차이 0.001
+  - `stroke.*` : 별_2.mp4 를 0.9s 부터 `scale=2322:1306,crop=1080:1080:628:104`
+    (링 중심 (965.5,532.3)·안쪽 경계 413.6 → 500. 밝은 띠 505~517 이 스크린 가장자리 520 에 붙는다.
+    27s 라 왕복 없이 connecting 2.9s 부터 기록 카드 장면까지 한 번에 재생)
   - 인코딩 : VP9 `-crf 14 -b:v 0 -aq-mode 2` / H.264 `-crf 14 -preset slow -x264-params aq-mode=3`.
     화면 대부분이 검정이라 전체 PSNR 은 높게 나와도 어두운 글로우가 먼저 깨진다. 비트레이트를 아끼지 말 것
   - 자잘한 타이밍·색 수정은 aep 에서 하고 다시 내보내 같은 crop 으로 갈아끼운다
@@ -113,3 +113,9 @@ Range 를 지원하는 서버로 띄워야 `star.*` 가 재생된다.
   흐린 판을 여러 장 겹쳐 마스크로 아래에서부터 드러내야 한다.
 - 대조 방법: `?s=N` (한 장면 정지, 1080 1:1) 을 헤드리스로 렌더해
   `get_screenshot` 로 받은 피그마 PNG 와 픽셀을 직접 비교한다.
+
+## 한국어 폰트
+
+`fonts/SFProKR-Semibold.otf`, `fonts/SFProKR-Bold.otf` (원본 `~/Downloads/SFProKR_OTF.zip`).
+Apple SF Pro KR 은 재배포할 수 없는 라이선스라 **공개 저장소에 올리지 않는다** (`.gitignore`).
+로컬 키오스크에서만 적용되고, 배포본(GitHub Pages)에서는 Pretendard 로 떨어진다.
