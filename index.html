@@ -269,6 +269,7 @@ body.connected  .rim::after{ animation:orbit 11s linear infinite; }
 /* 장면당 한 문장. 들어올 때는 즉시, 나갈 때만 천천히 사라진다 */
 .headline{ opacity:0; }
 body.fill    .l-greet,
+body.connecting .l-greet, body.connecting .l-hi,
 body.connected .l-hi,
 body.message .l-msg,
 body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
@@ -278,13 +279,13 @@ body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
    가지면(=.w 의 filter:blur) 깨지므로 단어마다 따로 입힌다 */
 .l-greet, .l-hi{ width:auto; white-space:nowrap;
                   font-size:67.319px; font-weight:600; line-height:1.5; }
+.l-greet{ font-size:56px; line-height:1.4; }   /* 두 줄 : 가장 긴 줄이 원 안에 여유 있게 */
 .l-greet .w, .l-hi .w{ background:linear-gradient(180deg,#E5E5E5 71.017%,#353046 89.851%);
                        -webkit-background-clip:text; background-clip:text; color:transparent; }
 
 /* 모션: DOM 순서 = 위 → 아래, 왼 → 오른쪽 */
 .w{ display:inline-block; opacity:0; will-change:transform,opacity,filter; }
 body.fill    .l-greet .w,
-body.connected .l-hi  .w,
 body.guide   .l-guide .w,
 body.message .l-msg   .w{
   animation:in .9s cubic-bezier(.2,.7,.2,1) both;
@@ -292,11 +293,22 @@ body.message .l-msg   .w{
 }
 /* 원이 화면을 다 채운 다음(transform 1.8s)에 이어서 올라온다 */
 body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
-/* 칩이 먼저 내려앉고(0.8s) 그 다음 문장 */
-body.connected .l-hi .w{ animation-delay:calc(var(--i) * 70ms + 1500ms); }
 @keyframes in{
   from{ opacity:0; transform:translateY(.42em); filter:blur(10px); }
   to  { opacity:1; transform:none;              filter:blur(0);    }
+}
+/* 인사 전환 (connecting) : 3000ms = 별이 가장 밝았다 가라앉기 시작하는 시점 */
+body.connecting .l-greet .w{
+  animation:out .7s ease-in both;
+  animation-delay:calc(var(--i) * 70ms + 3000ms); }
+body.connecting .l-hi .w{
+  animation:in .9s cubic-bezier(.2,.7,.2,1) both;
+  animation-delay:calc(var(--i) * 70ms + 3250ms); }
+/* connected : 이미 올라와 있는 영어를 그대로 둔다 */
+body.connected .l-hi .w{ opacity:1; }
+@keyframes out{
+  from{ opacity:1; filter:blur(0); }
+  to  { opacity:0; filter:blur(12px); }
 }
 
 /* ---------- connecting : AE 별 모션 ----------
@@ -358,12 +370,12 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 /* 위를 향할 땐 가만두지 않고 위로 두 번 쿡쿡 찌르고 쉰다 : 계속 직진.
    translate 는 rotate 바깥에서 먹으므로 화면 기준 위로 움직인다.
    1.2s 늦춰 시작 : 처음엔 도트 등장, 대각선에서 돌아올 땐 회전(1.4s)이 끝나갈 때 */
-.nav.up .navarrow{ animation:poke 1.5s cubic-bezier(.2,.8,.3,1) 1.2s infinite; }
+.nav.up .navarrow{ animation:poke 2.6s cubic-bezier(.45,0,.35,1) 1.2s infinite; }
 @keyframes poke{
-  0%, 42%, 100%{ translate:0 0; }
-  9%           { translate:0 -16px; }
-  19%          { translate:0 0; }
-  28%          { translate:0 -9px; }
+  0%, 52%, 100%{ translate:0 0; }
+  15%          { translate:0 -12px; }
+  29%          { translate:0 0; }
+  40%          { translate:0 -7px; }
 }
 
 /* 남은 거리 : NDOT 47 대신 같은 도트로 직접 그린다 */
@@ -428,8 +440,8 @@ body.follow .navto .w, body.follow .navdest .w{
 
 
 
-    <p class="headline l-greet reveal">Do you need help?</p>
-    <p class="headline l-hi reveal nopause">Hello! Somi</p>
+    <p class="headline l-greet reveal nopause">Guten Tag!<br>Wie kann ich Ihnen helfen?</p>
+    <p class="headline l-hi reveal nopause">Good Afternoon! Somi.</p>
     <p class="headline l-msg reveal">You had an appointment on <em>July&nbsp;20.</em></p>
 
     <!-- 기록 카드 (피그마 3142:299) -->
