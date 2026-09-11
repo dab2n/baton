@@ -271,14 +271,23 @@ body.connected  .rim::after{ animation:orbit 11s linear infinite; }
   font-size:42px; font-weight:500; line-height:1.6; color:#fff;   /* 44 면 You 의 Y 가 스트로크 링(480)에 3px 까지 붙는다 */
   transition:opacity .8s ease;
 }
-.headline em{ font-style:normal; font-weight:600; text-shadow:0 0 12px rgba(254,255,249,.9); }
+.headline em{ font-style:normal; font-weight:600; }
+/* 글리밍 (피그마 3153:219) : 같은 글자를 #FEFFF9 로 한 겹 더 얹고, 오른쪽으로 갈수록 더 흐리게.
+   피그마 코드젠은 progressive blur 를 균일 blur 5.95 로 납작하게 내보낸다 → 흐림이 다른 두 겹을
+   왼쪽은 비우고 오른쪽으로 드러내 흐림이 오른쪽으로 번져 가게. 글자는 JS 가 data-t 로 복사 */
+.glim{ position:relative; }
+.glim::before, .glim::after{ content:attr(data-t); position:absolute; left:0; right:0; top:0;
+  color:#FEFFF9; white-space:nowrap; pointer-events:none; }
+.glim::before{ filter:blur(2.5px); -webkit-mask:linear-gradient(90deg,transparent 8%,#000 55%); mask:linear-gradient(90deg,transparent 8%,#000 55%); }
+.glim::after { filter:blur(6px);   -webkit-mask:linear-gradient(90deg,transparent 40%,#000 100%); mask:linear-gradient(90deg,transparent 40%,#000 100%); }
 /* message : 카드 위 한 줄 */
-.l-msg{ width:auto; white-space:nowrap; top:188px; transform:translateX(-50%); }
+/* 가장자리에 너무 붙어 보이지 않게 188 → 218 로 내려 카드와 간격 62 → 32 */
+.l-msg, .l-fu{ width:auto; white-space:nowrap; top:218px; transform:translateX(-50%); }
 /* 스크린 가운데서 단어가 올라오기 시작하고, 0.8s 부터 제자리(top 188)로 올라간다.
-   318px = 화면 중심 540 - 문구 박스 중심 222 (42px × 1.6 = 67.2 높이) */
+   288px = 화면 중심 540 - 문구 박스 중심 252 (top 218 + 67.2÷2) */
 body.message .l-msg{ animation:msgUp 1.6s cubic-bezier(.65,0,.25,1) both; }
 @keyframes msgUp{
-  0%, 50% { translate:0 318px; }
+  0%, 50% { translate:0 288px; }
   100%    { translate:0 0; }
 }
 
@@ -288,6 +297,7 @@ body.fill    .l-greet,
 body.connecting .l-greet, body.connecting .l-hi,
 body.connected .l-hi,
 body.message .l-msg,
+body.followup .l-fu,
 body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 
 /* 기본 화면 문구 (피그마 3124:17778) : Delight Semi Bold 67.3px.
@@ -306,6 +316,7 @@ body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 .w{ display:inline-block; opacity:0; will-change:transform,opacity,filter; }
 body.fill    .l-greet .w,
 body.guide   .l-guide .w,
+body.followup .l-fu   .w,
 body.message .l-msg   .w{
   animation:in .9s cubic-bezier(.2,.7,.2,1) both;
   animation-delay:calc(var(--i) * 70ms + 200ms);
@@ -344,21 +355,21 @@ body.connecting .l-hi .ln{
 body.connecting .l-greet .ln + .ln,
 body.connecting .l-hi .ln + .ln{ animation-delay:400ms; }
 @keyframes deLine{
-  0%, 46.43%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out;
-                 filter:blur(0) drop-shadow(0 0 0 rgba(255,255,255,0)); }
-  57.14%       { opacity:.5; filter:blur(1.5px) drop-shadow(0 0 14px rgba(255,255,255,.55)); }
-  67.86%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0;
-                 filter:blur(4px) drop-shadow(0 0 18px rgba(255,255,255,0)); }
+  0%, 46.43%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  57.14%       { opacity:.5; }
+  67.86%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
 @keyframes enLine{
-  0%, 52.86%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out;
-                 filter:blur(6px) drop-shadow(0 0 0 rgba(255,255,255,0)); }
-  63.57%       { filter:blur(1.5px) drop-shadow(0 0 16px rgba(255,255,255,.6)); }
-  74.29%       { -webkit-mask-position:15% 0; mask-position:15% 0;
-                 filter:blur(0) drop-shadow(0 0 6px rgba(255,255,255,.18)); }
-  85%, 100%    { -webkit-mask-position:15% 0; mask-position:15% 0;
-                 filter:blur(0) drop-shadow(0 0 0 rgba(255,255,255,0)); }
+  0%, 52.86%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  74.29%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
+/* 줄 글리밍 겹 : 한국어는 지워지는 한가운데(3.08s), 영어는 드러나는 한가운데(3.56s)에 가장 밝다 */
+.ln.glim::before, .ln.glim::after{ top:18px; opacity:0; }
+body.connecting .l-greet .ln.glim::before, body.connecting .l-greet .ln.glim::after{ animation:glimKo 5600ms linear both; }
+body.connecting .l-hi .ln.glim::before,    body.connecting .l-hi .ln.glim::after{ animation:glimEn 5600ms linear both; }
+body.connecting .ln + .ln.glim::before, body.connecting .ln + .ln.glim::after{ animation-delay:400ms; }
+@keyframes glimKo{ 0%, 46.43%{ opacity:0; } 55%{ opacity:.9; } 67.86%, 100%{ opacity:0; } }
+@keyframes glimEn{ 0%, 52.86%{ opacity:0; } 63.57%{ opacity:.85; } 80%, 100%{ opacity:0; } }
 /* connected 로 넘어갈 때 마스크가 풀리며 한국어가 비치지 않게 즉시 끈다 */
 body.connected .l-greet{ transition:none; }
 
@@ -387,17 +398,33 @@ body.connecting .ripple{ animation:rippleUp 1.5s cubic-bezier(.45,0,.25,1) .45s 
 /* connected · message : 스크린 가장자리에 붙인 스트로크 (가장 밝은 선 약 518 = 가장자리 520, 바깥 글로우는 잘린다) */
 .stroke{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover;
          opacity:0; transition:opacity .6s ease; mix-blend-mode:screen; pointer-events:none; }
-body.connected .stroke, body.message .stroke{ opacity:1; }
+body.connected .stroke, body.message .stroke, body.followup .stroke{ opacity:1; }
 body.connecting .stroke{ opacity:1; transition-delay:2.9s; }   /* 영어 윗줄이 드러나는 시점 */
 
 /* ---------- message : 기록 카드 (피그마 3142:299) ---------- */
 .rec{ position:absolute; left:143px; top:317px; width:794px; height:545.875px;
       border-radius:119.1px; background:#fff; overflow:hidden;
       opacity:0; transform:translateY(160px);
-      transition:opacity .8s ease, transform 1.1s cubic-bezier(.2,.8,.2,1); }
+      transition:opacity .8s ease, transform 1.1s cubic-bezier(.2,.8,.2,1), filter 1.1s ease; }
 /* 문구가 거의 다 올라간 뒤 카드가 아래에서 밀려 올라온다.
    같이 출발하면 카드가 문구를 따라잡아 덮는다 */
-body.message .rec{ opacity:1; transform:none; transition-delay:1.3s; }
+body.message .rec-a{ opacity:1; transform:none; transition-delay:1.3s; }
+/* follow-up : 지난 카드는 왼쪽으로 밀리며 작아지고 어두워지다 사라지고, 새 카드가 오른쪽에서 들어온다 */
+.rec-b{ transform:translateX(900px); }
+.rec-b .rec-img{ object-fit:fill; }   /* 피그마는 이 사진을 자르지 않고 841x576 에 늘려 채운다 (코드젠에 object-cover 가 없음). PNG 대조 오차 0.8/255 */
+body.followup .rec-a{ opacity:0; transform:translateX(-720px) scale(.86); filter:brightness(.45);
+                      transition:transform 1.1s cubic-bezier(.5,0,.3,1), filter 1.1s ease, opacity .6s ease 1.0s; }
+body.followup .rec-b{ opacity:1; transform:none;
+                      transition:opacity .5s ease, transform 1.1s cubic-bezier(.5,0,.3,1), filter 1.1s ease; }
+/* 카드 글자는 알파벳이 무작위 순서로 다다닥, 그 중간에 의사 사진이 제자리에서 나타난다 */
+.ch{ font-style:normal; opacity:0; }
+body.message  .rec-a .ch{ animation:pop .16s linear both; animation-delay:calc(1700ms + var(--d)); }
+body.followup .rec-a .ch{ opacity:1; }
+body.followup .rec-b .ch{ animation:pop .16s linear both; animation-delay:calc(1100ms + var(--d)); }
+.rec-av{ opacity:0; }
+body.message  .rec-a .rec-av{ animation:pop .5s ease both 2.15s; }
+body.followup .rec-a .rec-av{ opacity:1; }
+body.followup .rec-b .rec-av{ animation:pop .5s ease both 1.55s; }
 .rec-img{ position:absolute; left:-24px; top:-12px; width:841px; height:576px;
           object-fit:cover; }
 /* 배경 블러는 progressive : 피그마 Progressive layer blur 는 코드젠에서
@@ -428,11 +455,16 @@ body.message .rec{ opacity:1; transform:none; transition-delay:1.3s; }
 .nav{ position:absolute; inset:0; pointer-events:none; }
 .nav > *{ opacity:0; transition:opacity .5s ease; }
 body.follow .nav > *{ opacity:1; }
-.navgauge, .navarrow, .navdigits{ position:absolute; inset:0; width:1080px; height:1080px; }
+.navgauge, .navglow, .navarrow, .navdigits{ position:absolute; inset:0; width:1080px; height:1080px; }
 
 /* 게이지 : 화면 중심(540,540) 반지름 475 원호. 좌하단 → 우측 목적지 */
 .navgauge{ fill:none; stroke-linecap:round; }
 .gtrack{ stroke:rgba(255,255,255,.16); stroke-width:30; }   /* 검정 위 : 트랙은 흐리게 */
+/* 채움 글리밍 : 글자와 같은 #FEFFF9 겹을 흐리게 깔고, 화면 오른쪽(진행 방향)으로 갈수록 짙게 */
+.navglow{ pointer-events:none; filter:blur(8px);
+  -webkit-mask:linear-gradient(90deg,transparent 10%,#000 90%); mask:linear-gradient(90deg,transparent 10%,#000 90%); }
+.gglow{ fill:none; stroke:#FEFFF9; stroke-width:34; stroke-linecap:round; opacity:.9;
+        stroke-dasharray:100; stroke-dashoffset:100; transition:stroke-dashoffset .5s cubic-bezier(.3,.9,.3,1); }
 .gfill { stroke:#fff; stroke-width:26; stroke-dasharray:100; stroke-dashoffset:100;
           transition:stroke-dashoffset .5s cubic-bezier(.3,.9,.3,1); }
 
@@ -524,10 +556,11 @@ body.follow .navto .w, body.follow .navdest .w{
 
     <p class="headline l-greet reveal nopause"><span class="ln">도움이 필요하신가요?</span><span class="ln">제가 안내해 드릴게요</span></p>
     <p class="headline l-hi reveal nopause"><span class="ln">Good Afternoon!</span><span class="ln">Somi.</span></p>
-    <p class="headline l-msg reveal">You had an appointment on <em>July&nbsp;20.</em></p>
+    <p class="headline l-msg reveal">Your last appointment was on <em>July&nbsp;20.</em></p>
+    <p class="headline l-fu reveal">Today is your <em>2nd</em> follow-up.</p>
 
     <!-- 기록 카드 (피그마 3142:299) -->
-    <div class="rec">
+    <div class="rec rec-a">
       <img class="rec-img" src="card-hospital.webp" alt="Northgate Medical Center">
       <img class="rec-img rec-b1" src="card-hospital.webp" alt="" aria-hidden="true">
       <img class="rec-img rec-b2" src="card-hospital.webp" alt="" aria-hidden="true">
@@ -537,9 +570,25 @@ body.follow .navto .w, body.follow .navdest .w{
       <div class="rec-row">
         <div class="rec-txt">
           <b>Northgate Medical Center</b>
-          <s>California, Urbine</s>
+          <s>Irvine, California</s>
         </div>
         <img class="rec-av" src="card-doctor.webp" alt="Dr. James Bennett">
+      </div>
+    </div>
+    <!-- follow-up 카드 (피그마 3153:222) -->
+    <div class="rec rec-b">
+      <img class="rec-img" src="card-samsung.webp" alt="Samsung Medical Center">
+      <img class="rec-img rec-b1" src="card-samsung.webp" alt="" aria-hidden="true">
+      <img class="rec-img rec-b2" src="card-samsung.webp" alt="" aria-hidden="true">
+      <img class="rec-img rec-b3" src="card-samsung.webp" alt="" aria-hidden="true">
+      <img class="rec-img rec-b4" src="card-samsung.webp" alt="" aria-hidden="true">
+      <div class="rec-veil"></div>
+      <div class="rec-row">
+        <div class="rec-txt">
+          <b>Samsung Medical Center</b>
+          <s>Seoul, Korea</s>
+        </div>
+        <img class="rec-av" src="card-doctor2.webp" alt="Doctor">
       </div>
     </div>
     <p class="headline l-guide reveal">
@@ -549,6 +598,7 @@ body.follow .navto .w, body.follow .navdest .w{
 
 
     <div class="nav">
+      <svg class="navglow" viewBox="0 0 1080 1080" aria-hidden="true"><path class="gglow" d="M179.9 849.8A475 475 0 0 0 1011.2 600.4" pathLength="100"/></svg>
       <svg class="navgauge" viewBox="0 0 1080 1080" aria-hidden="true">
         <path class="gtrack" d="M179.9 849.8A475 475 0 0 0 1011.2 600.4"/>
         <path class="gfill"  d="M179.9 849.8A475 475 0 0 0 1011.2 600.4" pathLength="100"/>
@@ -628,6 +678,19 @@ const split = el => {
   walk(el);
 };
 document.querySelectorAll('.reveal').forEach(split);
+// 글리밍 겹에 쓸 글자 복사 : 강조어의 단어(.w)마다, 인사 줄(.ln)마다
+document.querySelectorAll('.headline em .w').forEach(w => { w.classList.add('glim'); w.dataset.t = w.textContent; });
+document.querySelectorAll('.l-greet .ln, .l-hi .ln').forEach(l => { l.classList.add('glim'); l.dataset.t = l.textContent.replace(/\s+/g, ' ').trim(); });
+// 카드 글자 : 알파벳이 무작위 순서로 다다닥 (길안내 화살표 도트처럼). 카드 한 장 안에서 두 줄을 한꺼번에 섞는다
+document.querySelectorAll('.rec-txt').forEach(box => {
+  const chars = [];
+  box.querySelectorAll('b, s').forEach(el => {
+    const t = el.textContent; el.textContent = '';
+    for (const c of t) { const i = document.createElement('i'); i.className = 'ch'; i.textContent = c; el.append(i); chars.push(i); }
+  });
+  chars.map(c => [Math.random(), c]).sort((a, b) => a[0] - b[0])
+    .forEach(([, c], k) => c.style.setProperty('--d', (k * 22 + Math.random() * 30 | 0) + 'ms'));
+});
 
 
 // ---------- follow : 길안내 ----------
@@ -644,6 +707,8 @@ const dot = (x, y, r, o) => {
 const arrowSvg  = NAV.querySelector('.navarrow');
 const digitsSvg = NAV.querySelector('.navdigits');
 const gfill = NAV.querySelector('.gfill');
+const gglow = NAV.querySelector('.gglow');
+const setGauge = v => { gfill.style.strokeDashoffset = v; gglow.style.strokeDashoffset = v; };
 const navm  = NAV.querySelector('.navm');
 const navto = NAV.querySelector('.navto');
 
@@ -720,12 +785,17 @@ const navRun = () => {
   clearInterval(roll);
   clearTimeout(navRAF);
   NAV.classList.remove('arrived');
+  // 게이지는 반드시 빈 상태에서 시작 : 지난 바퀴의 가득 찬 값(0)에서 transition 으로 줄어드는 모습이
+  // 등장하자마자 보이던 오류. transition 을 끈 채 100 으로 되돌리고 다시 켠다
+  [gfill, gglow].forEach(p => { p.style.transition = 'none'; p.style.strokeDashoffset = 100; });
+  gfill.getBoundingClientRect();
+  [gfill, gglow].forEach(p => { p.style.transition = ''; });
   shown = -1;
   navto.dataset.t = '';
   let k = 0;
   const tick = () => {
     if (k >= SEQ.length) {
-      gfill.style.strokeDashoffset = 0;
+      setGauge(0);
       NAV.classList.add('arrived');
       NAV.classList.remove('up');
       setTo('Arrived');
@@ -733,7 +803,7 @@ const navRun = () => {
     }
     const n = SEQ[k++];
     const leg = LEGS.filter(l => n <= l.at).pop();
-    gfill.style.strokeDashoffset = 100 * n / TOTAL;
+    setGauge(100 * n / TOTAL);
     arrowSvg.style.rotate = leg.deg + 'deg';
     NAV.classList.toggle('up', leg.deg === 0);
     setTo(leg.to);
@@ -745,24 +815,23 @@ const navRun = () => {
 
 // 시퀀스 : 한 번 누르면 끝까지 자동 진행, 다시 누르면 idle 로 리셋
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
-const STEPS = ['idle','fill','connecting','connected','message','guide','follow'];
+const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 5600, 2000, 7600, 7600, 16500];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 5600, 2000, 6200, 6400, 7600, 16500];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer, strokeTimer;
 
 const go = n => {
   clearTimeout(timer);
-  body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|guide|follow)\b/, STEPS[n]);
+  body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|followup|guide|follow)\b/, STEPS[n]);
   if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); }
   else star.pause();
-  // 스트로크 : Hello Somi 에서 처음부터, 병원 카드 장면까지 끊지 않고 이어서
   // 스트로크 : 엄지척 뒤 영어가 드러나는 2.9s 에 처음부터 재생해 병원 카드 장면까지 끊지 않고
   clearTimeout(strokeTimer);
   if (STEPS[n] === 'connecting')
     strokeTimer = setTimeout(() => { stroke.currentTime = 0; stroke.play().catch(() => {}); }, 2900);
-  else if (STEPS[n] === 'connected' || STEPS[n] === 'message') stroke.play().catch(() => {});
+  else if (['connected', 'message', 'followup'].includes(STEPS[n])) stroke.play().catch(() => {});
   else stroke.pause();
   // fill 은 엄지척만이 다음으로 보낸다 : 별 모션은 반드시 엄지척이 인식된 뒤에만 재생
   if (HOLD[n] && STEPS[n] !== 'fill') timer = setTimeout(() => go((n + 1) % STEPS.length), HOLD[n]);

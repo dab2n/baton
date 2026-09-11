@@ -119,3 +119,11 @@ Range 를 지원하는 서버로 띄워야 `star.*` 가 재생된다.
 `fonts/SFProKR-Semibold.otf`, `fonts/SFProKR-Bold.otf` (원본 `~/Downloads/SFProKR_OTF.zip`).
 Apple SF Pro KR 은 재배포할 수 없는 라이선스라 **공개 저장소에 올리지 않는다** (`.gitignore`).
 로컬 키오스크에서만 적용되고, 배포본(GitHub Pages)에서는 Pretendard 로 떨어진다.
+
+## follow-up 장면 (피그마 3153:214)
+
+- `message` 다음 `followup` : "Today is your 2nd follow-up." + Samsung Medical Center 카드
+- 지난 카드(Northgate)는 왼쪽으로 밀리며 작아지고(0.86) 어두워진 뒤(밝기 .45) 사라지고, 새 카드가 오른쪽에서 같은 곡선으로 들어온다
+- `card-samsung.webp` 는 피그마처럼 **늘려 채운다(object-fit: fill)**. 코드젠에 `object-cover` 가 빠져 있는 게 실제 디자인이다 (PNG 대조 오차 0.8/255, cover 로는 21.4)
+- 카드 글자는 알파벳이 무작위 순서로 다다닥, 그 중간에 의사 사진이 제자리에서 나타난다
+- 강조어 글리밍 : 같은 글자를 #FEFFF9 로 한 겹 더, 오른쪽으로 갈수록 흐리게 (피그마 progressive blur 를 코드젠이 균일 blur 5.95 로 내보냄)
