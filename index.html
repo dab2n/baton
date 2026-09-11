@@ -86,7 +86,7 @@ body.kiosk .ring{ display:none; }             /* 전체화면 : 목업은 항상
 .camview video{ object-fit:cover; }
 .camstat{ margin-top:6px; font-size:11px; line-height:1.5; color:#888;
           text-align:right; white-space:pre-line; }
-body.kiosk .cam{ display:none; }
+body.kiosk .cam{ opacity:0; pointer-events:none; }   /* 전체화면 : 사람 썸네일은 절대 노출 안 함 (인식은 계속) */
 
 /* ---------- 스크린 1080x1080 ---------- */
 .screen{
@@ -355,6 +355,16 @@ body.follow .nav > *{ opacity:1; }
 /* 첫 등장 : 순서와 간격을 흩어 다다닥 튀어나오게 (--d 는 JS 가 뿌린다) */
 body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 @keyframes pop{ from{ opacity:0; } to{ opacity:1; } }
+/* 위를 향할 땐 가만두지 않고 위로 두 번 쿡쿡 찌르고 쉰다 : 계속 직진.
+   translate 는 rotate 바깥에서 먹으므로 화면 기준 위로 움직인다.
+   1.2s 늦춰 시작 : 처음엔 도트 등장, 대각선에서 돌아올 땐 회전(1.4s)이 끝나갈 때 */
+.nav.up .navarrow{ animation:poke 1.5s cubic-bezier(.2,.8,.3,1) 1.2s infinite; }
+@keyframes poke{
+  0%, 42%, 100%{ translate:0 0; }
+  9%           { translate:0 -16px; }
+  19%          { translate:0 0; }
+  28%          { translate:0 -9px; }
+}
 
 /* 남은 거리 : NDOT 47 대신 같은 도트로 직접 그린다 */
 /* 색 : 주 정보는 흰색, 보조 문구는 #E7E7E7 (기록 카드와 같은 위계) */
@@ -380,7 +390,7 @@ body.follow .navto .w, body.follow .navdest .w{
 
 @media (prefers-reduced-motion:reduce){
   .w{ animation:none; opacity:1; }
-  .field,.sheen,.core,.cyan,.rim,.rim::after{ animation:none; }
+  .field,.sheen,.core,.cyan,.rim,.rim::after,.nav.up .navarrow{ animation:none; }
 }
 </style>
 </head>
@@ -480,7 +490,8 @@ if (!CAM) {
 const SCREEN = location.hash === '#screen';
 const fs = matchMedia('(display-mode: fullscreen)');
 const kiosk = () => {
-  document.body.classList.toggle('kiosk', SCREEN || !!document.fullscreenElement || fs.matches);
+  const filled = innerWidth >= screen.width - 1 && innerHeight >= screen.height - 1;
+  document.body.classList.toggle('kiosk', SCREEN || !!document.fullscreenElement || fs.matches || filled);
   fit();
 };
 addEventListener('fullscreenchange', kiosk);
@@ -620,6 +631,7 @@ const navRun = () => {
     if (k >= SEQ.length) {
       gfill.style.strokeDashoffset = 0;
       NAV.classList.add('arrived');
+      NAV.classList.remove('up');
       setTo('Arrived');
       return;
     }
@@ -627,6 +639,7 @@ const navRun = () => {
     const leg = LEGS.filter(l => n <= l.at).pop();
     gfill.style.strokeDashoffset = 100 * n / TOTAL;
     arrowSvg.style.rotate = leg.deg + 'deg';
+    NAV.classList.toggle('up', leg.deg === 0);
     setTo(leg.to);
     rollTo(n);
     navRAF = setTimeout(tick, STEP);
@@ -648,7 +661,8 @@ const go = n => {
   if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); }
   else star.pause();
-  if (HOLD[n]) timer = setTimeout(() => go((n + 1) % STEPS.length), HOLD[n]);
+  const waitThumb = STEPS[n] === 'fill' && window.__cam;   // 엄지척이 트리거
+  if (HOLD[n] && !waitThumb) timer = setTimeout(() => go((n + 1) % STEPS.length), HOLD[n]);
 };
 const step = () => STEPS.findIndex(s => body.classList.contains(s));
 // 카메라가 없을 때의 수동 진행 : 한 단계씩, 마지막에서 리셋
@@ -737,8 +751,8 @@ const loop = () => {
   if (wants && hits >= HITS) { hits = 0; window.__go(n + 1); }
 };
 
-// 지금은 쓰지 않는다 : #cam 일 때만 켠다
-if (location.hash !== '#cam') document.querySelector('.cam').remove();
+// ?s=N (이미지 내보내기) 에서만 끈다
+if (new URLSearchParams(location.search).has('s')) document.querySelector('.cam').remove();
 else try {
   const { FilesetResolver, FaceDetector, GestureRecognizer } = await import(V + '/vision_bundle.mjs');
   const vision = await FilesetResolver.forVisionTasks(V + '/wasm');
@@ -754,6 +768,9 @@ else try {
   video.srcObject = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } });
   await video.play();
   say('카메라 ON');
+  window.__cam = true;
+  // 이미 fill 에서 자동 진행 타이머가 걸려 있었다면 거두고 엄지척을 기다린다
+  if (window.__step() === 1) window.__go(1);
   requestAnimationFrame(loop);
 } catch (e) {
   say('카메라 없음 — 화면을 탭해 진행');
