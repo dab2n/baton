@@ -289,9 +289,6 @@ body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 .l-greet, .l-hi{ font-size:48px; line-height:1.4; }   /* 두 줄 : 한국어·영어가 줄끼리 겹친다 */
 /* 두 문구의 박스를 같은 폭으로 : 지우개 경계가 화면 같은 x 를 지나가게 */
 .l-greet, .l-hi{ width:780px; }
-/* 한국어는 한 줄뿐 : 둘째 줄 자리를 비워 두고 두 문구를 반 줄(48×1.4÷2) 내린다.
-   한국어가 정중앙, 영어 윗줄(Good Afternoon!)도 정확히 같은 자리에 겹친다 */
-.l-greet, .l-hi{ top:calc(50% + 33.6px); }
 .l-greet .w, .l-hi .w{ background:linear-gradient(180deg,#E5E5E5 71.017%,#353046 89.851%);
                        -webkit-background-clip:text; background-clip:text; color:transparent; }
 
@@ -310,11 +307,12 @@ body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
   to  { opacity:1; transform:none;              filter:blur(0);    }
 }
 /* 인사 전환 (connecting 5600ms) : 글자는 제자리. 움직이는 건 마스크 경계와 투명도
-     0 ~ 2400  한국어는 제자리에 그대로. 아래→위로 투명한 파장이 훑고 지나가고(.ripple)
-               구 모션이 글자 위에 screen 으로 덮인다
-  3400 ~ 5200  윗줄 : 흐린 경계가 왼→오로 천천히 지나가며 한국어를 지우고 점점 투명해진다
-  3700 ~ 4900  윗줄 : 같은 경계가 300ms 늦게, 더 빠르게 영어를 드러낸다 (반투명한 한국어 위로 겹침)
-  +500ms       아랫줄(Somi.)은 0.5초 늦게 : 위→아래 순서
+     0 ~ 2400  한국어는 제자리에 그대로. 아래→위로 투명한 파장이 훑고(.ripple) 구 모션이 글자 위에 덮인다
+  2600 ~ 3800  윗줄 : 흐린 경계가 왼→오로 지나가며 한국어를 지우고 함께 투명해진다
+  2960 ~ 4160  윗줄 : 같은 속도로 360ms 뒤따르며 영어를 드러낸다.
+               360ms = 흐린 경계 폭(30%)이 지나가는 시간 : 두 경계가 맞닿기만 하고 겹치지 않아
+               한 자리에 두 언어가 같이 보이는 순간이 없다
+  +400ms       아랫줄은 0.4초 늦게 : 위→아래 순서
    마스크는 줄(.ln)마다. 폭 300% 그라디언트(가운데 10% 가 흐린 경계)를 85%→15% 로 민다 */
 .l-greet .ln, .l-hi .ln{ display:block; }
 body.connecting .l-greet .w,
@@ -329,16 +327,15 @@ body.connecting .l-hi .ln{
           mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
   animation:enLine 5600ms linear both; }
 body.connecting .l-greet .ln + .ln,
-body.connecting .l-hi .ln + .ln{ animation-delay:500ms; }
-}
+body.connecting .l-hi .ln + .ln{ animation-delay:400ms; }
 @keyframes deLine{
-  0%, 60.71%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
-  71.43%       { opacity:.45; animation-timing-function:ease-out; }
-  92.86%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }
+  0%, 46.43%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  57.14%       { opacity:.5; }
+  67.86%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
 @keyframes enLine{
-  0%, 66.07%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
-  87.50%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
+  0%, 52.86%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  74.29%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
 /* connected 로 넘어갈 때 마스크가 풀리며 한국어가 비치지 않게 즉시 끈다 */
 body.connected .l-greet{ transition:none; }
@@ -365,7 +362,7 @@ body.connecting .ripple{ animation:rippleUp 1.5s cubic-bezier(.45,0,.25,1) .45s 
   78%  { opacity:1; }
   100% { opacity:0; transform:translateY(-72%); }
 }
-/* connected · message : 스크린 가장자리에 붙인 스트로크 (링 안쪽 경계 480, 가장자리 520 에서 잘린다) */
+/* connected · message : 스크린 가장자리에 붙인 스트로크 (가장 밝은 선 약 518 = 가장자리 520, 바깥 글로우는 잘린다) */
 .stroke{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover;
          opacity:0; transition:opacity .6s ease; mix-blend-mode:screen; pointer-events:none; }
 body.connected .stroke, body.message .stroke{ opacity:1; }
@@ -489,8 +486,8 @@ body.follow .navto .w, body.follow .navdest .w{
     <!-- 글자 뒤 스트로크 : 별_3.mp4 의 3.9s~ 구간. 인트로 한 번 뒤 4.5s~ 구간을 역재생·정재생으로
          세 번 왕복시켜 이어 붙였다 (21s). 이음매가 같은 프레임이라 끊김이 없다 -->
     <video class="stroke" muted playsinline preload="auto" aria-hidden="true">
-      <source src="stroke.webm?v=2" type="video/webm">
-      <source src="stroke.mp4?v=2"  type="video/mp4">
+      <source src="stroke.webm?v=3" type="video/webm">
+      <source src="stroke.mp4?v=3"  type="video/mp4">
     </video>
     <div class="ripple" aria-hidden="true"></div>
     <!-- 의사 장면 배경 : 피그마 export 를 그대로 옮겼다 (경로·필터·그라디언트 동일) -->
@@ -502,7 +499,7 @@ body.follow .navto .w, body.follow .navdest .w{
 
 
 
-    <p class="headline l-greet reveal nopause"><span class="ln">좋은 오후예요.</span><span class="ln">&nbsp;</span></p>
+    <p class="headline l-greet reveal nopause"><span class="ln">어디로 가시나요?</span><span class="ln">제가 안내해 드릴게요</span></p>
     <p class="headline l-hi reveal nopause"><span class="ln">Good Afternoon!</span><span class="ln">Somi.</span></p>
     <p class="headline l-msg reveal">You had an appointment on <em>July&nbsp;20.</em></p>
 
