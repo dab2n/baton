@@ -458,8 +458,8 @@ body.follow .navto .w, body.follow .navdest .w{
     <!-- 연결 인식 모션. 원본 AE : ~/Desktop/grad_motion1.aep
          내보낸 별.mp4(1920x1080)를 구가 중앙에 오도록 crop=1080:1080:10:0 해서 넣었다 -->
     <video class="star" muted playsinline preload="auto" aria-hidden="true">
-      <source src="star.webm?v=2" type="video/webm">
-      <source src="star.mp4?v=2"  type="video/mp4">
+      <source src="star.webm?v=3" type="video/webm">
+      <source src="star.mp4?v=3"  type="video/mp4">
     </video>
     <!-- 의사 장면 배경 : 피그마 export 를 그대로 옮겼다 (경로·필터·그라디언트 동일) -->
     <div class="sheen"></div>
@@ -704,12 +704,16 @@ const go = n => {
   if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); }
   else star.pause();
-  const waitThumb = STEPS[n] === 'fill' && window.__cam;   // 엄지척이 트리거
-  if (HOLD[n] && !waitThumb) timer = setTimeout(() => go((n + 1) % STEPS.length), HOLD[n]);
+  // fill 은 엄지척만이 다음으로 보낸다 : 별 모션은 반드시 엄지척이 인식된 뒤에만 재생
+  if (HOLD[n] && STEPS[n] !== 'fill') timer = setTimeout(() => go((n + 1) % STEPS.length), HOLD[n]);
 };
 const step = () => STEPS.findIndex(s => body.classList.contains(s));
 // 카메라가 없을 때의 수동 진행 : 한 단계씩, 마지막에서 리셋
-const tap = () => { const n = step(); go(n < 0 || n === STEPS.length - 1 ? 0 : n + 1); };
+const tap = () => {
+  const n = step();
+  if (STEPS[n] === 'fill') return;   // 탭으로는 엄지척을 건너뛸 수 없다
+  go(n < 0 || n === STEPS.length - 1 ? 0 : n + 1);
+};
 window.__go = go; window.__step = step;
 // ?s=N : 그 장면 하나만 정지 (이미지 내보내기용)
 const SOLO = new URLSearchParams(location.search).get('s');
@@ -812,11 +816,9 @@ else try {
   await video.play();
   say('카메라 ON');
   window.__cam = true;
-  // 이미 fill 에서 자동 진행 타이머가 걸려 있었다면 거두고 엄지척을 기다린다
-  if (window.__step() === 1) window.__go(1);
   requestAnimationFrame(loop);
 } catch (e) {
-  say('카메라 없음 — 화면을 탭해 진행');
+  say('카메라 없음 — 엄지척을 인식할 수 없어 fill 에서 멈춤');
   console.warn('[cam]', e);
 }
 </script>

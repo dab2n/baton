@@ -80,8 +80,9 @@ spark.svg    Connecting 아이콘
 ## 모션 원본
 
 - 연결 인식 모션(`connecting`)의 별 애니메이션 : After Effects `~/Desktop/grad_motion1.aep`
-  - 내보낸 것 : `~/Desktop/grad_motion.aep_AME/별.mp4` (1920x1080)
-  - 이 저장소의 `star.webm` / `star.mp4` 는 위 파일을 `crop=1080:1080:10:0` (구가 중앙에 오도록) 한 것
+  - 내보낸 것 : `~/Desktop/grad_motion.aep_AME/별_1.mp4` (1920x1080, 3.3s, 각도는 AE 에서 맞춤)
+  - 이 저장소의 `star.webm` / `star.mp4` 는 위 파일을 `scale=2030:1142,crop=1080:1080:483:22` 한 것
+    (절정 프레임 글로우 중심 (968,532)·크기 약 908 → 1.057 배 키워 약 960 으로, 중심을 1080 정사각 중앙에)
   - 인코딩 : VP9 `-crf 14 -b:v 0 -aq-mode 2` / H.264 `-crf 14 -preset slow -x264-params aq-mode=3`.
     화면 대부분이 검정이라 전체 PSNR 은 높게 나와도 어두운 글로우가 먼저 깨진다. 비트레이트를 아끼지 말 것
   - 자잘한 타이밍·색 수정은 aep 에서 하고 다시 내보내 같은 crop 으로 갈아끼운다
@@ -89,7 +90,6 @@ spark.svg    Connecting 아이콘
 - Hello! Somi : 피그마 `node-id=3139-207`
 - 기록 카드(병원·의사·"You had-" 통합) : 피그마 `node-id=3142-299`
   - `card-hospital.webp` / `card-doctor.webp` 는 그 프레임의 이미지 애셋
-- `star.*` 는 `pad=1920:1092:0:12,crop=1080:1080:30:6,transpose=2` — 구를 정중앙에 놓고 좌회전 90도
 
 ## 로컬 확인
 
