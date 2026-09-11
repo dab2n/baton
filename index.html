@@ -142,10 +142,10 @@ body.guide      .field,
 body.follow     .field{ transform:translate(1px,145.5px) scale(1.2); }
 
 /* 검은 화면 장면들 : 예전 밝은 배경 레이어는 전부 물러난다 */
-body.fill .sheen,  body.connecting .sheen,  body.connected .sheen,  body.message .sheen,
-body.fill .cyan,   body.connecting .cyan,   body.connected .cyan,   body.message .cyan,
-body.fill .core,   body.connecting .core,   body.connected .core,   body.message .core,
-body.connecting .field, body.connected .field, body.message .field{ opacity:0; }
+body:not(.idle) .sheen,
+body:not(.idle) .cyan,
+body:not(.idle) .core,
+body:not(.idle):not(.fill) .field{ opacity:0; }
 
 /* C : connecting 에서 켜진다 */
 /* 노치가 작아져 상단이 드러난다 : idle 은 순수 블랙이어야 하므로 sheen 을 끈다 */
@@ -193,8 +193,7 @@ body.idle .field::before{ opacity:1; animation:gleam 9s ease-in-out infinite; }
 body.idle       .blur39{ filter:blur(17px); transition-delay:0s; }
 body.connecting .blur39{ filter:blur(39px); transition-delay:0s; }
 /* 정적 장면에서 .field 를 움직이면 어떻게든 검정이 드러난다. 고정.
-   대신 그 위의 파란 블롭(sheen/cyan)이 크게 흘러다니고,
-   본문 텍스트가 color-burn 이라 지나갈 때마다 글자 색이 미묘하게 바뀐다. */
+   (검은 화면 장면에선 배경 블롭도 모두 꺼져 있다) */
 body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; border-radius:50%; }
 /* 글자만 있는 장면에서는 배경을 아예 멈춘다 : 아주 작은 움직임도
    화면 오류처럼 잔물결로 보인다 */
@@ -255,22 +254,17 @@ body.connected  .rim::after{ animation:orbit 11s linear infinite; }
 @keyframes orbit{ to{ rotate:360deg; } }
 
 /* ---------- 본문 ---------- */
+/* 문장 규칙 (피그마 3142:328) : 흰 40px Medium, 강조어는 Semi Bold 에 번짐.
+   피그마는 강조어를 blur 5.95 로 한 겹 뒤에 까는데 text-shadow 한 줄로 같다 */
 .headline{
-  position:absolute; left:50%; transform:translateX(-50%);
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   margin:0; width:780px; text-align:center;
-  font-size:42px; font-weight:500; line-height:1.6; color:#3E3D0A;
-  mix-blend-mode:color-burn;
+  font-size:40px; font-weight:500; line-height:1.6; color:#fff;
   transition:opacity .8s ease;
 }
-/* 줄 수와 무관하게 스크린 정중앙 */
-.headline{ top:50%; transform:translate(-50%,-50%); }
-.headline em{ font-style:normal; font-weight:600; color:#26250A; }
-/* message 문구 (피그마 3142:328) : 카드 위 흰 글씨 한 줄 */
-.l-msg{ mix-blend-mode:normal; color:#fff; width:auto; white-space:nowrap;
-        font-size:40px; font-weight:500; line-height:1.6;
-        top:188px; transform:translateX(-50%); }
-/* 피그마는 같은 글자를 blur 5.95 로 한 겹 뒤에 깔아 번지게 한다 */
-.l-msg em{ color:#fff; text-shadow:0 0 12px rgba(254,255,249,.9); }
+.headline em{ font-style:normal; font-weight:600; text-shadow:0 0 12px rgba(254,255,249,.9); }
+/* message : 카드 위 한 줄 */
+.l-msg{ width:auto; white-space:nowrap; top:188px; transform:translateX(-50%); }
 
 /* 장면당 한 문장. 들어올 때는 즉시, 나갈 때만 천천히 사라진다 */
 .headline{ opacity:0; }
@@ -282,7 +276,7 @@ body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 /* 기본 화면 문구 (피그마 3124:17778) : Delight Semi Bold 67.3px.
    글자에 위→아래 그라디언트. background-clip:text 는 자식이 자기 레이어를
    가지면(=.w 의 filter:blur) 깨지므로 단어마다 따로 입힌다 */
-.l-greet, .l-hi{ mix-blend-mode:normal; width:auto; white-space:nowrap;
+.l-greet, .l-hi{ width:auto; white-space:nowrap;
                   font-size:67.319px; font-weight:600; line-height:1.5; }
 .l-greet .w, .l-hi .w{ background:linear-gradient(180deg,#E5E5E5 71.017%,#353046 89.851%);
                        -webkit-background-clip:text; background-clip:text; color:transparent; }
@@ -345,36 +339,36 @@ body.message .rec{ opacity:1; transform:scale(1); transition-delay:.45s; }
 
 /* ---------- follow : 길안내 (피그마 3070:700) ---------- */
 .nav{ position:absolute; inset:0; pointer-events:none; }
-/* 페이드는 자식마다 : .nav 에 z-index/opacity 를 주면 스태킹 컨텍스트가 생겨
-   color-burn 이 뒤 배경까지 닿지 않는다 (.headline 과 같은 방식) */
 .nav > *{ opacity:0; transition:opacity .5s ease; }
 body.follow .nav > *{ opacity:1; }
 .navgauge, .navarrow, .navdigits{ position:absolute; inset:0; width:1080px; height:1080px; }
 
 /* 게이지 : 화면 중심(540,540) 반지름 475 원호. 좌하단 → 우측 목적지 */
 .navgauge{ fill:none; stroke-linecap:round; }
-.gtrack{ stroke:rgba(255,255,255,.55); stroke-width:30; }
+.gtrack{ stroke:rgba(255,255,255,.16); stroke-width:30; }   /* 검정 위 : 트랙은 흐리게 */
 .gfill { stroke:#fff; stroke-width:26; stroke-dasharray:100; stroke-dashoffset:100;
           transition:stroke-dashoffset .5s cubic-bezier(.3,.9,.3,1); }
 
 /* 화살표 도트 : 그룹째 회전한다 (다리가 바뀔 때 부드럽게) */
 .navarrow{ transform-origin:540px 538.5px; transition:rotate 1.4s cubic-bezier(.4,0,.2,1); }
-/* 피그마 : #741C1C 에 color-dodge → 밝은 배경 위에선 흰 도트로 뜬다 */
-.navarrow{ mix-blend-mode:color-dodge; }
-.navarrow circle{ fill:#741C1C; opacity:0; transform-box:fill-box; transform-origin:50% 50%; }
+.navarrow circle{ fill:#E5E5E5; opacity:0; transform-box:fill-box; transform-origin:50% 50%; }
 /* 첫 등장 : 순서와 간격을 흩어 다다닥 튀어나오게 (--d 는 JS 가 뿌린다) */
 body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 @keyframes pop{ from{ opacity:0; } to{ opacity:1; } }
 
 /* 남은 거리 : NDOT 47 대신 같은 도트로 직접 그린다 */
-.navdigits circle{ fill:#3E3D0A; }
-.navdigits, .navm, .navto, .navdest{ mix-blend-mode:color-burn; color:#3E3D0A; }
+/* 색 : 주 정보는 흰색, 보조 문구는 #E7E7E7 (기록 카드와 같은 위계) */
+.navdigits circle{ fill:#fff; }
 .navm { position:absolute; left:205px; top:502px; font-size:55px; font-weight:700;
-        line-height:1; color:#3E3D0A; }
+        line-height:1; color:#fff; }
 .navto{ position:absolute; left:75px; top:566px; font-size:28px; line-height:1.04;
-        white-space:nowrap; }
+        white-space:nowrap; color:#E7E7E7; }
 .navdest{ position:absolute; right:89px; top:517px; font-size:28px; line-height:1.04;
-          text-align:right; white-space:nowrap; }
+          text-align:right; white-space:nowrap; color:#fff; font-weight:600; }
+/* 문구는 다른 장면과 같은 단어 등장. navto 는 바뀔 때마다 새로 쪼개 다시 올라온다 */
+body.follow .navto .w, body.follow .navdest .w{
+  animation:in .9s cubic-bezier(.2,.7,.2,1) both;
+  animation-delay:calc(var(--i) * 70ms + 200ms); }
 .navpin{ position:absolute; right:40px; top:522px; width:41.9px; height:48px; }
 
 /* 도착 : 거리는 지우고 문구만 크게, 핀이 뛴다 */
@@ -445,7 +439,7 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
       </div>
     </div>
     <p class="headline l-guide reveal">
-      I&rsquo;ll take you to the waiting area.<br>
+      I&rsquo;ll take you to the <em>waiting area.</em><br>
       Please follow me slowly.
     </p>
 
@@ -459,8 +453,8 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
       <svg class="navdigits" viewBox="0 0 1080 1080" aria-hidden="true"></svg>
       <span class="navm">m</span>
       <span class="navto">to Elevator</span>
-      <span class="navdest">Rehabilitation<br>Center</span>
-      <svg class="navpin" viewBox="0 0 41.897 48.0068" aria-hidden="true"><path fill="#E1B742" fill-opacity=".75" d="M20.9485 0C32.4961 0.000150891 41.8967 9.39648 41.8967 20.9385C41.975 37.8193 23.253 46.9338 22.467 47.5098C22.022 47.8499 21.4721 48.0068 20.9485 48.0068C20.4249 48.0068 19.875 47.8237 19.4299 47.5098C18.6444 46.934 -0.0779867 37.8195 0.000244478 20.9385C0.000244478 9.39638 9.40076 0 20.9485 0ZM20.467 9.44141C14.382 9.44141 9.44849 14.3749 9.44849 20.46C9.44871 26.5448 14.3821 31.4775 20.467 31.4775C26.5519 31.4774 31.4844 26.5448 31.4846 20.46C31.4846 14.375 26.552 9.44153 20.467 9.44141Z"/></svg>
+      <span class="navdest reveal">Rehabilitation<br>Center</span>
+      <svg class="navpin" viewBox="0 0 41.897 48.0068" aria-hidden="true"><path fill="#E5E5E5" d="M20.9485 0C32.4961 0.000150891 41.8967 9.39648 41.8967 20.9385C41.975 37.8193 23.253 46.9338 22.467 47.5098C22.022 47.8499 21.4721 48.0068 20.9485 48.0068C20.4249 48.0068 19.875 47.8237 19.4299 47.5098C18.6444 46.934 -0.0779867 37.8195 0.000244478 20.9385C0.000244478 9.39638 9.40076 0 20.9485 0ZM20.467 9.44141C14.382 9.44141 9.44849 14.3749 9.44849 20.46C9.44871 26.5448 14.3821 31.4775 20.467 31.4775C26.5519 31.4774 31.4844 26.5448 31.4846 20.46C31.4846 14.375 26.552 9.44153 20.467 9.44141Z"/></svg>
     </div>
 
     <!-- 카메라 노치 : .screen 안에 두어 같은 clip-path 로 잘리게 한다 (경계에 흰 선이 안 남음) -->
@@ -548,8 +542,7 @@ const navto = NAV.querySelector('.navto');
 
 // 화살표 : 5열 x 6행, 간격 63.4, 중심 (540,538.5). 아래로 갈수록 옅어진다
 {
-  // 피그마 원본 SVG : 18개 전부 #741C1C 단색, 불투명도 1.
-  // 위아래 농담은 배경이 달라 color-dodge 결과가 달라지는 것뿐이다
+  // 도트 18개 : 검은 화면에선 #E5E5E5 단색 (CSS)
   const cells = [];
   ['..X..', '.XXX.', 'XXXXX', '.XXX.', '.XXX.', '.XXX.'].forEach((row, r) =>
     [...row].forEach((ch, c) => {
@@ -575,6 +568,10 @@ const GLYPH = {
   9: '01110,10001,10001,01111,00001,00010,01100',
 };
 let shown = -1;
+const setTo = t => {
+  if (navto.dataset.t === t) return;
+  navto.dataset.t = t; navto.textContent = t; split(navto);
+};
 const setDist = n => {
   if (n === shown) return;
   shown = n;
@@ -617,19 +614,20 @@ const navRun = () => {
   clearTimeout(navRAF);
   NAV.classList.remove('arrived');
   shown = -1;
+  navto.dataset.t = '';
   let k = 0;
   const tick = () => {
     if (k >= SEQ.length) {
       gfill.style.strokeDashoffset = 0;
       NAV.classList.add('arrived');
-      navto.textContent = 'Arrived';
+      setTo('Arrived');
       return;
     }
     const n = SEQ[k++];
     const leg = LEGS.filter(l => n <= l.at).pop();
     gfill.style.strokeDashoffset = 100 * n / TOTAL;
     arrowSvg.style.rotate = leg.deg + 'deg';
-    navto.textContent = leg.to;
+    setTo(leg.to);
     rollTo(n);
     navRAF = setTimeout(tick, STEP);
   };
