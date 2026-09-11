@@ -259,17 +259,17 @@ body.connected  .rim::after{ animation:orbit 11s linear infinite; }
 .headline{
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   margin:0; width:780px; text-align:center;
-  font-size:40px; font-weight:500; line-height:1.6; color:#fff;
+  font-size:42px; font-weight:500; line-height:1.6; color:#fff;   /* 44 면 You 의 Y 가 스트로크 링(480)에 3px 까지 붙는다 */
   transition:opacity .8s ease;
 }
 .headline em{ font-style:normal; font-weight:600; text-shadow:0 0 12px rgba(254,255,249,.9); }
 /* message : 카드 위 한 줄 */
 .l-msg{ width:auto; white-space:nowrap; top:188px; transform:translateX(-50%); }
 /* 스크린 가운데서 단어가 올라오기 시작하고, 0.8s 부터 제자리(top 188)로 올라간다.
-   320px = 화면 중심 540 - 문구 박스 중심 220 */
+   318px = 화면 중심 540 - 문구 박스 중심 222 (42px × 1.6 = 67.2 높이) */
 body.message .l-msg{ animation:msgUp 1.6s cubic-bezier(.65,0,.25,1) both; }
 @keyframes msgUp{
-  0%, 50% { translate:0 320px; }
+  0%, 50% { translate:0 318px; }
   100%    { translate:0 0; }
 }
 
@@ -286,12 +286,12 @@ body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
    가지면(=.w 의 filter:blur) 깨지므로 단어마다 따로 입힌다 */
 .l-greet, .l-hi{ width:auto; white-space:nowrap;
                   font-size:67.319px; font-weight:600; line-height:1.5; }
-.l-greet, .l-hi{ font-size:56px; line-height:1.4; }   /* 두 줄 : 한국어·영어가 줄끼리 겹친다 */
+.l-greet, .l-hi{ font-size:48px; line-height:1.4; }   /* 두 줄 : 한국어·영어가 줄끼리 겹친다 */
 /* 두 문구의 박스를 같은 폭으로 : 지우개 경계가 화면 같은 x 를 지나가게 */
 .l-greet, .l-hi{ width:780px; }
-/* 한국어는 한 줄뿐 : 둘째 줄 자리를 비워 두고 두 문구를 반 줄(56×1.4÷2) 내린다.
+/* 한국어는 한 줄뿐 : 둘째 줄 자리를 비워 두고 두 문구를 반 줄(48×1.4÷2) 내린다.
    한국어가 정중앙, 영어 윗줄(Good Afternoon!)도 정확히 같은 자리에 겹친다 */
-.l-greet, .l-hi{ top:calc(50% + 39.2px); }
+.l-greet, .l-hi{ top:calc(50% + 33.6px); }
 .l-greet .w, .l-hi .w{ background:linear-gradient(180deg,#E5E5E5 71.017%,#353046 89.851%);
                        -webkit-background-clip:text; background-clip:text; color:transparent; }
 
@@ -310,9 +310,8 @@ body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
   to  { opacity:1; transform:none;              filter:blur(0);    }
 }
 /* 인사 전환 (connecting 5600ms) : 글자는 제자리. 움직이는 건 마스크 경계와 투명도
-     0 ~  500  한국어가 사라진다 (엄지척 → 구 모션 0.8~2.4s)
-   500 ~ 2600  글자 없음 : 구만
-  2600 ~ 3100  한국어가 그 자리에 다시 나타난다
+     0 ~ 2400  한국어는 제자리에 그대로. 아래→위로 투명한 파장이 훑고 지나가고(.ripple)
+               구 모션이 글자 위에 screen 으로 덮인다
   3400 ~ 5200  윗줄 : 흐린 경계가 왼→오로 천천히 지나가며 한국어를 지우고 점점 투명해진다
   3700 ~ 4900  윗줄 : 같은 경계가 300ms 늦게, 더 빠르게 영어를 드러낸다 (반투명한 한국어 위로 겹침)
   +500ms       아랫줄(Somi.)은 0.5초 늦게 : 위→아래 순서
@@ -321,7 +320,6 @@ body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
 body.connecting .l-greet .w,
 body.connecting .l-hi .w,
 body.connected  .l-hi .w{ opacity:1; }
-body.connecting .l-greet{ animation:deScene 5600ms linear both; }
 body.connecting .l-greet .ln{
   -webkit-mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
@@ -332,10 +330,6 @@ body.connecting .l-hi .ln{
   animation:enLine 5600ms linear both; }
 body.connecting .l-greet .ln + .ln,
 body.connecting .l-hi .ln + .ln{ animation-delay:500ms; }
-@keyframes deScene{
-  0%            { opacity:1; }
-  8.93%, 46.43% { opacity:0; }
-  55.36%, 100%  { opacity:1; }
 }
 @keyframes deLine{
   0%, 60.71%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
@@ -351,10 +345,27 @@ body.connected .l-greet{ transition:none; }
 
 /* ---------- connecting : AE 별 모션 ----------
    검정 위에 얹으므로 screen : 영상의 검은 부분은 배경 그라디언트가 그대로 비친다 */
-.star{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover;
+.star{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover; z-index:2;
        opacity:0; transition:opacity .45s ease; mix-blend-mode:screen; pointer-events:none; }
 body.connecting .star{ opacity:1; }
-/* connected · message : 스크린 가장자리를 도는 스트로크 (링 반지름 465, 가장자리 520) */
+/* 파장 : 구가 아래에서 올라오는 방향 그대로 투명한 물결 앞머리가 화면을 훑는다 (Siri 호출).
+   뒤에 있는 글자와 구를 흐리고 밝혀 굴절처럼 보이게. 중심을 화면 아래 멀리 둔 큰 타원의
+   윗호만 띠로 남겨 가운데가 먼저 올라가는 곡선이 된다 */
+.ripple{ position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0;
+  -webkit-backdrop-filter:blur(5px) brightness(1.2) saturate(1.3);
+          backdrop-filter:blur(5px) brightness(1.2) saturate(1.3);   /* 9px 이면 글자가 통째로 뭉개진다 */
+  -webkit-mask:radial-gradient(110% 105% at 50% 140%, transparent 72%, #000 79%, #000 84%, transparent 91%);
+          mask:radial-gradient(110% 105% at 50% 140%, transparent 72%, #000 79%, #000 84%, transparent 91%); }
+.ripple::after{ content:''; position:absolute; inset:0;
+  background:radial-gradient(110% 105% at 50% 140%, transparent 80%, rgba(255,255,255,.10) 82.5%, transparent 85%); }
+body.connecting .ripple{ animation:rippleUp 1.5s cubic-bezier(.45,0,.25,1) .45s both; }
+@keyframes rippleUp{
+  0%   { opacity:0; transform:translateY(58%); }
+  14%  { opacity:1; }
+  78%  { opacity:1; }
+  100% { opacity:0; transform:translateY(-72%); }
+}
+/* connected · message : 스크린 가장자리에 붙인 스트로크 (링 안쪽 경계 480, 가장자리 520 에서 잘린다) */
 .stroke{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover;
          opacity:0; transition:opacity .6s ease; mix-blend-mode:screen; pointer-events:none; }
 body.connected .stroke, body.message .stroke{ opacity:1; }
@@ -478,9 +489,10 @@ body.follow .navto .w, body.follow .navdest .w{
     <!-- 글자 뒤 스트로크 : 별_3.mp4 의 3.9s~ 구간. 인트로 한 번 뒤 4.5s~ 구간을 역재생·정재생으로
          세 번 왕복시켜 이어 붙였다 (21s). 이음매가 같은 프레임이라 끊김이 없다 -->
     <video class="stroke" muted playsinline preload="auto" aria-hidden="true">
-      <source src="stroke.webm?v=1" type="video/webm">
-      <source src="stroke.mp4?v=1"  type="video/mp4">
+      <source src="stroke.webm?v=2" type="video/webm">
+      <source src="stroke.mp4?v=2"  type="video/mp4">
     </video>
+    <div class="ripple" aria-hidden="true"></div>
     <!-- 의사 장면 배경 : 피그마 export 를 그대로 옮겼다 (경로·필터·그라디언트 동일) -->
     <div class="sheen"></div>
     <div class="core"></div>
