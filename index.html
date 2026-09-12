@@ -142,18 +142,20 @@ body.kiosk .cam{ opacity:0; pointer-events:none; }   /* 전체화면 : 사람 �
    위/아래 방향은 아주 긴 마스크로만 나눈다. 등색선이 테두리와 같은 곡률(가운데가 높고 옆이 낮다)로 휜다 */
 .screen::before, .screen::after{ content:''; position:absolute; inset:0; pointer-events:none; }
 .screen::before{   /* 위 : 감청 */
-  background:radial-gradient(circle 530px at 540px 540px, rgba(27,39,67,0) 58%, rgba(26,37,62,.45) 82%, #1B2743 97%, #1B2743 100%);
-  -webkit-mask:linear-gradient(180deg,#000 0 8%, rgba(0,0,0,.8) 22%, transparent 46%);
-          mask:linear-gradient(180deg,#000 0 8%, rgba(0,0,0,.8) 22%, transparent 46%); }
+  background:radial-gradient(circle 530px at 540px 540px, rgba(30,44,76,0) 56%, rgba(29,42,71,.5) 80%, #1E2C4C 94%, #1E2C4C 100%);
+  -webkit-mask:linear-gradient(180deg,#000 0 10%, rgba(0,0,0,.78) 24%, transparent 44%);
+          mask:linear-gradient(180deg,#000 0 10%, rgba(0,0,0,.78) 24%, transparent 44%); }
 .screen::after{    /* 아래 : 밝은 회색 */
-  background:radial-gradient(circle 530px at 540px 540px, rgba(74,74,74,0) 60%, rgba(62,62,62,.45) 84%, #4A4A4A 97%, #4A4A4A 100%);
-  -webkit-mask:linear-gradient(0deg,#000 0 6%, rgba(0,0,0,.85) 20%, transparent 44%);
-          mask:linear-gradient(0deg,#000 0 6%, rgba(0,0,0,.85) 20%, transparent 44%); }
+  background:radial-gradient(circle 530px at 540px 540px, rgba(62,69,83,0) 60%, rgba(56,63,77,.45) 84%, #3E4553 96%, #3E4553 100%);
+  -webkit-mask:linear-gradient(0deg,#000 0 8%, rgba(0,0,0,.82) 22%, transparent 42%);
+          mask:linear-gradient(0deg,#000 0 8%, rgba(0,0,0,.82) 22%, transparent 42%); }
+/* 길안내 게이지가 아래 띠와 밝기가 비슷해 뒤 레이어처럼 보였다 → 그 장면에선 띠를 낮춰 게이지를 앞세운다 */
+body.follow .screen::after{ opacity:.45; }
 /* 그 색이 가장자리를 따라 아주 천천히 돈다 : 원뿔 그라디언트를 테두리 쪽만 남기고 회전 */
 .rimlight{ position:absolute; inset:-8%; pointer-events:none;
   background:conic-gradient(from 0deg,
-    rgba(27,39,67,0)    0deg, rgba(33,48,84,.55)  55deg, rgba(20,26,44,0)  135deg,
-    rgba(74,74,74,0)  205deg, rgba(74,74,74,.45) 275deg, rgba(27,39,67,0)  360deg);
+    rgba(30,44,76,0)    0deg, rgba(36,52,90,.5)   55deg, rgba(22,29,48,0)  135deg,
+    rgba(62,69,83,0)  205deg, rgba(62,69,83,.4)  275deg, rgba(30,44,76,0)  360deg);
   -webkit-mask:radial-gradient(circle closest-side, transparent 70%, #000 92%);
           mask:radial-gradient(circle closest-side, transparent 70%, #000 92%);
   animation:rimOrbit 18s linear infinite; }
