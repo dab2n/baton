@@ -447,25 +447,8 @@ body.connected .l-greet{ transition:none; }
    검정 위에 얹으므로 screen : 영상의 검은 부분은 배경 그라디언트가 그대로 비친다 */
 .star{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover; z-index:2;
        opacity:0; transition:opacity .45s ease; mix-blend-mode:screen; pointer-events:none; }
-/* 구 위치·크기 : 별 영상의 밝은 링을 밝기 가중 평균 반지름으로 재면 R 450~468, 중심이 왼쪽 29~38 · 위 39~-5 인데
-   이어지는 스트로크 영상의 링은 R 514, 중심 오차 1px 이다 (그래서 왼쪽으로 쏠려 보이고 넘어갈 때 어긋난다).
-   별 쪽을 스트로크 링에 맞춘다 : k = 514/R, translate = 중심 오프셋 x k. 영상과 같은 2.6s 타임라인
-     1.60s 이전  구가 아래에서 올라오는 구간이라 원본 그대로
-     1.85~2.20s  링이 뚜렷한 구간을 맞춘다 (dy 는 +35 → -6 으로 천천히 따라간다)
-     2.25s 이후  링이 흩어지며 검게 지므로 0 으로 되돌린다 */
-body.connecting .star{ animation:starFit 2600ms linear both; }
-@keyframes starFit{
-  0%, 61.5%   { translate:0 0;         scale:1;    }   /* ~1.60s */
-  71.2%       { translate:33px 35px;   scale:1.12; }   /* 1.85s : R 458 중심 -29.7,-31.2 */
-  75%         { translate:34px 22px;   scale:1.14; }   /* 1.95s : R 450 중심 -29.8,-18.9 */
-  80.8%       { translate:33px 6px;    scale:1.14; }   /* 2.10s : R 449 중심 -28.9,-4.9 */
-  84.6%       { translate:43px -6px;   scale:1.11; }   /* 2.20s : R 462 중심 -38.3,+4.9 */
-  90.4%, 100% { translate:0 0;         scale:1;    }   /* 2.35s~ : 링이 사라진 뒤 */
-}   /* ~1.5s : 구가 아래에서 올라오는 구간은 원본 그대로 */
-  65.4%      { translate:12.1px 10.5px; scale:1.034; }   /* 1.70s */
-  69.2%      { translate:2.4px 2.3px;   scale:1.019; }   /* 1.80s */
-  75%, 100%  { translate:0 0;           scale:1;     }   /* 1.95s~ */
-}
+/* 새 엄지척 영상(별_1.mp4)은 크롭 단계에서 중심·크기를 맞췄으므로 CSS 보정이 없다.
+   실측(인코딩 결과) : 절정 1.9s 에 중심 540.4,541.5 · R 521.7 (스크린 반지름 520) */
 body.connecting .star{ opacity:1; }
 /* 파장 : 구가 아래에서 올라오는 방향 그대로 투명한 물결 앞머리가 화면을 훑는다 (Siri 호출).
    뒤에 있는 글자와 구를 흐리고 밝혀 굴절처럼 보이게. 중심을 화면 아래 멀리 둔 큰 타원의
@@ -488,6 +471,7 @@ body.connecting .ripple{ animation:rippleUp 1.5s cubic-bezier(.45,0,.25,1) .45s 
 /* z-index 3 : 카드(.rec)는 DOM 이 뒤라 그냥 두면 스트로크 위를 지나간다. 스트로크를 위로 올려
    카드가 가장자리 그래픽 뒤로 사라지게 (screen 합성이라 링 글로우가 카드 위에 얹힌다) */
 .stroke{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover; z-index:3;
+         scale:1.02;   /* 링(R 514)을 살짝 밖으로 : 스크린 안에 걸리는 밝은 띠 18px → 8px (1.04 면 거의 사라진다) */
          opacity:0; transition:opacity .6s ease; mix-blend-mode:screen; pointer-events:none; }
 body.connected .stroke, body.message .stroke, body.followup .stroke, body.guide .stroke{ opacity:1; }
 body.connecting .stroke{ opacity:1; transition-delay:1.8s; }   /* 0.8배 재생이라 링이 차는 데 1s : 언어가 바뀌기(3s) 전에 끝난다 */
@@ -646,8 +630,8 @@ body.follow .navto .w, body.follow .navdest .w{
     <!-- 연결 인식 모션. 원본 AE : ~/Desktop/grad_motion1.aep
          내보낸 별.mp4(1920x1080)를 구가 중앙에 오도록 crop=1080:1080:10:0 해서 넣었다 -->
     <video class="star" muted playsinline preload="auto" aria-hidden="true">
-      <source src="star.webm?v=5" type="video/webm">
-      <source src="star.mp4?v=5"  type="video/mp4">
+      <source src="star.webm?v=6" type="video/webm">
+      <source src="star.mp4?v=6"  type="video/mp4">
     </video>
     <!-- 글자 뒤 스트로크 : 별_3.mp4 의 3.9s~ 구간. 인트로 한 번 뒤 4.5s~ 구간을 역재생·정재생으로
          세 번 왕복시켜 이어 붙였다 (21s). 이음매가 같은 프레임이라 끊김이 없다 -->
