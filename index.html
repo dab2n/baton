@@ -52,7 +52,7 @@ body{
 }
 /* 자간 -1% : letter-spacing 은 계산된 px 로 상속돼서 body 에만 주면
    글자 크기가 다른 곳에서 비율이 어긋난다. 요소마다 em 을 다시 풀어준다 */
-.device, .device *{ letter-spacing:0.015em; }
+.device, .device *{ letter-spacing:0.03em; }
 
 /* ---------- 폰트 대체 : 배포 링크를 다른 컴퓨터에서 열 때 ----------
    Delight(영문)나 SF Pro KR(한글)이 없으면 JS 가 html 에 fb-en / fb-ko 를 달고 그 글자만 Pretendard 로.
@@ -70,16 +70,16 @@ body{
 html.fb-ko{ --ff-ko:'Pretendard Web'; }
 html.fb-en{ --ff-en:var(--ff-ko,'SF Pro KR'); }   /* 영문만 없으면 한글은 SF Pro KR 그대로, 둘 다 없으면 Pretendard */
 /* 한글 600 48px : Pretendard 가 7.6% 넓다 → −0.054em */
-html.fb-ko .l-greet, html.fb-ko .l-greet *{ letter-spacing:-0.039em; }
+html.fb-ko .l-greet, html.fb-ko .l-greet *{ letter-spacing:-0.024em; }
 /* 영문 : 굵기·크기마다 Delight 와 폭 차이가 달라 따로 (괄호 안이 보정값) */
-html.fb-en .headline:not(.l-greet), html.fb-en .headline:not(.l-greet) *{ letter-spacing:0.0106em; }   /* 500 42 (−0.0044) */
-html.fb-en .headline:not(.l-greet) em, html.fb-en .headline:not(.l-greet) em *{ letter-spacing:0.0216em; }   /* 600 42 (+0.0066) */
-html.fb-en .headline.l-hi, html.fb-en .headline.l-hi *{ letter-spacing:0.025em; }   /* 600 48 (+0.0100) */
-html.fb-en .rec-txt b, html.fb-en .rec-txt b *{ letter-spacing:0.0216em; }   /* 600 42 (+0.0066) */
-html.fb-en .rec-txt s, html.fb-en .rec-txt s *{ letter-spacing:0.0015em; }   /* 400 31.4 (−0.0135) */
-html.fb-en .navm{ letter-spacing:0.0133em; }   /* 700 42 (−0.0017) */
-html.fb-en .navto, html.fb-en .navto *{ letter-spacing:0.0098em; }   /* 400 24 (−0.0052) */
-html.fb-en .navdest, html.fb-en .navdest *{ letter-spacing:0.0287em; }   /* 600 28 (+0.0137) */
+html.fb-en .headline:not(.l-greet), html.fb-en .headline:not(.l-greet) *{ letter-spacing:0.0256em; }   /* 500 42 (−0.0044) */
+html.fb-en .headline:not(.l-greet) em, html.fb-en .headline:not(.l-greet) em *{ letter-spacing:0.0366em; }   /* 600 42 (+0.0066) */
+html.fb-en .headline.l-hi, html.fb-en .headline.l-hi *{ letter-spacing:0.04em; }   /* 600 48 (+0.0100) */
+html.fb-en .rec-txt b, html.fb-en .rec-txt b *{ letter-spacing:0.0366em; }   /* 600 42 (+0.0066) */
+html.fb-en .rec-txt s, html.fb-en .rec-txt s *{ letter-spacing:0.0165em; }   /* 400 31.4 (−0.0135) */
+html.fb-en .navm{ letter-spacing:0.0283em; }   /* 700 42 (−0.0017) */
+html.fb-en .navto, html.fb-en .navto *{ letter-spacing:0.0248em; }   /* 400 24 (−0.0052) */
+html.fb-en .navdest, html.fb-en .navdest *{ letter-spacing:0.0437em; }   /* 600 28 (+0.0137) */
 
 .device{ position:relative; width:1080px; height:1080px; flex:none; transform:scale(var(--s,1)); }
 
@@ -140,6 +140,15 @@ body.kiosk .cam{ opacity:0; pointer-events:none; }   /* 전체화면 : 사람 �
   /* 피그마 프레임은 border:20px solid #000 : 표시영역은 20px 안쪽 원 */
   clip-path:circle(520px at 540px 540px);
 }
+/* 위아래 색 띠가 아주 천천히 일렁인다 (idle 구슬의 gleam 과 같은 결). 배경 위, 콘텐츠 아래 */
+.screen::before{ content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(180deg,#16203A 0%,transparent 32%,transparent 72%,#4A4A4A 100%)
+             no-repeat 0 20px / 100% 1040px;
+  animation:screenSway 11s ease-in-out infinite; }
+@keyframes screenSway{
+  0%, 100%{ opacity:.3; translate:0 0;     }
+  50%     { opacity:.7; translate:0 -12px; }
+}
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
         z-index:4; pointer-events:none; }
 
@@ -174,7 +183,8 @@ body.kiosk .cam{ opacity:0; pointer-events:none; }   /* 전체화면 : 사람 �
 body.idle       .field{ transform:translate(1px,145.5px) scale(.22); }
 /* 1.14 = 1022x1053 타원이 지름 1080 원을 완전히 덮는 배율(블러 39px 여유 포함) */
 /* 기본 화면은 검정 : 구슬은 idle 크기 그대로 조용히 사라진다 */
-body.fill       .field{ transform:translate(1px,145.5px) scale(.22); opacity:0; }
+/* 얼굴이 가까워지면(fill) 구슬이 사라지지 않고 화면을 채우며 커진다. 대신 옅게 해서 화면은 어둡게 유지 */
+body.fill       .field{ transform:translate(1px,145.5px) scale(1.2); opacity:.1; }
 /* connecting : 중심 원은 작게 물러나고 가장자리 스캔이 주인공 */
 body.connecting .field{ transform:translate(1px,145.5px) scale(.58); }
 body.connected  .field,
@@ -300,10 +310,12 @@ body.connected  .rim::after{ animation:orbit 11s linear infinite; }
 .headline{
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   margin:0; width:780px; text-align:center;
-  font-size:42px; font-weight:500; line-height:1.6; color:#fff;   /* 44 면 You 의 Y 가 스트로크 링(480)에 3px 까지 붙는다 */
+  font-size:42px; font-weight:500; line-height:1.8; color:#fff;   /* 44 면 You 의 Y 가 스트로크 링(480)에 3px 까지 붙는다 */
   transition:opacity .8s ease;
 }
-.headline em{ font-style:normal; font-weight:600; }
+/* inline-block : 인라인 em 의 박스는 줄 상자보다 10px 아래에서 시작해 글리밍 겹이 그만큼 내려갔다.
+   inline-block 이면 박스가 단어(.w) 와 같은 줄 상자라 겹이 글자와 정확히 겹친다 */
+.headline em{ font-style:normal; font-weight:600; display:inline-block; }
 /* 글리밍 (피그마 3153:219) : 같은 글자를 #FEFFF9 로 한 겹 더 얹고, 오른쪽으로 갈수록 더 흐리게.
    피그마 코드젠은 progressive blur 를 균일 blur 5.95 로 납작하게 내보낸다 → 흐림이 다른 두 겹을
    왼쪽은 비우고 오른쪽으로 드러내 흐림이 오른쪽으로 번져 가게. 글자는 JS 가 data-t 로 복사 */
@@ -313,8 +325,8 @@ body.connected  .rim::after{ animation:orbit 11s linear infinite; }
 .glim::before{ filter:blur(2.5px); -webkit-mask:linear-gradient(90deg,transparent 8%,#000 55%); mask:linear-gradient(90deg,transparent 8%,#000 55%); }
 .glim::after { filter:blur(6px);   -webkit-mask:linear-gradient(90deg,transparent 40%,#000 100%); mask:linear-gradient(90deg,transparent 40%,#000 100%); }
 /* message : 카드 위 한 줄 */
-/* 피그마 export 실측 : 글자 윗선 248 (박스 top 231), 카드 top 340 */
-.l-msg, .l-fu{ width:auto; white-space:nowrap; top:231px; transform:translateX(-50%); }
+/* 피그마 export 실측 : 글자 윗선 248, 카드 top 340. 행간 1.6 → 1.8 로 줄 상자가 8.4px 커져 top 을 4px 올렸다 */
+.l-msg, .l-fu{ width:auto; white-space:nowrap; top:227px; transform:translateX(-50%); }
 /* 스크린 가운데서 단어가 올라오기 시작하고, 0.8s 부터 제자리(top 231)로 올라간다.
    275px = 화면 중심 540 - 문구 박스 중심 265 (top 231 + 67.2÷2) */
 body.message .l-msg{ animation:msgUp 1.6s cubic-bezier(.65,0,.25,1) both; }
@@ -337,8 +349,8 @@ body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
    가지면(=.w 의 filter:blur) 깨지므로 단어마다 따로 입힌다 */
 .l-greet, .l-hi{ width:auto; white-space:nowrap;
                   font-size:67.319px; font-weight:600; line-height:1.5; }
-.l-greet, .l-hi{ font-size:48px; line-height:1.4; }   /* 두 줄 : 한국어·영어가 줄끼리 겹친다 */
-.l-greet{ line-height:1.22; }   /* 한글은 행간을 좁게 (윗줄이 영어 윗줄보다 약 5px 아래에 겹친다) */
+.l-greet, .l-hi{ font-size:48px; line-height:1.6; }   /* 두 줄 : 한국어·영어가 줄끼리 겹친다 */
+.l-greet{ line-height:1.42; }   /* 한글은 행간을 좁게 : 두 언어의 차(0.18)를 유지해 줄끼리 겹치게 */
 /* 두 문구의 박스를 같은 폭으로 : 지우개 경계가 화면 같은 x 를 지나가게 */
 .l-greet, .l-hi{ width:780px; }
 /* 피그마 원본은 아래로 #353046 까지 어두워지는 그라디언트인데, 검은 화면에선 글자 아랫부분이 배경에 묻혀
@@ -415,6 +427,9 @@ body.connecting .l-hi .ln + .ln{ animation-delay:600ms; }
 .ln.glim::before, .ln.glim::after{ top:18px; opacity:0; }
 /* 강조어 글리밍은 글자가 다 올라온 뒤(단어 하나가 i*70+200 에 시작해 0.9s) 켠다 */
 .headline em.glim::before, .headline em.glim::after{ opacity:0; }
+/* em 은 인라인 : left/right 0 + 가운데 정렬이면 겹의 글자 폭(attr 텍스트)과 본문 폭(단어 span + 자간)
+   차이만큼 좌우로 어긋난다. 왼쪽 기준으로 붙여 시작점을 맞춘다 */
+.headline em.glim::before, .headline em.glim::after{ right:auto; text-align:left; }
 body.message  .l-msg em.glim::before,  body.message  .l-msg em.glim::after,
 body.followup .l-fu em.glim::before,   body.followup .l-fu em.glim::after,
 body.guide    .l-guide em.glim::before, body.guide   .l-guide em.glim::after{
@@ -432,16 +447,21 @@ body.connected .l-greet{ transition:none; }
    검정 위에 얹으므로 screen : 영상의 검은 부분은 배경 그라디언트가 그대로 비친다 */
 .star{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover; z-index:2;
        opacity:0; transition:opacity .45s ease; mix-blend-mode:screen; pointer-events:none; }
-/* 구 중심은 시간에 따라 움직인다. 프레임마다 방향별 도달 반지름을 재 r(a) = R + dx·cos a + dy·sin a 로 적합하면
-     1.70s  R 503  중심 왼쪽 11.7 · 위 10.2  → 오른쪽에 검은 띠 34px
-     1.80s  R 510  중심 왼쪽 2.4 · 위 2.3
-     1.90s~ R 521~531  중심 ±11 (이미 가운데고 가장자리를 넘겨 띠가 없다)
-   그래서 띠가 보이는 1.7~1.8s 만 맞추고 1.95s 부터는 원본 그대로 둔다.
-   절정 구간까지 맞추면 0.1s 사이에 13px 씩 움직여 화면이 흔들려 보인다.
-   영상과 같은 2.6s 타임라인 (go() 가 class 와 currentTime=0 을 같은 프레임에 준다) */
+/* 구 위치·크기 : 별 영상의 밝은 링을 밝기 가중 평균 반지름으로 재면 R 450~468, 중심이 왼쪽 29~38 · 위 39~-5 인데
+   이어지는 스트로크 영상의 링은 R 514, 중심 오차 1px 이다 (그래서 왼쪽으로 쏠려 보이고 넘어갈 때 어긋난다).
+   별 쪽을 스트로크 링에 맞춘다 : k = 514/R, translate = 중심 오프셋 x k. 영상과 같은 2.6s 타임라인
+     1.60s 이전  구가 아래에서 올라오는 구간이라 원본 그대로
+     1.85~2.20s  링이 뚜렷한 구간을 맞춘다 (dy 는 +35 → -6 으로 천천히 따라간다)
+     2.25s 이후  링이 흩어지며 검게 지므로 0 으로 되돌린다 */
 body.connecting .star{ animation:starFit 2600ms linear both; }
 @keyframes starFit{
-  0%, 57.7%  { translate:0 0;           scale:1;     }   /* ~1.5s : 구가 아래에서 올라오는 구간은 원본 그대로 */
+  0%, 61.5%   { translate:0 0;         scale:1;    }   /* ~1.60s */
+  71.2%       { translate:33px 35px;   scale:1.12; }   /* 1.85s : R 458 중심 -29.7,-31.2 */
+  75%         { translate:34px 22px;   scale:1.14; }   /* 1.95s : R 450 중심 -29.8,-18.9 */
+  80.8%       { translate:33px 6px;    scale:1.14; }   /* 2.10s : R 449 중심 -28.9,-4.9 */
+  84.6%       { translate:43px -6px;   scale:1.11; }   /* 2.20s : R 462 중심 -38.3,+4.9 */
+  90.4%, 100% { translate:0 0;         scale:1;    }   /* 2.35s~ : 링이 사라진 뒤 */
+}   /* ~1.5s : 구가 아래에서 올라오는 구간은 원본 그대로 */
   65.4%      { translate:12.1px 10.5px; scale:1.034; }   /* 1.70s */
   69.2%      { translate:2.4px 2.3px;   scale:1.019; }   /* 1.80s */
   75%, 100%  { translate:0 0;           scale:1;     }   /* 1.95s~ */
@@ -465,10 +485,12 @@ body.connecting .ripple{ animation:rippleUp 1.5s cubic-bezier(.45,0,.25,1) .45s 
   100% { opacity:0; transform:translateY(-72%); }
 }
 /* connected · message : 스크린 가장자리에 붙인 스트로크 (가장 밝은 선 약 518 = 가장자리 520, 바깥 글로우는 잘린다) */
-.stroke{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover;
+/* z-index 3 : 카드(.rec)는 DOM 이 뒤라 그냥 두면 스트로크 위를 지나간다. 스트로크를 위로 올려
+   카드가 가장자리 그래픽 뒤로 사라지게 (screen 합성이라 링 글로우가 카드 위에 얹힌다) */
+.stroke{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover; z-index:3;
          opacity:0; transition:opacity .6s ease; mix-blend-mode:screen; pointer-events:none; }
 body.connected .stroke, body.message .stroke, body.followup .stroke, body.guide .stroke{ opacity:1; }
-body.connecting .stroke{ opacity:1; transition-delay:2s; }   /* 구가 사그라들 때 : 언어가 바뀌기(3s) 전에 링이 먼저 찬다 */
+body.connecting .stroke{ opacity:1; transition-delay:1.8s; }   /* 0.8배 재생이라 링이 차는 데 1s : 언어가 바뀌기(3s) 전에 끝난다 */
 
 /* ---------- message : 기록 카드 (피그마 3142:299) ---------- */
 /* 카드 속 레이어는 원래 794 기준 좌표 그대로 두고 통째로 줄여 피그마 726x500, r130 에 맞춘다.
@@ -804,6 +826,7 @@ document.querySelectorAll('.rec-txt').forEach(box => {
 // ---------- follow : 길안내 ----------
 const star = document.querySelector('.star');
 const stroke = document.querySelector('.stroke');
+stroke.playbackRate = .8;   // 더 천천히 부드럽게 (26s → 32.6s 분량, 쓰는 구간 약 20s 라 여유)
 const NAV = document.querySelector('.nav');
 const NS  = 'http://www.w3.org/2000/svg';
 const dot = (x, y, r, o) => {
@@ -964,7 +987,7 @@ const go = n => {
   // 스트로크 : 구가 사그라드는 2.0s 에 처음부터 재생해(언어 전환 3.0s 보다 먼저) I'll take you 까지 끊지 않고 (영상 26s, 쓰는 구간 약 20s)
   clearTimeout(strokeTimer);
   if (STEPS[n] === 'connecting')
-    strokeTimer = setTimeout(() => { stroke.currentTime = 0; stroke.play().catch(() => {}); }, 2000);
+    strokeTimer = setTimeout(() => { stroke.currentTime = 0; stroke.play().catch(() => {}); }, 1800);
   else if (['connected', 'message', 'followup', 'guide'].includes(STEPS[n])) stroke.play().catch(() => {});
   else stroke.pause();
   askRun(STEPS[n] === 'fill');   // 엄지척(connecting)부터는 마지막 문구 그대로
