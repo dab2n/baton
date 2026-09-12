@@ -418,7 +418,11 @@ body.connected .l-greet{ transition:none; }
 
 /* ---------- connecting : AE 별 모션 ----------
    검정 위에 얹으므로 screen : 영상의 검은 부분은 배경 그라디언트가 그대로 비친다 */
+/* 구 위치·크기 보정 : 검은 띠가 보이는 구간(1.65~1.80s) 의 프레임에서 방향별 도달 반지름을 재고
+   r(a) = R + dx·cos a + dy·sin a 로 적합하면 R 505, 중심이 왼쪽 8.4 · 위 6.8 (그래서 오른쪽 띠가 34px).
+   중심을 맞추고 520 에 닿게 2.9% 키운다. scale 은 요소 중심(=화면 중심) 기준이라 translate 는 scale 뒤의 값 */
 .star{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover; z-index:2;
+       translate:8.7px 7px; scale:1.029;
        opacity:0; transition:opacity .45s ease; mix-blend-mode:screen; pointer-events:none; }
 body.connecting .star{ opacity:1; }
 /* 파장 : 구가 아래에서 올라오는 방향 그대로 투명한 물결 앞머리가 화면을 훑는다 (Siri 호출).
