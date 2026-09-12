@@ -374,16 +374,16 @@ body.message .l-msg   .w{
 }
 /* 인사 문구는 제자리에서 나타나고 사라진다 (위→아래·왼→오른쪽 순서는 --i 그대로).
    원이 화면을 다 채운 다음(transform 1.8s)에 이어서 */
-body.fill .l-greet .w{ animation:inPlace .7s ease both; animation-delay:calc(var(--i) * 70ms + 1750ms); }
+body.fill .l-greet .w{ animation:inPlace 1.3s ease both; animation-delay:calc(var(--i) * 100ms + 1750ms); }
 @keyframes inPlace{
   from{ opacity:0; filter:blur(8px); }
   to  { opacity:1; filter:blur(0);   }
 }
 /* fill 에서 6초마다 문구가 바뀐다 (JS askRun). 다음 문구부터는 원이 이미 차 있으니 바로 올라오고,
    바뀌기 전 0.5s 동안 흐려지며 살짝 올라가 사라진다. out 이 cyc 보다 뒤에 있어야 지연 0 이 이긴다 */
-/* 다음 문구는 앞 문구가 사라지기 시작한 0.35s 뒤부터 같은 순서로 올라온다 (언어 전환처럼 겹치는 순간이 있게) */
-body.fill .l-greet.cyc .w{ animation-delay:calc(var(--i) * 70ms + 350ms); }
-body.fill .l-greet.out .w{ animation:out .5s cubic-bezier(.4,0,.6,1) both; animation-delay:calc(var(--i) * 60ms); }
+/* 다음 문구는 앞 문구가 사라지는 동안(0.5s 뒤부터) 같은 순서로 천천히 올라온다 : 부드럽게 말을 거는 느낌 */
+body.fill .l-greet.cyc .w{ animation-delay:calc(var(--i) * 100ms + 500ms); }
+body.fill .l-greet.out .w{ animation:out 1.1s cubic-bezier(.4,0,.6,1) both; animation-delay:calc(var(--i) * 90ms); }
 @keyframes out{
   from{ opacity:1; filter:blur(0);   }
   to  { opacity:0; filter:blur(8px); }
@@ -392,12 +392,12 @@ body.fill .l-greet.out .w{ animation:out .5s cubic-bezier(.4,0,.6,1) both; anima
   from{ opacity:0; transform:translateY(.42em); filter:blur(10px); }
   to  { opacity:1; transform:none;              filter:blur(0);    }
 }
-/* 인사 전환 (connecting 7600ms) : 글자는 제자리. 움직이는 건 마스크 경계와 투명도.
+/* 인사 전환 (connecting 7200ms) : 글자는 제자리. 움직이는 건 마스크 경계와 투명도.
    바뀌는 건 엄지척 순간 떠 있던 마지막 문구 (한 줄이든 두 줄이든 줄마다)
      0 ~ 2500  한국어는 제자리에 그대로. 아래→위로 투명한 파장이 훑고(.ripple) 구가 가운데서 커진다
   2000 ~ 2800  스트로크가 가장자리에 먼저 차오른다 (영상 0.4~0.8s 에 링이 찬다)
-  2400 ~ 5400  윗줄 : 스트로크가 차오르는 동안(1.8s~) 흐린 경계가 왼→오로 지나가며 한국어를 지운다
-  3300 ~ 6300  윗줄 : 같은 속도로 900ms 뒤따르며 영어를 드러낸다.
+  1900 ~ 4900  윗줄 : 스트로크가 뜨는 순간(1.7s~)부터 흐린 경계가 왼→오로 지나가며 한국어를 지운다
+  2800 ~ 5800  윗줄 : 같은 속도로 900ms 뒤따르며 영어를 드러낸다.
                900ms = 흐린 경계 폭(30%)이 지나가는 시간 : 두 경계가 맞닿기만 하고 겹치지 않아
                한 자리에 두 언어가 같이 보이는 순간이 없다
   +900ms       아랫줄은 0.9초 늦게 : 위→아래 순서
@@ -414,25 +414,25 @@ body.connected  .l-hi .w{ opacity:1; }
 body.connecting .l-greet .ln{
   -webkit-mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
-  animation:deLine 7600ms linear both; }
+  animation:deLine 7200ms linear both; }
 body.connecting .l-hi .ln{
   -webkit-mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
-  animation:enLine 7600ms linear both; }
+  animation:enLine 7200ms linear both; }
 body.connecting .l-greet .ln + .ln,
 body.connecting .l-hi .ln + .ln{ animation-delay:900ms; }
 @keyframes deLine{
-  0%, 31.58%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
-  51.32%       { opacity:.5; }
-  71.05%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }
+  0%, 26.39%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  47.22%       { opacity:.5; }
+  68.06%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
 @keyframes enLine{
-  0%, 43.42%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
-  82.89%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
+  0%, 38.89%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  80.56%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
-/* 줄 글리밍 겹 : 한국어는 지워지는 한가운데(3.9s), 영어는 드러나는 한가운데(4.8s)에 가장 밝다 */
+/* 줄 글리밍 겹 : 한국어는 지워지는 한가운데(3.4s), 영어는 드러나는 한가운데(4.3s)에 가장 밝다 */
 .ln.glim::before, .ln.glim::after{ top:18px; opacity:0; }
-/* 강조어 글리밍은 글자가 다 올라온 뒤(단어 하나가 i*70+200 에 시작해 0.9s) 켠다 */
+/* 강조어 글리밍은 글자와 같은 시각·같은 길이로 떠오른다 (전에는 글자가 다 나타난 뒤 1.0s 에 켜져 나중에 얹힌 느낌) */
 .headline em.glim::before, .headline em.glim::after{ opacity:0; }
 /* em 은 인라인 : left/right 0 + 가운데 정렬이면 겹의 글자 폭(attr 텍스트)과 본문 폭(단어 span + 자간)
    차이만큼 좌우로 어긋난다. 왼쪽 기준으로 붙여 시작점을 맞춘다 */
@@ -440,13 +440,13 @@ body.connecting .l-hi .ln + .ln{ animation-delay:900ms; }
 body.message  .l-msg em.glim::before,  body.message  .l-msg em.glim::after,
 body.followup .l-fu em.glim::before,   body.followup .l-fu em.glim::after,
 body.guide    .l-guide em.glim::before, body.guide   .l-guide em.glim::after{
-  animation:glimFade .45s ease both; animation-delay:calc(var(--i) * 70ms + 1000ms); }
+  animation:glimFade .9s cubic-bezier(.2,.7,.2,1) both; animation-delay:calc(var(--i) * 70ms + 200ms); }
 @keyframes glimFade{ from{ opacity:0; } to{ opacity:1; } }
-body.connecting .l-greet .ln.glim::before, body.connecting .l-greet .ln.glim::after{ animation:glimKo 7600ms linear both; }
-body.connecting .l-hi .ln.glim::before,    body.connecting .l-hi .ln.glim::after{ animation:glimEn 7600ms linear both; }
+body.connecting .l-greet .ln.glim::before, body.connecting .l-greet .ln.glim::after{ animation:glimKo 7200ms linear both; }
+body.connecting .l-hi .ln.glim::before,    body.connecting .l-hi .ln.glim::after{ animation:glimEn 7200ms linear both; }
 body.connecting .ln + .ln.glim::before, body.connecting .ln + .ln.glim::after{ animation-delay:900ms; }
-@keyframes glimKo{ 0%, 31.58%{ opacity:0; } 51.32%{ opacity:.9; } 71.05%, 100%{ opacity:0; } }
-@keyframes glimEn{ 0%, 43.42%{ opacity:0; } 63.16%{ opacity:.85; } 82.89%, 100%{ opacity:0; } }
+@keyframes glimKo{ 0%, 26.39%{ opacity:0; } 47.22%{ opacity:.9; } 68.06%, 100%{ opacity:0; } }
+@keyframes glimEn{ 0%, 38.89%{ opacity:0; } 59.72%{ opacity:.85; } 80.56%, 100%{ opacity:0; } }
 /* connected 로 넘어갈 때 마스크가 풀리며 한국어가 비치지 않게 즉시 끈다 */
 body.connected .l-greet{ transition:none; }
 
@@ -481,7 +481,7 @@ body.connecting .ripple{ animation:rippleUp 1.5s cubic-bezier(.45,0,.25,1) .45s 
          scale:1.02;   /* 링(R 514)을 살짝 밖으로 : 스크린 안에 걸리는 밝은 띠 18px → 8px (1.04 면 거의 사라진다) */
          opacity:0; transition:opacity .6s ease; mix-blend-mode:screen; pointer-events:none; }
 body.connected .stroke, body.message .stroke, body.followup .stroke, body.guide .stroke{ opacity:1; }
-body.connecting .stroke{ opacity:1; transition-delay:1.8s; }   /* 0.8배 재생이라 링이 차는 데 1s : 언어가 바뀌기(3s) 전에 끝난다 */
+body.connecting .stroke{ opacity:1; transition-delay:1.7s; transition-duration:.4s; }   /* 링이 뜨는 순간(1.7s) 바로 뒤에 언어가 바뀌기 시작한다(1.9s) */
 
 /* ---------- message : 기록 카드 (피그마 3142:299) ---------- */
 /* 카드 속 레이어는 원래 794 기준 좌표 그대로 두고 통째로 줄여 피그마 726x500, r130 에 맞춘다.
@@ -938,7 +938,7 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 7600, 1600, 5400, 4600, 4000, 14000];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 7200, 1600, 5400, 4600, 4000, 14000];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer, strokeTimer;
 
@@ -949,11 +949,11 @@ const ASK = ['도움이 필요하신가요?', '찾고 계신 장소나|오늘의
 const greets = [document.querySelector('.l-greet'), null];
 greets[1] = greets[0].cloneNode(false);
 greets[0].after(greets[1]);
-let ask = 0, askTimer, clearTimer, slot = 0;
+let ask = 0, askTimer, clearTimer, askSlot = 0;   // askSlot : 지금 문구가 들어 있는 겹
 const setAsk = (k, first) => {
-  const cur = greets[slot], prev = greets[1 - slot];
-  prev.classList.remove('cyc');
-  if (!first) prev.classList.add('out');
+  const i = first ? askSlot : 1 - askSlot;
+  const cur = greets[i], prev = greets[askSlot];
+  if (!first) { prev.classList.remove('cyc'); prev.classList.add('out'); }
   cur.classList.remove('out');
   cur.classList.toggle('cyc', !first);
   cur.replaceChildren(...ASK[k].split('|').map(t => {
@@ -963,18 +963,19 @@ const setAsk = (k, first) => {
   }));
   split(cur);
   clearTimeout(clearTimer);
-  clearTimer = setTimeout(() => prev.replaceChildren(), 1300);   // 다 사라진 뒤 비운다 (엄지척이 겹쳐도 한 문구만 남게)
-  slot = 1 - slot;
+  if (!first) clearTimer = setTimeout(() => prev.replaceChildren(), 2000);   // 다 사라진 뒤 비운다
+  askSlot = i;
 };
 const askRun = on => {
   clearTimeout(askTimer); clearTimeout(clearTimer);
   greets.forEach(g => g.classList.remove('out', 'cyc'));
-  if (!on) { greets[slot].replaceChildren(); return; }   // 장면이 바뀌면 쓰지 않는 겹은 비운다
+  // 장면이 바뀌면(엄지척 등) 보이는 겹만 남기고 나머지는 비운다 : 두 문구가 함께 지워지지 않게
+  if (!on) { greets.forEach((g, i) => { if (i !== askSlot) g.replaceChildren(); }); return; }
   setAsk(ask = 0, true);
-  // 첫 문구는 원이 차는 1.75s 뒤에 올라오므로 조금 더 오래. 이후 6초마다 교체 (사라짐 0~1.1s / 등장 0.35s~ 로 겹친다)
+  // 첫 문구는 원이 차는 1.75s 뒤에 올라오므로 조금 더 오래. 이후 6.5초마다 교체 (사라짐 0~1.6s / 등장 0.5~1.9s 로 겹친다)
   const next = delay => { askTimer = setTimeout(() => {
     setAsk(ask = (ask + 1) % ASK.length);   // 사라짐(0~1.1s)과 등장(0.35s~)이 겹친다
-    next(6000);
+    next(6500);
   }, delay); };
   next(6800);
 };
@@ -988,7 +989,7 @@ const go = n => {
   // 스트로크 : 구가 사그라드는 2.0s 에 처음부터 재생해(언어 전환 3.0s 보다 먼저) I'll take you 까지 끊지 않고 (영상 26s, 쓰는 구간 약 20s)
   clearTimeout(strokeTimer);
   if (STEPS[n] === 'connecting')
-    strokeTimer = setTimeout(() => { stroke.currentTime = 0; stroke.play().catch(() => {}); }, 1800);
+    strokeTimer = setTimeout(() => { stroke.currentTime = 0; stroke.play().catch(() => {}); }, 1700);
   else if (['connected', 'message', 'followup', 'guide'].includes(STEPS[n])) stroke.play().catch(() => {});
   else stroke.pause();
   askRun(STEPS[n] === 'fill');   // 엄지척(connecting)부터는 마지막 문구 그대로
