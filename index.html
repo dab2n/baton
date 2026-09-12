@@ -37,7 +37,9 @@ body.shot{ --fit: 1080; }
   unicode-range:U+1100-11FF, U+3130-318F, U+AC00-D7A3; }
 
 *{ box-sizing: border-box; }
-html,body{ height:100%; margin:0; overflow:hidden; background:#fff; }
+/* 스크린 밖 여백 : 채도 낮은 검정에 가까운 남색. 스크린 위쪽 감청(#0F1627) 보다 어둡고
+   가운데 순검정보다는 밝아, 검은 원이 그대로 원으로 읽힌다 */
+html,body{ height:100%; margin:0; overflow:hidden; background:#0B0F18; }
 body{
   display:flex; align-items:center; justify-content:center;
   /* 영문 Delight(이 맥에 설치) · 한글 SF Pro KR(fonts/, 공개 저장소엔 없음). 없는 쪽만 Pretendard 로 (아래 fb-en / fb-ko) */
@@ -112,7 +114,7 @@ body.bare .ring{ display:none; }
 body.bare .toggle .sw{ background:#d6d6d6; }
 body.bare .toggle .sw::after{ transform:none; }
 body.kiosk .toggle, body.shot .toggle{ display:none; }   /* 전체화면·내보내기에선 숨김 */
-body.kiosk{ cursor:none; background:#fff; }   /* 터치/마우스 없는 스크린 */
+body.kiosk{ cursor:none; background:#0B0F18; }   /* 터치/마우스 없는 스크린 */
 body.kiosk .ring{ display:none; }             /* 전체화면 : 목업은 항상 숨김 */
 
 /* 카메라 모니터 (테스트용) */
