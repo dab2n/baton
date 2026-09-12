@@ -184,7 +184,9 @@ body.idle       .field{ transform:translate(1px,145.5px) scale(.22); }
 /* 1.14 = 1022x1053 타원이 지름 1080 원을 완전히 덮는 배율(블러 39px 여유 포함) */
 /* 기본 화면은 검정 : 구슬은 idle 크기 그대로 조용히 사라진다 */
 /* 얼굴이 가까워지면(fill) 구슬이 사라지지 않고 화면을 채우며 커진다. 대신 옅게 해서 화면은 어둡게 유지 */
-body.fill       .field{ transform:translate(1px,145.5px) scale(1.2); opacity:.1; }
+body.fill       .field{ transform:translate(1px,145.5px) scale(1.2); opacity:.045; filter:grayscale(1); }
+/* 커진 구슬 위에 스크린 위아래 색 띠까지 겹치면 파랗고 누렇게 보인다 → fill 에선 띠를 죽인다 */
+body.fill .screen::before{ animation:none; opacity:.12; }
 /* connecting : 중심 원은 작게 물러나고 가장자리 스캔이 주인공 */
 body.connecting .field{ transform:translate(1px,145.5px) scale(.58); }
 body.connected  .field,
@@ -322,8 +324,8 @@ body.connected  .rim::after{ animation:orbit 11s linear infinite; }
 .glim{ position:relative; }
 .glim::before, .glim::after{ content:attr(data-t); position:absolute; left:0; right:0; top:0;
   color:#FEFFF9; white-space:nowrap; pointer-events:none; }
-.glim::before{ filter:blur(2.5px); -webkit-mask:linear-gradient(90deg,transparent 8%,#000 55%); mask:linear-gradient(90deg,transparent 8%,#000 55%); }
-.glim::after { filter:blur(6px);   -webkit-mask:linear-gradient(90deg,transparent 40%,#000 100%); mask:linear-gradient(90deg,transparent 40%,#000 100%); }
+.glim::before{ filter:blur(2px);   -webkit-mask:linear-gradient(90deg,transparent 0%,#000 22%); mask:linear-gradient(90deg,transparent 0%,#000 22%); }
+.glim::after { filter:blur(4px);   -webkit-mask:linear-gradient(90deg,transparent 5%,#000 45%); mask:linear-gradient(90deg,transparent 5%,#000 45%); }
 /* message : 카드 위 한 줄 */
 /* 피그마 export 실측 : 글자 윗선 248, 카드 top 340. 행간 1.6 → 1.8 로 줄 상자가 8.4px 커져 top 을 4px 올렸다 */
 .l-msg, .l-fu{ width:auto; white-space:nowrap; top:227px; transform:translateX(-50%); }
@@ -356,44 +358,48 @@ body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 /* 피그마 원본은 아래로 #353046 까지 어두워지는 그라디언트인데, 검은 화면에선 글자 아랫부분이 배경에 묻혀
    물음표 점(줄 박스 72~90% 구간)이 뚝 잘린 것처럼 보인다 → 단색으로 */
 .l-greet .w{ color:#E5E5E5; }
-/* 엄지척 뒤 안내 문구 : 흰색이 줄 박스 40% 까지 가득하다 아래로 투명해진다 (피그마 export 실측 :
-   글자 아랫부분 알파 .94 → .49 가 한 줄 박스의 40% → 88.5% 직선). 강조어는 흰색 그대로 */
-.headline:not(.l-greet) .w{ background:linear-gradient(180deg,#fff 40%,rgba(255,255,255,0) 88.5%);
+/* 엄지척 뒤 안내 문구 : 흰색이 줄 박스 66% 까지 가득하고 아래 끝에서만 살짝 옅어진다
+   (예전 40% → 투명 88.5% 는 글자 아래가 너무 지워져 흰색이 잘 안 느껴졌다) */
+.headline:not(.l-greet) .w{ background:linear-gradient(180deg,#fff 0 66%,rgba(255,255,255,.55) 100%);
                        -webkit-background-clip:text; background-clip:text; color:transparent; }
 .headline:not(.l-greet) em .w{ background:none; color:#fff; }
 
 /* 모션: DOM 순서 = 위 → 아래, 왼 → 오른쪽 */
 .w{ display:inline-block; opacity:0; will-change:transform,opacity,filter; }
-body.fill    .l-greet .w,
 body.guide   .l-guide .w,
 body.followup .l-fu   .w,
 body.message .l-msg   .w{
   animation:in .9s cubic-bezier(.2,.7,.2,1) both;
   animation-delay:calc(var(--i) * 70ms + 200ms);
 }
-/* 원이 화면을 다 채운 다음(transform 1.8s)에 이어서 올라온다 */
-body.fill .l-greet .w{ animation-delay:calc(var(--i) * 70ms + 1750ms); }
+/* 인사 문구는 제자리에서 나타나고 사라진다 (위→아래·왼→오른쪽 순서는 --i 그대로).
+   원이 화면을 다 채운 다음(transform 1.8s)에 이어서 */
+body.fill .l-greet .w{ animation:inPlace .7s ease both; animation-delay:calc(var(--i) * 70ms + 1750ms); }
+@keyframes inPlace{
+  from{ opacity:0; filter:blur(8px); }
+  to  { opacity:1; filter:blur(0);   }
+}
 /* fill 에서 6초마다 문구가 바뀐다 (JS askRun). 다음 문구부터는 원이 이미 차 있으니 바로 올라오고,
    바뀌기 전 0.5s 동안 흐려지며 살짝 올라가 사라진다. out 이 cyc 보다 뒤에 있어야 지연 0 이 이긴다 */
 body.fill .l-greet.cyc .w{ animation-delay:calc(var(--i) * 70ms + 150ms); }
-body.fill .l-greet.out .w{ animation:out .5s cubic-bezier(.4,0,.6,1) both; }
+body.fill .l-greet.out .w{ animation:out .5s cubic-bezier(.4,0,.6,1) both; animation-delay:calc(var(--i) * 60ms); }
 @keyframes out{
-  from{ opacity:1; transform:none;               filter:blur(0);    }
-  to  { opacity:0; transform:translateY(-.3em);  filter:blur(10px); }
+  from{ opacity:1; filter:blur(0);   }
+  to  { opacity:0; filter:blur(8px); }
 }
 @keyframes in{
   from{ opacity:0; transform:translateY(.42em); filter:blur(10px); }
   to  { opacity:1; transform:none;              filter:blur(0);    }
 }
-/* 인사 전환 (connecting 6800ms) : 글자는 제자리. 움직이는 건 마스크 경계와 투명도.
+/* 인사 전환 (connecting 8200ms) : 글자는 제자리. 움직이는 건 마스크 경계와 투명도.
    바뀌는 건 엄지척 순간 떠 있던 마지막 문구 (한 줄이든 두 줄이든 줄마다)
      0 ~ 2500  한국어는 제자리에 그대로. 아래→위로 투명한 파장이 훑고(.ripple) 구가 가운데서 커진다
   2000 ~ 2800  스트로크가 가장자리에 먼저 차오른다 (영상 0.4~0.8s 에 링이 찬다)
-  3000 ~ 5000  윗줄 : 흐린 경계가 왼→오로 천천히 지나가며 한국어를 지우고 함께 투명해진다
-  3600 ~ 5600  윗줄 : 같은 속도로 600ms 뒤따르며 영어를 드러낸다.
-               600ms = 흐린 경계 폭(30%)이 지나가는 시간 : 두 경계가 맞닿기만 하고 겹치지 않아
+  3000 ~ 6000  윗줄 : 흐린 경계가 왼→오로 아주 천천히 지나가며 한국어를 지우고 함께 투명해진다
+  3900 ~ 6900  윗줄 : 같은 속도로 900ms 뒤따르며 영어를 드러낸다.
+               900ms = 흐린 경계 폭(30%)이 지나가는 시간 : 두 경계가 맞닿기만 하고 겹치지 않아
                한 자리에 두 언어가 같이 보이는 순간이 없다
-  +600ms       아랫줄은 0.6초 늦게 : 위→아래 순서
+  +900ms       아랫줄은 0.9초 늦게 : 위→아래 순서
    마스크는 줄(.ln)마다. 폭 300% 그라디언트(가운데 10% 가 흐린 경계)를 85%→15% 로 민다 */
 .l-greet .ln, .l-hi .ln{ display:block; }
 /* 번짐이 줄 박스(마스크 영역) 위아래에서 잘리지 않게 여유를 준다. 배치는 그대로.
@@ -407,23 +413,23 @@ body.connected  .l-hi .w{ opacity:1; }
 body.connecting .l-greet .ln{
   -webkit-mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
-  animation:deLine 6800ms linear both; }
+  animation:deLine 8200ms linear both; }
 body.connecting .l-hi .ln{
   -webkit-mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
-  animation:enLine 6800ms linear both; }
+  animation:enLine 8200ms linear both; }
 body.connecting .l-greet .ln + .ln,
-body.connecting .l-hi .ln + .ln{ animation-delay:600ms; }
+body.connecting .l-hi .ln + .ln{ animation-delay:900ms; }
 @keyframes deLine{
-  0%, 44.12%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
-  58.82%       { opacity:.5; }
-  73.53%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }
+  0%, 36.59%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  54.88%       { opacity:.5; }
+  73.17%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
 @keyframes enLine{
-  0%, 52.94%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
-  82.35%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
+  0%, 47.56%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  84.15%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
-/* 줄 글리밍 겹 : 한국어는 지워지는 한가운데(4.0s), 영어는 드러나는 한가운데(4.6s)에 가장 밝다 */
+/* 줄 글리밍 겹 : 한국어는 지워지는 한가운데(4.5s), 영어는 드러나는 한가운데(5.4s)에 가장 밝다 */
 .ln.glim::before, .ln.glim::after{ top:18px; opacity:0; }
 /* 강조어 글리밍은 글자가 다 올라온 뒤(단어 하나가 i*70+200 에 시작해 0.9s) 켠다 */
 .headline em.glim::before, .headline em.glim::after{ opacity:0; }
@@ -435,11 +441,11 @@ body.followup .l-fu em.glim::before,   body.followup .l-fu em.glim::after,
 body.guide    .l-guide em.glim::before, body.guide   .l-guide em.glim::after{
   animation:glimFade .45s ease both; animation-delay:calc(var(--i) * 70ms + 1000ms); }
 @keyframes glimFade{ from{ opacity:0; } to{ opacity:1; } }
-body.connecting .l-greet .ln.glim::before, body.connecting .l-greet .ln.glim::after{ animation:glimKo 6800ms linear both; }
-body.connecting .l-hi .ln.glim::before,    body.connecting .l-hi .ln.glim::after{ animation:glimEn 6800ms linear both; }
-body.connecting .ln + .ln.glim::before, body.connecting .ln + .ln.glim::after{ animation-delay:600ms; }
-@keyframes glimKo{ 0%, 44.12%{ opacity:0; } 58.82%{ opacity:.9; } 73.53%, 100%{ opacity:0; } }
-@keyframes glimEn{ 0%, 52.94%{ opacity:0; } 67.65%{ opacity:.85; } 82.35%, 100%{ opacity:0; } }
+body.connecting .l-greet .ln.glim::before, body.connecting .l-greet .ln.glim::after{ animation:glimKo 8200ms linear both; }
+body.connecting .l-hi .ln.glim::before,    body.connecting .l-hi .ln.glim::after{ animation:glimEn 8200ms linear both; }
+body.connecting .ln + .ln.glim::before, body.connecting .ln + .ln.glim::after{ animation-delay:900ms; }
+@keyframes glimKo{ 0%, 36.59%{ opacity:0; } 54.88%{ opacity:.9; } 73.17%, 100%{ opacity:0; } }
+@keyframes glimEn{ 0%, 47.56%{ opacity:0; } 65.85%{ opacity:.85; } 84.15%, 100%{ opacity:0; } }
 /* connected 로 넘어갈 때 마스크가 풀리며 한국어가 비치지 않게 즉시 끈다 */
 body.connected .l-greet{ transition:none; }
 
@@ -931,7 +937,7 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 6800, 1600, 5400, 4600, 4000, 14000];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 8200, 1600, 5400, 4600, 4000, 14000];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer, strokeTimer;
 
@@ -952,16 +958,16 @@ const askRun = on => {
   greet.classList.remove('out', 'cyc');
   if (!on) return;
   setAsk(ask = 0);
-  // 첫 문구는 원이 차는 1.75s 뒤에 올라오므로 조금 더 오래. 이후 6초마다 : 0.5s 사라지고 다음 문구
+  // 첫 문구는 원이 차는 1.75s 뒤에 올라오므로 조금 더 오래. 이후 6초마다 : 0.9s 동안 순서대로 사라지고 다음 문구
   const next = delay => { askTimer = setTimeout(() => {
     greet.classList.add('out');
     askTimer = setTimeout(() => {
       greet.classList.replace('out', 'cyc');
       setAsk(ask = (ask + 1) % ASK.length);
-      next(5500);
-    }, 500);
+      next(5100);
+    }, 900);
   }, delay); };
-  next(7200);
+  next(6800);
 };
 
 const go = n => {
