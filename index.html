@@ -40,6 +40,8 @@ body.shot{ --fit: 1080; }
 /* 스크린 밖 여백 : 채도 낮은 검정에 가까운 남색. 스크린 위쪽 감청(#0F1627) 보다 어둡고
    가운데 순검정보다는 밝아, 검은 원이 그대로 원으로 읽힌다 */
 html,body{ height:100%; margin:0; overflow:hidden; background:#0B0F18; }
+/* ?s=N 이미지샷 : 별도 요청이 없으면 배경색 없이 UI 만 내보낸다 (캔버스까지 투명하게) */
+html:has(.shot), html:has(.shot) body{ background:transparent; }
 body{
   display:flex; align-items:center; justify-content:center;
   /* 영문 Delight(이 맥에 설치) · 한글 SF Pro KR(fonts/, 공개 저장소엔 없음). 없는 쪽만 Pretendard 로 (아래 fb-en / fb-ko) */
@@ -50,7 +52,7 @@ body{
 }
 /* 자간 -1% : letter-spacing 은 계산된 px 로 상속돼서 body 에만 주면
    글자 크기가 다른 곳에서 비율이 어긋난다. 요소마다 em 을 다시 풀어준다 */
-.device, .device *{ letter-spacing:-0.01em; }
+.device, .device *{ letter-spacing:0.015em; }
 
 /* ---------- 폰트 대체 : 배포 링크를 다른 컴퓨터에서 열 때 ----------
    Delight(영문)나 SF Pro KR(한글)이 없으면 JS 가 html 에 fb-en / fb-ko 를 달고 그 글자만 Pretendard 로.
@@ -68,16 +70,16 @@ body{
 html.fb-ko{ --ff-ko:'Pretendard Web'; }
 html.fb-en{ --ff-en:var(--ff-ko,'SF Pro KR'); }   /* 영문만 없으면 한글은 SF Pro KR 그대로, 둘 다 없으면 Pretendard */
 /* 한글 600 48px : Pretendard 가 7.6% 넓다 → −0.054em */
-html.fb-ko .l-greet, html.fb-ko .l-greet *{ letter-spacing:-0.064em; }
+html.fb-ko .l-greet, html.fb-ko .l-greet *{ letter-spacing:-0.039em; }
 /* 영문 : 굵기·크기마다 Delight 와 폭 차이가 달라 따로 (괄호 안이 보정값) */
-html.fb-en .headline:not(.l-greet), html.fb-en .headline:not(.l-greet) *{ letter-spacing:-0.0144em; }   /* 500 42 (−0.0044) */
-html.fb-en .headline:not(.l-greet) em, html.fb-en .headline:not(.l-greet) em *{ letter-spacing:-0.0034em; }   /* 600 42 (+0.0066) */
-html.fb-en .headline.l-hi, html.fb-en .headline.l-hi *{ letter-spacing:0em; }   /* 600 48 (+0.0100) */
-html.fb-en .rec-txt b, html.fb-en .rec-txt b *{ letter-spacing:-0.0034em; }   /* 600 42 (+0.0066) */
-html.fb-en .rec-txt s, html.fb-en .rec-txt s *{ letter-spacing:-0.0235em; }   /* 400 31.4 (−0.0135) */
-html.fb-en .navm{ letter-spacing:-0.0117em; }   /* 700 42 (−0.0017) */
-html.fb-en .navto, html.fb-en .navto *{ letter-spacing:-0.0152em; }   /* 400 24 (−0.0052) */
-html.fb-en .navdest, html.fb-en .navdest *{ letter-spacing:0.0037em; }   /* 600 28 (+0.0137) */
+html.fb-en .headline:not(.l-greet), html.fb-en .headline:not(.l-greet) *{ letter-spacing:0.0106em; }   /* 500 42 (−0.0044) */
+html.fb-en .headline:not(.l-greet) em, html.fb-en .headline:not(.l-greet) em *{ letter-spacing:0.0216em; }   /* 600 42 (+0.0066) */
+html.fb-en .headline.l-hi, html.fb-en .headline.l-hi *{ letter-spacing:0.025em; }   /* 600 48 (+0.0100) */
+html.fb-en .rec-txt b, html.fb-en .rec-txt b *{ letter-spacing:0.0216em; }   /* 600 42 (+0.0066) */
+html.fb-en .rec-txt s, html.fb-en .rec-txt s *{ letter-spacing:0.0015em; }   /* 400 31.4 (−0.0135) */
+html.fb-en .navm{ letter-spacing:0.0133em; }   /* 700 42 (−0.0017) */
+html.fb-en .navto, html.fb-en .navto *{ letter-spacing:0.0098em; }   /* 400 24 (−0.0052) */
+html.fb-en .navdest, html.fb-en .navdest *{ letter-spacing:0.0287em; }   /* 600 28 (+0.0137) */
 
 .device{ position:relative; width:1080px; height:1080px; flex:none; transform:scale(var(--s,1)); }
 
@@ -339,8 +341,9 @@ body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 .l-greet{ line-height:1.22; }   /* 한글은 행간을 좁게 (윗줄이 영어 윗줄보다 약 5px 아래에 겹친다) */
 /* 두 문구의 박스를 같은 폭으로 : 지우개 경계가 화면 같은 x 를 지나가게 */
 .l-greet, .l-hi{ width:780px; }
-.l-greet .w{ background:linear-gradient(180deg,#E5E5E5 71.017%,#353046 89.851%);
-                       -webkit-background-clip:text; background-clip:text; color:transparent; }
+/* 피그마 원본은 아래로 #353046 까지 어두워지는 그라디언트인데, 검은 화면에선 글자 아랫부분이 배경에 묻혀
+   물음표 점(줄 박스 72~90% 구간)이 뚝 잘린 것처럼 보인다 → 단색으로 */
+.l-greet .w{ color:#E5E5E5; }
 /* 엄지척 뒤 안내 문구 : 흰색이 줄 박스 40% 까지 가득하다 아래로 투명해진다 (피그마 export 실측 :
    글자 아랫부분 알파 .94 → .49 가 한 줄 박스의 40% → 88.5% 직선). 강조어는 흰색 그대로 */
 .headline:not(.l-greet) .w{ background:linear-gradient(180deg,#fff 40%,rgba(255,255,255,0) 88.5%);
@@ -410,6 +413,13 @@ body.connecting .l-hi .ln + .ln{ animation-delay:600ms; }
 }
 /* 줄 글리밍 겹 : 한국어는 지워지는 한가운데(4.0s), 영어는 드러나는 한가운데(4.6s)에 가장 밝다 */
 .ln.glim::before, .ln.glim::after{ top:18px; opacity:0; }
+/* 강조어 글리밍은 글자가 다 올라온 뒤(단어 하나가 i*70+200 에 시작해 0.9s) 켠다 */
+.headline em.glim::before, .headline em.glim::after{ opacity:0; }
+body.message  .l-msg em.glim::before,  body.message  .l-msg em.glim::after,
+body.followup .l-fu em.glim::before,   body.followup .l-fu em.glim::after,
+body.guide    .l-guide em.glim::before, body.guide   .l-guide em.glim::after{
+  animation:glimFade .45s ease both; animation-delay:calc(var(--i) * 70ms + 1000ms); }
+@keyframes glimFade{ from{ opacity:0; } to{ opacity:1; } }
 body.connecting .l-greet .ln.glim::before, body.connecting .l-greet .ln.glim::after{ animation:glimKo 6800ms linear both; }
 body.connecting .l-hi .ln.glim::before,    body.connecting .l-hi .ln.glim::after{ animation:glimEn 6800ms linear both; }
 body.connecting .ln + .ln.glim::before, body.connecting .ln + .ln.glim::after{ animation-delay:600ms; }
@@ -420,12 +430,22 @@ body.connected .l-greet{ transition:none; }
 
 /* ---------- connecting : AE 별 모션 ----------
    검정 위에 얹으므로 screen : 영상의 검은 부분은 배경 그라디언트가 그대로 비친다 */
-/* 구 위치·크기 보정 : 검은 띠가 보이는 구간(1.65~1.80s) 의 프레임에서 방향별 도달 반지름을 재고
-   r(a) = R + dx·cos a + dy·sin a 로 적합하면 R 505, 중심이 왼쪽 8.4 · 위 6.8 (그래서 오른쪽 띠가 34px).
-   중심을 맞추고 520 에 닿게 2.9% 키운다. scale 은 요소 중심(=화면 중심) 기준이라 translate 는 scale 뒤의 값 */
 .star{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover; z-index:2;
-       translate:8.7px 7px; scale:1.029;
        opacity:0; transition:opacity .45s ease; mix-blend-mode:screen; pointer-events:none; }
+/* 구 중심은 시간에 따라 움직인다. 프레임마다 방향별 도달 반지름을 재 r(a) = R + dx·cos a + dy·sin a 로 적합하면
+     1.70s  R 503  중심 왼쪽 11.7 · 위 10.2  → 오른쪽에 검은 띠 34px
+     1.80s  R 510  중심 왼쪽 2.4 · 위 2.3
+     1.90s~ R 521~531  중심 ±11 (이미 가운데고 가장자리를 넘겨 띠가 없다)
+   그래서 띠가 보이는 1.7~1.8s 만 맞추고 1.95s 부터는 원본 그대로 둔다.
+   절정 구간까지 맞추면 0.1s 사이에 13px 씩 움직여 화면이 흔들려 보인다.
+   영상과 같은 2.6s 타임라인 (go() 가 class 와 currentTime=0 을 같은 프레임에 준다) */
+body.connecting .star{ animation:starFit 2600ms linear both; }
+@keyframes starFit{
+  0%, 57.7%  { translate:0 0;           scale:1;     }   /* ~1.5s : 구가 아래에서 올라오는 구간은 원본 그대로 */
+  65.4%      { translate:12.1px 10.5px; scale:1.034; }   /* 1.70s */
+  69.2%      { translate:2.4px 2.3px;   scale:1.019; }   /* 1.80s */
+  75%, 100%  { translate:0 0;           scale:1;     }   /* 1.95s~ */
+}
 body.connecting .star{ opacity:1; }
 /* 파장 : 구가 아래에서 올라오는 방향 그대로 투명한 물결 앞머리가 화면을 훑는다 (Siri 호출).
    뒤에 있는 글자와 구를 흐리고 밝혀 굴절처럼 보이게. 중심을 화면 아래 멀리 둔 큰 타원의
@@ -760,7 +780,14 @@ const split = el => {
 };
 document.querySelectorAll('.reveal').forEach(split);
 // 글리밍 겹에 쓸 글자 복사 : 강조어의 단어(.w)마다, 인사 줄(.ln)마다
-document.querySelectorAll('.headline em .w').forEach(w => { w.classList.add('glim'); w.dataset.t = w.textContent; });
+// 글리밍은 강조어 전체를 한 겹으로 (July 20. 을 단어별로 나누면 번짐이 따로 놀아 어색하다).
+// --i 는 첫 단어 것을 물려받아 글자가 올라온 뒤에 번짐이 켜지게
+document.querySelectorAll('.headline em').forEach(em => {
+  em.classList.add('glim');
+  em.dataset.t = em.textContent;
+  const first = em.querySelector('.w');
+  if (first) em.style.setProperty('--i', first.style.getPropertyValue('--i'));
+});
 document.querySelectorAll('.l-greet .ln, .l-hi .ln').forEach(l => { l.classList.add('glim'); l.dataset.t = l.textContent.replace(/\s+/g, ' ').trim(); });
 // 카드 글자 : 알파벳이 무작위 순서로 다다닥 (길안내 화살표 도트처럼). 카드 한 장 안에서 두 줄을 한꺼번에 섞는다
 document.querySelectorAll('.rec-txt').forEach(box => {
