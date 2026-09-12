@@ -140,7 +140,8 @@ body.kiosk .cam{ opacity:0; pointer-events:none; }   /* 전체화면 : 사람 �
 /* 위아래 색 띠 (피그마 3124:17775 의 감청 / 밝은 회색) :
    직선 그라디언트는 검은 화면에서 경계가 가로줄로 보인다 → 스크린과 같은 중심(540,540)의 동심원으로 번지게 하고
    위/아래 방향은 아주 긴 마스크로만 나눈다. 등색선이 테두리와 같은 곡률(가운데가 높고 옆이 낮다)로 휜다 */
-.screen::before, .screen::after{ content:''; position:absolute; inset:0; pointer-events:none; }
+.screen::before, .screen::after{ content:''; position:absolute; inset:0; pointer-events:none;
+  transition:opacity 1.4s ease; }   /* idle → fill 로 넘어갈 때 뚝 켜지지 않고 스며 나온다 */
 .screen::before{   /* 위 : 감청 */
   background:radial-gradient(circle 530px at 540px 540px, rgba(22,33,58,0) 68%, rgba(20,29,50,.4) 86%, #16213A 97%, #16213A 100%);
   -webkit-mask:linear-gradient(180deg,#000 0 7%, rgba(0,0,0,.7) 18%, transparent 32%);
@@ -160,7 +161,7 @@ body.follow .screen::after{ opacity:.45; }
     rgba(62,69,83,0)  205deg, rgba(62,69,83,.4)  275deg, rgba(30,44,76,0)  360deg);
   -webkit-mask:radial-gradient(circle closest-side, transparent 70%, #000 92%);
           mask:radial-gradient(circle closest-side, transparent 70%, #000 92%);
-  opacity:.55; animation:rimOrbit 18s linear infinite; }
+  opacity:.55; transition:opacity 1.4s ease; animation:rimOrbit 18s linear infinite; }
 @keyframes rimOrbit{ to{ rotate:360deg; } }
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
         z-index:4; pointer-events:none; }
@@ -660,7 +661,7 @@ body.follow .navto .w, body.follow .navdest .w{
 
 
 
-    <p class="headline l-greet reveal nopause"><span class="ln">도움이 필요하신가요?</span></p>
+    <p class="headline l-greet reveal nopause"><span class="ln">안녕하세요.</span><span class="ln">도움이 필요하신가요?</span></p>
     <p class="headline l-hi reveal nopause"><span class="ln">Good Afternoon!</span><span class="ln">Somi.</span></p>
     <p class="headline l-msg reveal">Your last appointment was on <em>July&nbsp;20.</em></p>
     <p class="headline l-fu reveal">Today is your <em>2nd</em> follow-up.</p>
@@ -948,7 +949,7 @@ const body = document.body;
 let timer, strokeTimer;
 
 // fill : 엄지척 전까지 6초 간격으로 문구가 바뀐다. | 는 줄바꿈
-const ASK = ['도움이 필요하신가요?', '찾고 계신 장소나|오늘의 일정을 말해주세요', '접수를 도와드릴까요?', '진료 예약을|확인해 드릴까요?'];
+const ASK = ['안녕하세요.|도움이 필요하신가요?', '찾고 계신 장소나|오늘의 일정을 말해주세요', '기다림 없이 빠르게|접수를 도와드릴 수 있어요.'];
 // 문구를 두 겹으로 번갈아 : 앞 문구가 순서대로 사라지는 동안 다음 문구가 같은 순서로 겹쳐 올라온다
 // (한 겹만 쓰면 DOM 을 갈아끼우는 순간 앞 문구가 통째로 사라진다)
 const greets = [document.querySelector('.l-greet'), null];
@@ -985,8 +986,19 @@ const askRun = on => {
   next(6800);
 };
 
+const field = document.querySelector('.field');
 const go = n => {
   clearTimeout(timer);
+  // idle 에서 나갈 때 : 배회 애니메이션을 끊으면 translate 가 0 으로 튀어 다른 물체처럼 보인다.
+  // 지금 값을 인라인으로 물려 class 를 바꾸고, 다음 프레임에 지워 전환(1.2s)이 그 자리에서 이어지게 한다
+  if (body.classList.contains('idle') && STEPS[n] !== 'idle') {
+    const cs = getComputedStyle(field);
+    field.style.translate = cs.translate; field.style.rotate = cs.rotate;
+    field.style.borderRadius = cs.borderRadius;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      field.style.translate = field.style.rotate = field.style.borderRadius = '';
+    }));
+  }
   body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|followup|guide|follow)\b/, STEPS[n]);
   if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); }
