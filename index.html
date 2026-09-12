@@ -142,20 +142,20 @@ body.kiosk .cam{ opacity:0; pointer-events:none; }   /* 전체화면 : 사람 �
    위/아래 방향은 아주 긴 마스크로만 나눈다. 등색선이 테두리와 같은 곡률(가운데가 높고 옆이 낮다)로 휜다 */
 .screen::before, .screen::after{ content:''; position:absolute; inset:0; pointer-events:none; }
 .screen::before{   /* 위 : 감청 */
-  background:radial-gradient(circle 530px at 540px 540px, rgba(27,39,67,0) 30%, rgba(26,37,62,.5) 66%, #1B2743 92%, #1B2743 100%);
-  -webkit-mask:linear-gradient(180deg,#000 0 14%, rgba(0,0,0,.82) 34%, transparent 66%);
-          mask:linear-gradient(180deg,#000 0 14%, rgba(0,0,0,.82) 34%, transparent 66%); }
+  background:radial-gradient(circle 530px at 540px 540px, rgba(27,39,67,0) 58%, rgba(26,37,62,.45) 82%, #1B2743 97%, #1B2743 100%);
+  -webkit-mask:linear-gradient(180deg,#000 0 8%, rgba(0,0,0,.8) 22%, transparent 46%);
+          mask:linear-gradient(180deg,#000 0 8%, rgba(0,0,0,.8) 22%, transparent 46%); }
 .screen::after{    /* 아래 : 밝은 회색 */
-  background:radial-gradient(circle 530px at 540px 540px, rgba(74,74,74,0) 34%, rgba(62,62,62,.5) 70%, #4A4A4A 94%, #4A4A4A 100%);
-  -webkit-mask:linear-gradient(0deg,#000 0 8%, rgba(0,0,0,.9) 26%, transparent 58%);
-          mask:linear-gradient(0deg,#000 0 8%, rgba(0,0,0,.9) 26%, transparent 58%); }
+  background:radial-gradient(circle 530px at 540px 540px, rgba(74,74,74,0) 60%, rgba(62,62,62,.45) 84%, #4A4A4A 97%, #4A4A4A 100%);
+  -webkit-mask:linear-gradient(0deg,#000 0 6%, rgba(0,0,0,.85) 20%, transparent 44%);
+          mask:linear-gradient(0deg,#000 0 6%, rgba(0,0,0,.85) 20%, transparent 44%); }
 /* 그 색이 가장자리를 따라 아주 천천히 돈다 : 원뿔 그라디언트를 테두리 쪽만 남기고 회전 */
 .rimlight{ position:absolute; inset:-8%; pointer-events:none;
   background:conic-gradient(from 0deg,
     rgba(27,39,67,0)    0deg, rgba(33,48,84,.55)  55deg, rgba(20,26,44,0)  135deg,
     rgba(74,74,74,0)  205deg, rgba(74,74,74,.45) 275deg, rgba(27,39,67,0)  360deg);
-  -webkit-mask:radial-gradient(circle closest-side, transparent 56%, #000 88%);
-          mask:radial-gradient(circle closest-side, transparent 56%, #000 88%);
+  -webkit-mask:radial-gradient(circle closest-side, transparent 70%, #000 92%);
+          mask:radial-gradient(circle closest-side, transparent 70%, #000 92%);
   animation:rimOrbit 18s linear infinite; }
 @keyframes rimOrbit{ to{ rotate:360deg; } }
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
@@ -193,10 +193,10 @@ body.idle       .field{ transform:translate(1px,145.5px) scale(.22); }
 /* 1.14 = 1022x1053 타원이 지름 1080 원을 완전히 덮는 배율(블러 39px 여유 포함) */
 /* 기본 화면은 검정 : 구슬은 idle 크기 그대로 조용히 사라진다 */
 /* 얼굴이 가까워지면(fill) 구슬이 사라지지 않고 화면을 채우며 커진다. 대신 옅게 해서 화면은 어둡게 유지 */
-body.fill       .field{ transform:translate(1px,145.5px) scale(1.2); opacity:.045; filter:grayscale(1); }
-/* 커진 구슬 위에 스크린 위아래 색 띠까지 겹치면 파랗고 누렇게 보인다 → fill 에선 띠와 발광을 죽인다 */
-body.fill .screen::before, body.fill .screen::after{ opacity:.12; }
-body.fill .rimlight{ animation:none; opacity:.1; }
+body.fill       .field{ transform:translate(1px,145.5px) scale(1.2); opacity:.03; filter:grayscale(1); }
+/* 구슬이 커질 때도 위아래 띠는 보여야 한다. 다만 구슬과 겹쳐 색이 뜨지 않게 살짝만 낮춘다 */
+body.fill .screen::before, body.fill .screen::after{ opacity:.8; }
+body.fill .rimlight{ opacity:.5; }
 /* connecting : 중심 원은 작게 물러나고 가장자리 스캔이 주인공 */
 body.connecting .field{ transform:translate(1px,145.5px) scale(.58); }
 body.connected  .field,
