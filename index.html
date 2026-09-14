@@ -371,14 +371,14 @@ body.followup .l-msg{ opacity:1; translate:0 -34.2px;
    글자는 인라인 span(.c) : inline-block 이면 커닝이 끊겨 모양이 바뀐다.
    켜지기 전의 숨김은 animation-fill-mode:both 가 맡는다 (기본은 보임 → 장면이 바뀌면 문장이 통째로 흐려지며 사라진다) */
 @keyframes letterIn{
-  0%        { opacity:0; filter:blur(4px) drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
-  18%       { opacity:1; filter:blur(0)   drop-shadow(0 0 5px var(--g1))  drop-shadow(0 0 13px var(--g2)); }
-  58%, 100% { opacity:1; filter:blur(0)   drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  0%   { opacity:0; filter:blur(6px)  drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  38%  { opacity:1; filter:blur(.6px) drop-shadow(0 0 5px var(--g1))  drop-shadow(0 0 13px var(--g2)); }
+  100% { opacity:1; filter:blur(0)    drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
 }
 /* 기록 · 재진 · 안내 */
 body.message .l-msg .c, body.followup .l-fu .c, body.guide .l-guide .c{
-  animation:letterIn .64s cubic-bezier(.2,.7,.3,1) both;
-  animation-delay:calc(var(--k) * 42ms + var(--base)); }
+  animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both;
+  animation-delay:calc(var(--t) * 1ms + var(--base)); }
 .l-msg{ --base:200ms; }
 .l-fu{ --base:650ms; }      /* 첫 문장이 위로 비켜나기 시작한 뒤 */
 .l-guide{ --base:700ms; }   /* 앞 두 줄이 사라진 뒤 */
@@ -388,17 +388,17 @@ body.message .l-msg .c, body.followup .l-fu .c, body.guide .l-guide .c{
   to  { filter:blur(0) drop-shadow(0 0 7px var(--g1)) drop-shadow(0 0 17px var(--g2)); }
 }
 body.message .l-msg em .c, body.followup .l-fu em .c, body.guide .l-guide em .c{
-  animation:letterIn .64s cubic-bezier(.2,.7,.3,1) both, emGlow 2.4s ease-in-out infinite alternate;
-  animation-delay:calc(var(--k) * 42ms + var(--base)), calc(var(--k) * 90ms + var(--base) + .64s); }
-body.followup .l-msg em .c{ animation:emGlow 2.4s ease-in-out infinite alternate; animation-delay:calc(var(--k) * 90ms); }
+  animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both, emGlow 2.4s ease-in-out infinite alternate;
+  animation-delay:calc(var(--t) * 1ms + var(--base)), calc(var(--ei) * 90ms + var(--t0) * 1ms + var(--base) + .95s); }
+body.followup .l-msg em .c{ animation:emGlow 2.4s ease-in-out infinite alternate; animation-delay:calc(var(--ei) * 90ms); }
 /* 한국어 문구 : 원이 다 찬 뒤(1.75s) 한 글자씩. 교체 때는 앞 문구가 한 글자씩 사라지는 동안 다음 문구가 한 글자씩 */
-body.fill .l-greet .c{ animation:letterIn .7s cubic-bezier(.2,.7,.3,1) both; animation-delay:calc(var(--k) * 60ms + 1750ms); }
-body.fill .l-greet.cyc .c{ animation-delay:calc(var(--k) * 60ms + 500ms); }
-body.fill .l-greet.out .c{ animation:out 1.1s cubic-bezier(.4,0,.6,1) both; animation-delay:calc(var(--k) * 45ms); }
+body.fill .l-greet .c{ animation:letterIn 1s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 1750ms); }
+body.fill .l-greet.cyc .c{ animation-delay:calc(var(--t) * 1ms + 500ms); }
+body.fill .l-greet.out .c{ animation:out 1.1s cubic-bezier(.4,0,.6,1) both; animation-delay:calc(var(--t) * .35ms); }   /* 말한 속도보다 빨리 걷힌다 */
 /* 영어 인사 : 한국어가 지워지는 흐름을 따라 1.7s 부터 한 글자씩 천천히 */
-body.connecting .l-hi .c{ animation:letterIn .7s cubic-bezier(.2,.7,.3,1) both; animation-delay:calc(var(--k) * 110ms + 1700ms); }
+body.connecting .l-hi .c{ animation:letterIn 1.05s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 1700ms); }
 /* 길안내 라벨 */
-body.follow .navto .c, body.follow .navdest .c{ animation:letterIn .5s cubic-bezier(.2,.7,.3,1) both; animation-delay:calc(var(--k) * 32ms + 200ms); }
+body.follow .navto .c, body.follow .navdest .c{ animation:letterIn .75s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 200ms); }
 /* 인사 문구는 제자리에서 나타나고 사라진다 (위→아래·왼→오른쪽 순서는 --i 그대로).
    원이 화면을 다 채운 다음(transform 1.8s)에 이어서 */
 
@@ -449,12 +449,12 @@ body.connecting .l-greet .ln + .ln{ animation-delay:600ms; }
 /* em 은 인라인 : left/right 0 + 가운데 정렬이면 겹의 글자 폭(attr 텍스트)과 본문 폭(단어 span + 자간)
    차이만큼 좌우로 어긋난다. 왼쪽 기준으로 붙여 시작점을 맞춘다 */
 .headline em.glim::before, .headline em.glim::after{ right:auto; text-align:left; }
-/* 강조어 글리밍은 그 강조어의 첫 글자가 켜질 때 시작해 마지막 글자까지 같은 속도로 훑는다 (--k0 · --kn 은 JS) */
+/* 강조어 글리밍은 그 강조어의 첫 글자가 켜질 때 시작해 마지막 글자가 켜질 때까지 훑는다 (--t0 · --tn 은 JS) */
 body.message  .l-msg em.glim::before,  body.message  .l-msg em.glim::after,
 body.followup .l-fu em.glim::before,   body.followup .l-fu em.glim::after,
 body.guide    .l-guide em.glim::before, body.guide   .l-guide em.glim::after{
-  animation:glimWipe calc(var(--kn) * 42ms + 300ms) linear both;
-  animation-delay:calc(var(--k0) * 42ms + var(--base)); }
+  animation:glimWipe calc(var(--tn) * 1ms + 500ms) cubic-bezier(.3,.5,.4,1) both;
+  animation-delay:calc(var(--t0) * 1ms + var(--base)); }
 body.followup .l-msg em.glim::before, body.followup .l-msg em.glim::after{ opacity:1;
   -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }
 @keyframes glimWipe{
@@ -758,33 +758,46 @@ document.querySelectorAll('.headline em').forEach(em => {
   if (first) em.style.setProperty('--i', first.style.getPropertyValue('--i'));
 });
 document.querySelectorAll('.l-greet .ln, .l-hi .ln').forEach(l => { l.classList.add('glim'); l.dataset.t = l.textContent.replace(/\s+/g, ' ').trim(); });
-// 한 글자씩 : 단어(.w) 안의 글자를 인라인 .c 로 쪼개 --k(그 문장 안 글자 순서)와 번짐 색 짝을 준다.
-// 문장이 끝나는 글자(.?!) 뒤에는 한 박자 쉰다. 강조어(em)에는 첫 글자 순서 --k0 와 글자 수 --kn
-const GLOW = [['rgba(245,252,131,.95)', 'rgba(113,172,251,.8)'],   // 연두 · 파랑
-              ['rgba(138,255,243,.95)', 'rgba(176,150,255,.7)'],   // 하늘 · 라벤더
-              ['rgba(255,250,222,.95)', 'rgba(113,220,251,.75)']]; // 흰 핵 · 하늘
-const letters = el => {
-  let k = 0;
-  el.querySelectorAll('.w').forEach(w => {
-    const t = w.textContent; w.textContent = '';
-    [...t].forEach((ch, j) => {
+// 말하는 리듬으로 한 글자씩 : 단어(.w) 안의 글자를 인라인 .c 로 쪼개 글자마다 시작 시각 --t(ms)를 준다.
+//  · 단어 안에서는 글자가 24ms 간격으로 빠르게 번져 나와 단어가 부드럽게 흘러나온다 (왼→오)
+//  · 다음 단어는 이 단어를 '말하는' 시간만큼 뒤에 : 글자 수 × (한국어 음절 120ms / 영어 글자 48ms) + 70ms
+//  · 쉼표 뒤 +220ms, 문장 끝(.?!) 뒤 +420ms, 줄이 바뀌는 자리(한국어 문구의 | ) +380ms 로 한 박자 쉰다 (겹치면 긴 쪽만)
+//  · rate : 문장마다 말하는 속도 (영어 인사 1.3 = 천천히, 길안내 라벨 .7 = 빠르게)
+// 일반 글자의 번짐은 옅은 색, 강조어(em)는 짙은 색. 강조어에는 첫 글자 시각 --t0, 길이 --tn, 강조어 안 순서 --ei
+const GLOW_EM   = [['rgba(245,252,131,.95)', 'rgba(113,172,251,.8)'],    // 연두 · 파랑
+                   ['rgba(138,255,243,.95)', 'rgba(176,150,255,.7)'],    // 하늘 · 라벤더
+                   ['rgba(255,250,222,.95)', 'rgba(113,220,251,.75)']];  // 흰 핵 · 하늘
+const GLOW_SOFT = GLOW_EM.map(pair => pair.map(c => c.replace(/[\d.]+\)$/, a => (parseFloat(a) * .35).toFixed(2) + ')')));
+const letters = (el, rate = 1) => {
+  let t = 0;
+  const words = [...el.querySelectorAll('.w')];
+  words.forEach((w, wi) => {
+    const text = w.textContent; w.textContent = '';
+    const ko = /[가-힣]/.test(text), em = !!w.closest('em');
+    [...text].forEach((ch, j) => {
       const c = document.createElement('span');
       c.className = 'c'; c.textContent = ch;
-      c.style.setProperty('--k', k);
-      const [g1, g2] = GLOW[k % GLOW.length];
+      c.style.setProperty('--t', Math.round(t + j * 24 * rate));
+      const [g1, g2] = (em ? GLOW_EM : GLOW_SOFT)[(wi + j) % 3];
       c.style.setProperty('--g1', g1); c.style.setProperty('--g2', g2);
       w.append(c);
-      k += /[.?!]/.test(ch) && j === t.length - 1 && !/^(Dr|Mr|Ms|Mrs|St)\.$/.test(t) ? 6 : 1;
     });
+    const next = words[wi + 1];
+    const lineBreak = next && next.closest('.ln') !== w.closest('.ln');
+    // 문장 끝과 줄바꿈이 겹치면 긴 쪽 한 번만 쉰다 (둘 다 더하면 'Good Afternoon!' 뒤가 2초나 비었다)
+    const pause = Math.max(/[.?!]$/.test(text) ? 420 : /[,;:]$/.test(text) ? 220 : 0, lineBreak ? 380 : 0);
+    t += (text.length * (ko ? 120 : 48) + 70 + pause) * rate;
   });
   el.querySelectorAll('em').forEach(em => {
-    const cs = em.querySelectorAll('.c');
+    const cs = [...em.querySelectorAll('.c')];
     if (!cs.length) return;
-    em.style.setProperty('--k0', cs[0].style.getPropertyValue('--k'));
-    em.style.setProperty('--kn', cs.length);
+    const t0 = +cs[0].style.getPropertyValue('--t'), t1 = +cs.at(-1).style.getPropertyValue('--t');
+    em.style.setProperty('--t0', t0); em.style.setProperty('--tn', t1 - t0);
+    cs.forEach((c, n) => c.style.setProperty('--ei', n));
   });
 };
-document.querySelectorAll('.headline, .navdest').forEach(letters);
+document.querySelectorAll('.headline').forEach(el => letters(el, el.classList.contains('l-hi') ? 1.3 : 1));
+letters(document.querySelector('.navdest'), .7);
 
 
 // ---------- follow : 길안내 ----------
@@ -837,7 +850,7 @@ const GLYPH = {
 let shown = -1;
 const setTo = t => {
   if (navto.dataset.t === t) return;
-  navto.dataset.t = t; navto.textContent = t; split(navto); letters(navto);
+  navto.dataset.t = t; navto.textContent = t; split(navto); letters(navto, .7);
 };
 const setDist = n => {
   if (n === shown) return;
@@ -909,7 +922,7 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 5600, 1600, 5000, 5200, 5200, 14000];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 5600, 1600, 5000, 5200, 6200, 14000];   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer, strokeTimer;
 
