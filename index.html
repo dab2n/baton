@@ -344,6 +344,10 @@ body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 /* 첫 문장은 켠 채로 위로 올라간다 (다음 문장의 첫 글자보다 먼저 자리를 비켜 준다) */
 body.followup .l-msg{ opacity:1; translate:0 -34.2px;
   transition:translate .8s cubic-bezier(.45,0,.2,1), opacity .15s ease; }
+/* 다음 장면으로 넘어가며 사라질 때도 윗줄은 제자리 : 이 규칙이 없으면 translate 가 0 으로 튀어
+   두 줄 간격이 갑자기 좁아진 채 흐려졌다. 강조어 번짐도 그대로 이어서 흐려지게 */
+body.guide .l-msg{ translate:0 -34.2px; }
+body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-out infinite alternate; animation-delay:calc(var(--ei) * 90ms); }
 
 /* 기본 화면 문구 (피그마 3124:17778) : Delight Semi Bold 67.3px.
    글자에 위→아래 그라디언트. background-clip:text 는 자식이 자기 레이어를
@@ -758,11 +762,12 @@ document.querySelectorAll('.headline em').forEach(em => {
   if (first) em.style.setProperty('--i', first.style.getPropertyValue('--i'));
 });
 document.querySelectorAll('.l-greet .ln, .l-hi .ln').forEach(l => { l.classList.add('glim'); l.dataset.t = l.textContent.replace(/\s+/g, ' ').trim(); });
-// 말하는 리듬으로 한 글자씩 : 단어(.w) 안의 글자를 인라인 .c 로 쪼개 글자마다 시작 시각 --t(ms)를 준다.
-//  · 단어 안에서는 글자가 24ms 간격으로 빠르게 번져 나와 단어가 부드럽게 흘러나온다 (왼→오)
-//  · 다음 단어는 이 단어를 '말하는' 시간만큼 뒤에 : 글자 수 × (한국어 음절 120ms / 영어 글자 48ms) + 70ms
-//  · 쉼표 뒤 +220ms, 문장 끝(.?!) 뒤 +420ms, 줄이 바뀌는 자리(한국어 문구의 | ) +380ms 로 한 박자 쉰다 (겹치면 긴 쪽만)
-//  · rate : 문장마다 말하는 속도 (영어 인사 1.3 = 천천히, 길안내 라벨 .7 = 빠르게)
+// 문장 단위로 한 글자씩 : 단어(.w) 안의 글자를 인라인 .c 로 쪼개 글자마다 시작 시각 --t(ms)를 준다.
+//  · 한 문장 안에서는 글자(띄어쓰기 한 칸 포함)가 30ms 간격으로 끊김 없이 흘러나온다. 등장 자체는 0.95s 라
+//    여러 글자가 겹쳐 번지므로 딱딱 끊겨 보이지 않는다
+//  · 쉬는 곳은 문장 끝(.?!) +450ms 와 줄이 바뀌는 자리(한국어 문구의 | ) +380ms 뿐 (겹치면 긴 쪽만).
+//    띄어쓰기마다 뜸을 들이면 어색했다
+//  · rate : 문장마다 흐르는 속도 (영어 인사 1.8 = 천천히, 길안내 라벨 .8)
 // 일반 글자의 번짐은 옅은 색, 강조어(em)는 짙은 색. 강조어에는 첫 글자 시각 --t0, 길이 --tn, 강조어 안 순서 --ei
 const GLOW_EM   = [['rgba(245,252,131,.95)', 'rgba(113,172,251,.8)'],    // 연두 · 파랑
                    ['rgba(138,255,243,.95)', 'rgba(176,150,255,.7)'],    // 하늘 · 라벤더
@@ -771,22 +776,24 @@ const GLOW_SOFT = GLOW_EM.map(pair => pair.map(c => c.replace(/[\d.]+\)$/, a => 
 const letters = (el, rate = 1) => {
   let t = 0;
   const words = [...el.querySelectorAll('.w')];
+  const STEP = 30;
   words.forEach((w, wi) => {
     const text = w.textContent; w.textContent = '';
-    const ko = /[가-힣]/.test(text), em = !!w.closest('em');
+    const em = !!w.closest('em');
     [...text].forEach((ch, j) => {
       const c = document.createElement('span');
       c.className = 'c'; c.textContent = ch;
-      c.style.setProperty('--t', Math.round(t + j * 24 * rate));
+      c.style.setProperty('--t', Math.round(t));
       const [g1, g2] = (em ? GLOW_EM : GLOW_SOFT)[(wi + j) % 3];
       c.style.setProperty('--g1', g1); c.style.setProperty('--g2', g2);
       w.append(c);
+      t += STEP * rate;
     });
     const next = words[wi + 1];
-    const lineBreak = next && next.closest('.ln') !== w.closest('.ln');
-    // 문장 끝과 줄바꿈이 겹치면 긴 쪽 한 번만 쉰다 (둘 다 더하면 'Good Afternoon!' 뒤가 2초나 비었다)
-    const pause = Math.max(/[.?!]$/.test(text) ? 420 : /[,;:]$/.test(text) ? 220 : 0, lineBreak ? 380 : 0);
-    t += (text.length * (ko ? 120 : 48) + 70 + pause) * rate;
+    if (!next) return;
+    const lineBreak = next.closest('.ln') !== w.closest('.ln');
+    const pause = Math.max(/[.?!]$/.test(text) ? 450 : 0, lineBreak ? 380 : 0);
+    t += (STEP + pause) * rate;   // 띄어쓰기 한 칸 + (문장 끝·줄바꿈이면) 한 박자
   });
   el.querySelectorAll('em').forEach(em => {
     const cs = [...em.querySelectorAll('.c')];
@@ -796,8 +803,8 @@ const letters = (el, rate = 1) => {
     cs.forEach((c, n) => c.style.setProperty('--ei', n));
   });
 };
-document.querySelectorAll('.headline').forEach(el => letters(el, el.classList.contains('l-hi') ? 1.3 : 1));
-letters(document.querySelector('.navdest'), .7);
+document.querySelectorAll('.headline').forEach(el => letters(el, el.classList.contains('l-hi') ? 1.8 : 1));
+letters(document.querySelector('.navdest'), .8);
 
 
 // ---------- follow : 길안내 ----------
@@ -850,7 +857,7 @@ const GLYPH = {
 let shown = -1;
 const setTo = t => {
   if (navto.dataset.t === t) return;
-  navto.dataset.t = t; navto.textContent = t; split(navto); letters(navto, .7);
+  navto.dataset.t = t; navto.textContent = t; split(navto); letters(navto, .8);
 };
 const setDist = n => {
   if (n === shown) return;
