@@ -375,8 +375,8 @@ body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-o
    글자는 인라인 span(.c) : inline-block 이면 커닝이 끊겨 모양이 바뀐다.
    켜지기 전의 숨김은 animation-fill-mode:both 가 맡는다 (기본은 보임 → 장면이 바뀌면 문장이 통째로 흐려지며 사라진다) */
 @keyframes letterIn{
-  0%   { opacity:0; filter:blur(6px)  drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
-  38%  { opacity:1; filter:blur(.6px) drop-shadow(0 0 5px var(--g1))  drop-shadow(0 0 13px var(--g2)); }
+  0%   { opacity:0; filter:blur(2px) drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  38%  { opacity:1; filter:blur(0)   drop-shadow(0 0 3.5px var(--g1)) drop-shadow(0 0 8.5px var(--g2)); }
   100% { opacity:1; filter:blur(0)    drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
 }
 /* 기록 · 재진 · 안내 */
@@ -388,8 +388,8 @@ body.message .l-msg .c, body.followup .l-fu .c, body.guide .l-guide .c{
 .l-guide{ --base:700ms; }   /* 앞 두 줄이 사라진 뒤 */
 /* 강조어 : 켜진 뒤에도 비눗방울 번짐이 글자를 따라 물결처럼 일렁인다 (글자마다 90ms 씩 늦게 시작해 흐른다) */
 @keyframes emGlow{
-  from{ filter:blur(0) drop-shadow(0 0 1px var(--g1)) drop-shadow(0 0 3px var(--g2)); }
-  to  { filter:blur(0) drop-shadow(0 0 7px var(--g1)) drop-shadow(0 0 17px var(--g2)); }
+  from{ filter:blur(0) drop-shadow(0 0 .5px var(--g1)) drop-shadow(0 0 1.2px var(--g2)); }
+  to  { filter:blur(0) drop-shadow(0 0 1.6px var(--g1)) drop-shadow(0 0 4px var(--g2)); }   /* 가장자리만 얇게 일렁인다 */
 }
 body.message .l-msg em .c, body.followup .l-fu em .c, body.guide .l-guide em .c{
   animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both, emGlow 2.4s ease-in-out infinite alternate;
@@ -453,6 +453,9 @@ body.connecting .l-greet .ln + .ln{ animation-delay:600ms; }
 /* em 은 인라인 : left/right 0 + 가운데 정렬이면 겹의 글자 폭(attr 텍스트)과 본문 폭(단어 span + 자간)
    차이만큼 좌우로 어긋난다. 왼쪽 기준으로 붙여 시작점을 맞춘다 */
 .headline em.glim::before, .headline em.glim::after{ right:auto; text-align:left; }
+/* 강조어 글리밍 겹은 얇게 : 번짐이 두꺼우면 글자가 뭉개져 보였다 (줄 글리밍은 그대로) */
+.headline em.glim::before{ filter:blur(1px); }
+.headline em.glim::after { filter:blur(2px); }
 /* 강조어 글리밍은 그 강조어의 첫 글자가 켜질 때 시작해 마지막 글자가 켜질 때까지 훑는다 (--t0 · --tn 은 JS) */
 body.message  .l-msg em.glim::before,  body.message  .l-msg em.glim::after,
 body.followup .l-fu em.glim::before,   body.followup .l-fu em.glim::after,
