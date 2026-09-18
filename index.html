@@ -207,6 +207,7 @@ body.connected  .field,
 body.message    .field,
 body.guide      .field,
 body.follow     .field{ transform:translate(1px,145.5px) scale(1.2); }
+body.bye        .field{ transform:translate(1px,145.5px) scale(.22); }   /* 보이지 않는 동안 기본 크기로 돌려 두어 idle 에서 작은 구슬로 바로 떠오르게 */
 
 /* 검은 화면 장면들 : 예전 밝은 배경 레이어는 전부 물러난다 */
 body:not(.idle) .sheen,
@@ -411,7 +412,7 @@ body.connecting.out .l-nav{ opacity:0; transition:opacity .9s ease; }
 .dotch{ display:inline-block; height:.7em; width:calc(.7em * 119 / 169); margin:0 .06em; vertical-align:baseline; overflow:visible; }
 .dotch circle{ fill:currentColor; r:12px; }
 /* 길안내 라벨 */
-body.follow .navto .c, body.follow .navdest .c{ animation:letterIn .75s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 200ms); }
+body.follow .navto .c, body.follow .navdest .c, body.bye .navto .c, body.bye .navdest .c{ animation:letterIn .75s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 200ms); }
 /* 인사 문구는 제자리에서 나타나고 사라진다 (위→아래·왼→오른쪽 순서는 --i 그대로).
    원이 화면을 다 채운 다음(transform 1.8s)에 이어서 */
 
@@ -538,6 +539,20 @@ body.connecting .ripple{ animation:rippleUp 1.5s cubic-bezier(.45,0,.25,1) .1s b
 body.connected .sring, body.message .sring, body.followup .sring, body.guide .sring{ opacity:1; }
 /* 스트로크가 도는 동안은 영상만 : 위아래 색 띠와 가장자리 발광을 끈다 */
 body.connected .screen::before, body.connected .screen::after, body.connected .rimlight, body.message .screen::before, body.message .screen::after, body.message .rimlight, body.followup .screen::before, body.followup .screen::after, body.followup .rimlight, body.guide .screen::before, body.guide .screen::after, body.guide .rimlight, body.connecting .screen::before, body.connecting .screen::after, body.connecting .rimlight{ opacity:0; }
+
+/* ---------- bye : 도착 뒤 로봇과 연결이 끊긴다 ----------
+   스트로크가 스크린 가장자리(×1.25 → R 513)에 스며 나왔다가(1.4s) 12시부터 시계 방향으로 지워지고,
+   그동안 화면 안의 모든 것이 서서히 옅어진다. 지우개 머리는 100° 에 걸쳐 흐리게,
+   12시 이음매도 지우개가 다가오는 동안(--tk) 함께 흐려져 어디에도 끊긴 경계가 없다 */
+@property --bh{ syntax:'<angle>';  inherits:false; initial-value:-100deg; }
+@property --tk{ syntax:'<number>'; inherits:false; initial-value:0; }
+body.bye .sring{ opacity:1; scale:1.25; transition:opacity 1.4s ease;
+  -webkit-mask:conic-gradient(from 0deg at 540px 540px, transparent var(--bh), #000 calc(var(--bh) + 100deg) 290deg, rgba(0,0,0,calc(1 - var(--tk))) 360deg);
+          mask:conic-gradient(from 0deg at 540px 540px, transparent var(--bh), #000 calc(var(--bh) + 100deg) 290deg, rgba(0,0,0,calc(1 - var(--tk))) 360deg);
+  animation:byeSweep 2.8s cubic-bezier(.45,0,.35,1) 2s both; }
+@keyframes byeSweep{ 0%{ --bh:-100deg; --tk:0; } 30%{ --tk:1; } 100%{ --bh:360deg; --tk:1; } }
+body.bye .sdisc{ opacity:0; }   /* 가장자리 링엔 안쪽을 자를 검은 원이 필요 없다 */
+body.bye .nav > *, body.bye .screen::before, body.bye .screen::after, body.bye .rimlight{ opacity:0; transition:opacity 2.8s ease 2s; }
 
 /* ---------- follow : 길안내 (피그마 3070:700) ---------- */
 .nav{ position:absolute; inset:0; pointer-events:none; }
@@ -964,6 +979,8 @@ const navRun = () => {
       NAV.classList.add('arrived');
       NAV.classList.remove('up');
       setTo('Arrived');
+      if (!document.body.classList.contains('shot') || new URLSearchParams(location.search).has('bye'))
+        navRAF = setTimeout(() => window.__go(STEPS.indexOf('bye')), 2500);   // 도착 → 연결 끊김
       return;
     }
     const n = SEQ[k++];
@@ -981,9 +998,9 @@ const navRun = () => {
 
 // 시퀀스 : 한 번 누르면 끝까지 자동 진행, 다시 누르면 idle 로 리셋
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
-const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow'];
+const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow','bye'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 5200, 5200, 5000, 5200, 6200, 14000];   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 5200, 5200, 5000, 5200, 6200, 0, 5600];   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer, strokeTimer;
 
@@ -1042,12 +1059,13 @@ const go = n => {
     }));
   }
   body.classList.remove('out');
-  body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|followup|guide|follow)\b/, STEPS[n]);
+  body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|followup|guide|follow|bye)\b/, STEPS[n]);
   if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); }
   else star.pause();
   // 스트로크 : 기기 번호가 사라진 뒤 connected 에서 처음부터 켜져 I'll take you 까지 끊지 않고 (영상 26s, 쓰는 구간 약 20s)
   if (['connected', 'message', 'followup', 'guide'].includes(STEPS[n])) stroke.play().catch(() => {});
+  else if (STEPS[n] === 'bye') { stroke.currentTime = 2; stroke.play().catch(() => {}); }   // 등장 없이 다 찬 링으로
   else { stroke.pause(); stroke.currentTime = 0; }
   askRun(STEPS[n] === 'fill');   // 엄지척(connecting)부터는 마지막 문구 그대로
   // idle 은 얼굴이 가까워져야, fill 은 엄지척이어야만 다음으로 : 별 모션은 반드시 엄지척이 인식된 뒤에만 재생
