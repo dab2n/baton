@@ -519,12 +519,8 @@ body.connecting .ripple{ animation:rippleUp 1.5s cubic-bezier(.45,0,.25,1) .1s b
 @property --dr{ syntax:'<length>'; inherits:false; initial-value:400px; }
 .sdisc{ position:absolute; inset:0;
   background:radial-gradient(circle at 540px 540px, #000 calc(var(--dr) - 3px), transparent var(--dr));
-}
+  animation:discBreath 3.6s ease-in-out infinite alternate; }
 @keyframes discBreath{ from{ --dr:396px; } to{ --dr:405px; } }
-/* 등장 : 영상 속 링은 R 326 → 413 으로 커지며 나온다. 검은 원이 처음부터 400 이면 커지는 링을 덮고 있다가 끝에 툭 튀어나온다
-   → 원도 가운데에서부터 링 바로 안쪽을 따라 커지게 해 중심에서 퍼져 나오는 것처럼 */
-@keyframes discIn{ from{ --dr:40px; } to{ --dr:396px; } }
-body.connected .sdisc, body.message .sdisc, body.followup .sdisc, body.guide .sdisc, body.connecting .sdisc{ animation:discIn .85s cubic-bezier(.35,.25,.3,1) 0.9s both, discBreath 3.6s ease-in-out 1.75s infinite alternate; }
 .stroke{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover;
          scale:.8;     /* 링을 가장자리가 아니라 안쪽에 : 밝은 선 R 513 × .8 ≈ 410 (스크린 520 의 75%, 레퍼런스 실측) */
          /* 줄이면 영상 프레임(1080) 끝이 사각으로 보인다 → 링 바로 바깥에서 원형으로 흐려 끊는다 (흐림은 부모 .sglow 에서) */
@@ -812,6 +808,28 @@ letters(document.querySelector('.navdest'), .8);
 // ---------- follow : 길안내 ----------
 const star = document.querySelector('.star');
 const stroke = document.querySelector('.stroke');
+// 검은 원을 영상 속 링에 붙인다 : 등장 구간(0~0.7s)의 링 반지름을 실측해 두고, 재생 시각에 맞춰 원을 링 바로 안쪽(17px)에 둔다.
+// CSS 로 따로 키우면 영상이 늦게 뜨거나 곡선이 달라 링과 원이 어긋난다. 등장이 끝나면 CSS 숨쉬기(396~405)가 이어받는다
+const sdisc = document.querySelector('.sdisc');
+const RING = [[0, 405], [.05, 413], [.1, 415], [.15, 420], [.2, 422], [.25, 428], [.3, 433], [.35, 445],
+              [.4, 453], [.45, 477], [.5, 492], [.55, 511], [.6, 512], [.65, 515], [.7, 516]];   // 영상 시각(s) → 링 반지름(영상 px)
+const ringAt = t => {
+  const i = RING.findIndex(([s]) => s > t);
+  if (i < 0) return RING.at(-1)[1];
+  const [t0, r0] = RING[i - 1], [t1, r1] = RING[i];
+  return r0 + (r1 - r0) * (t - t0) / (t1 - t0);
+};
+const discLoop = () => {
+  requestAnimationFrame(discLoop);
+  const t = stroke.currentTime;
+  if (t < .7) {
+    sdisc.style.animation = 'none';
+    sdisc.style.setProperty('--dr', (ringAt(t) * .8 - 17).toFixed(1) + 'px');   // .8 = 영상 축소 비율
+  } else if (sdisc.style.animation) {
+    sdisc.style.animation = ''; sdisc.style.removeProperty('--dr');
+  }
+};
+discLoop();
 stroke.playbackRate = .8;   // 더 천천히 부드럽게 (26s → 32.6s 분량, 쓰는 구간 약 20s 라 여유)
 const NAV = document.querySelector('.nav');
 const NS  = 'http://www.w3.org/2000/svg';
