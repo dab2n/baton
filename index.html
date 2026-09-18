@@ -334,6 +334,7 @@ body:not(.idle):not(.connecting) .cyan{ animation:none !important; }
 .l-fu{ translate:0 34.2px; }
 
 /* 장면당 한 문장. 들어올 때는 즉시, 나갈 때만 천천히 사라진다 */
+body.direct .l-greet{ visibility:hidden; }
 .headline{ opacity:0; }
 body.fill    .l-greet,
 body.connecting .l-greet, body.connecting .l-hi,
@@ -987,6 +988,8 @@ const go = n => {
       field.style.translate = field.style.rotate = field.style.borderRadius = '';
     }));
   }
+  // idle 에서 엄지척으로 바로 오면 한국어 문구는 한 번도 안 나왔다 : 통째로 뜬 채 영어로 바뀌지 않게 영어 인사만 쓴다
+  body.classList.toggle('direct', STEPS[n] === 'connecting' && body.classList.contains('idle'));
   body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|followup|guide|follow)\b/, STEPS[n]);
   if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); }
@@ -1031,7 +1034,7 @@ addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') tap()
 <script type="module">
 /* ---------- 카메라 인터랙션 ----------
    idle  : 얼굴이 가까워지면(≈30cm 이내) 원이 커진다
-   fill  : 엄지척을 올리면 connecting 으로 넘어간다
+   idle · fill : 엄지척을 올리면 connecting 으로 넘어간다 (얼굴 근접을 거치지 않아도 된다)
    두 모델을 매 프레임 같이 돌려 썸네일에 항상 인식 결과를 그린다.
    카메라/권한이 없으면 조용히 꺼지고 탭 조작만 남는다. */
 
@@ -1085,12 +1088,13 @@ const loop = () => {
   const n = window.__step();
   say('얼굴 ' + (ratio ? Math.round(ratio * 100) + '%' : '—') + ' / ' + Math.round(NEAR * 100) + '%\n'
     + '제스처 ' + (g ? g.categoryName + ' ' + g.score.toFixed(2) : '—') + '\n'
-    + (n === 0 ? '얼굴을 가까이' : n === 1 ? '엄지척을 올리세요' : '진행 중'));
+    + (n === 0 ? '얼굴을 가까이 또는 엄지척' : n === 1 ? '엄지척을 올리세요' : '진행 중'));
 
   // 트리거 : 놓친 프레임 하나에 초기화되지 않게 깎기만 한다
-  const wants = n === 0 ? ratio >= NEAR : n === 1 ? up : false;
-  hits = wants ? hits + 1 : Math.max(0, hits - 1);
-  if (wants && hits >= HITS) { hits = 0; window.__go(n + 1); }
+  // 엄지척은 idle 에서도 바로 connecting 으로 (얼굴 근접 단계를 건너뛴다)
+  const to = n <= 1 && up ? 2 : n === 0 && ratio >= NEAR ? 1 : 0;
+  hits = to ? hits + 1 : Math.max(0, hits - 1);
+  if (to && hits >= HITS) { hits = 0; window.__go(to); }
 };
 
 // ?s=N (이미지 내보내기) 에서만 끈다
