@@ -110,7 +110,8 @@ spark.svg    Connecting 아이콘
 ## 로컬 확인
 
 `python -m http.server` 는 Range 요청을 200 으로 답해서 크롬이 영상을 못 읽는다.
-Range 를 지원하는 서버로 띄워야 `star.*` 가 재생된다.
+Range 를 지원하는 서버로 띄워야 `star.*` 가 재생된다 : `python3 serve.py` (기본 8777, 포트는 인자로).
+헬스장(8779)·호텔(8780) 저장소도 이 파일로 띄운다.
 
 ## 피그마 대조에서 걸린 함정
 
