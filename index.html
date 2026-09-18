@@ -303,7 +303,7 @@ body:not(.idle):not(.connecting) .cyan{ animation:none !important; }
 .headline{
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   margin:0; width:780px; text-align:center;
-  font-size:42px; font-weight:500; line-height:1.8; color:#fff;   /* 44 면 You 의 Y 가 스트로크 링(480)에 3px 까지 붙는다 */
+  font-size:39px; font-weight:500; line-height:1.8; color:#fff;   /* 링(R 380) 안 : 가장 긴 줄 끝이 중심에서 300 이내 */
   transition:opacity .8s ease;
 }
 /* inline-block : 인라인 em 의 박스는 줄 상자보다 10px 아래에서 시작해 글리밍 겹이 그만큼 내려갔다.
@@ -329,9 +329,9 @@ body:not(.idle):not(.connecting) .cyan{ animation:none !important; }
   -webkit-mask-image:linear-gradient(90deg,transparent 5%,#000 45%), linear-gradient(90deg,#000 0 68%, transparent 100%);
           mask-image:linear-gradient(90deg,transparent 5%,#000 45%), linear-gradient(90deg,#000 0 68%, transparent 100%); }
 /* 기록 → 재진 : 카드 없이 문장만. 첫 문장은 화면 가운데 한 줄, 다음 문장이 나오면 첫 문장이 위로 한 칸
-   올라가 두 줄이 되고 둘이 함께 화면 가운데에 놓인다 (38px × 행간 1.8 = 줄 상자 68.4 → 반씩 ±34.2) */
-.l-msg, .l-fu{ width:auto; white-space:nowrap; font-size:38px; }
-.l-fu{ translate:0 34.2px; }
+   올라가 두 줄이 되고 둘이 함께 화면 가운데에 놓인다 (32px × 행간 1.8 = 줄 상자 57.6 → 반씩 ±28.8) */
+.l-msg, .l-fu{ width:auto; white-space:nowrap; font-size:32px; }   /* 링(R 380) 안쪽 흐림에 닿지 않게 : 긴 줄 끝이 중심에서 300 이내 */
+.l-fu{ translate:0 28.8px; }
 
 /* 장면당 한 문장. 들어올 때는 즉시, 나갈 때만 천천히 사라진다 */
 body.direct .l-greet{ visibility:hidden; }
@@ -343,11 +343,11 @@ body.message .l-msg,
 body.followup .l-fu,
 body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 /* 첫 문장은 켠 채로 위로 올라간다 (다음 문장의 첫 글자보다 먼저 자리를 비켜 준다) */
-body.followup .l-msg{ opacity:1; translate:0 -34.2px;
+body.followup .l-msg{ opacity:1; translate:0 -28.8px;
   transition:translate .8s cubic-bezier(.45,0,.2,1), opacity .15s ease; }
 /* 다음 장면으로 넘어가며 사라질 때도 윗줄은 제자리 : 이 규칙이 없으면 translate 가 0 으로 튀어
    두 줄 간격이 갑자기 좁아진 채 흐려졌다. 강조어 번짐도 그대로 이어서 흐려지게 */
-body.guide .l-msg{ translate:0 -34.2px; }
+body.guide .l-msg{ translate:0 -28.8px; }
 body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-out infinite alternate; animation-delay:calc(var(--ei) * 90ms); }
 
 /* 기본 화면 문구 (피그마 3124:17778) : Delight Semi Bold 67.3px.
@@ -503,15 +503,25 @@ body.connecting .ripple{ animation:rippleUp 1.5s cubic-bezier(.45,0,.25,1) .1s b
 /* connected · message : 스크린 가장자리에 붙인 스트로크 (가장 밝은 선 약 518 = 가장자리 520, 바깥 글로우는 잘린다) */
 /* z-index 3 : 스크린 안 콘텐츠보다 위, 노치(.bezel z4)보다 아래. screen 합성이라 링 글로우가 아래 것 위에 얹힌다 */
 .stroke{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover; z-index:3;
-         scale:1.01;   /* 링(R 514)을 살짝 밖으로 : 스크린 안에 걸리는 밝은 띠 18px → 약 13px (1.02 는 너무 잘렸다) */
+         scale:.74;    /* 링을 가장자리가 아니라 안쪽에 : 밝은 선 R 513 × .74 ≈ 380 (스크린 520 의 75%, 레퍼런스 실측) */
+         /* 줄이면 영상 프레임(1080) 끝이 사각으로 보인다 → 링 바로 바깥에서 원형으로 흐려 끊고 .halo 가 번짐을 잇는다 */
+         -webkit-mask:radial-gradient(circle closest-side, #000 94%, transparent 100%);
+                 mask:radial-gradient(circle closest-side, #000 94%, transparent 100%);
          opacity:0; transition:opacity .6s ease; mix-blend-mode:screen; pointer-events:none; }
-body.connected .stroke, body.message .stroke, body.followup .stroke, body.guide .stroke{ opacity:1; }
-body.connecting .stroke{ opacity:1; transition-delay:.9s; transition-duration:.4s; }
+body.connected :is(.stroke,.halo), body.message :is(.stroke,.halo), body.followup :is(.stroke,.halo), body.guide :is(.stroke,.halo){ opacity:1; }
+body.connecting :is(.stroke,.halo){ opacity:1; transition-delay:.9s; transition-duration:.4s; }
+/* 링 바깥 번짐 : 레퍼런스 실측 — 링(380)에서 안팎으로 옅어지고 바깥은 약 465 에서 끊긴다. 영상 프레임엔 그만큼의 번짐이 없어 따로 그린다 */
+.halo{ position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0; transition:opacity .6s ease;
+  /* 링의 빛을 그대로 번지게 : 밝은 곳은 밝게, 어두운 곳은 어둡게 따라간다 (균일한 띠를 그리면 레퍼런스보다 뻣뻣하다) */
+  -webkit-backdrop-filter:blur(30px) brightness(2.3); backdrop-filter:blur(30px) brightness(2.3);
+  -webkit-mask:radial-gradient(circle at 540px 540px, transparent 376px, #000 396px, #000 430px, transparent 466px);
+          mask:radial-gradient(circle at 540px 540px, transparent 376px, #000 396px, #000 430px, transparent 466px); }
 /* 스트로크 블러 : 링의 스크린 안쪽(중심에 가까운 쪽)으로 갈수록 더 흐리게.
    영상은 한 겹이라 선명/흐림을 동시에 못 준다 → 링 위에 backdrop-filter 고리를 세 겹 얹는다.
    바깥 밝은 선(r 510~520)은 선명하게 두고 안쪽 번짐(r 440~500)만 겹겹이 흐려진다.
    세 겹은 형제로 둔다 : 한 요소의 가상 요소로 넣으면 부모의 mask 가 backdrop root 가 되어 뒤를 못 읽는다 */
 .sblur{ position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0; transition:opacity .6s ease;
+  scale:.74;   /* 스트로크와 같이 줄인다 (마스크 반지름이 링 기준 px 값이라 통째로) */
   -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
   -webkit-mask-composite:source-in; mask-composite:intersect; }
 /* 일렁임 : 고리 마스크에 원뿔 모양 세기 분포를 교집합으로 겹치고 그 각도(--sa)를 겹마다 다른 속도·방향으로 돌린다.
@@ -637,6 +647,7 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
       <source src="stroke.webm?v=4" type="video/webm">
       <source src="stroke.mp4?v=4"  type="video/mp4">
     </video>
+    <div class="halo" aria-hidden="true"></div>
     <div class="sblur sb1" aria-hidden="true"></div>
     <div class="sblur sb2" aria-hidden="true"></div>
     <div class="sblur sb3" aria-hidden="true"></div>
