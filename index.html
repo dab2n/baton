@@ -200,8 +200,9 @@ body.fill       .field{ transform:translate(1px,145.5px) scale(1.2); opacity:.03
 /* 구슬이 커질 때도 위아래 띠는 보여야 한다. 다만 구슬과 겹쳐 색이 뜨지 않게 살짝만 낮춘다 */
 body.fill .screen::before, body.fill .screen::after{ opacity:.85; }
 body.fill .rimlight{ opacity:.35; }
-/* connecting : 중심 원은 작게 물러나고 가장자리 스캔이 주인공 */
-body.connecting .field{ transform:translate(1px,145.5px) scale(.58); }
+/* connecting : 엄지척 순간 구슬은 그 자리·그 모습(노랑) 그대로 옅어지며 사라진다.
+   예전엔 커지고(.58) 더 흐려지며(39px) 흰 덩어리로 번져 별 모션을 흐렸다 */
+body.connecting .field{ transform:translate(1px,145.5px) scale(.22); transition-duration:1.8s, .6s, 1.2s, 1.2s, 1.2s, 1.2s; }
 body.connected  .field,
 body.message    .field,
 body.guide      .field,
@@ -257,7 +258,7 @@ body.idle .field::before{ opacity:1; animation:gleam 9s ease-in-out infinite; }
 }
 /* 39px 로는 구슬에 가장자리가 안 생겨 광택이 그려질 데가 없다 */
 body.idle       .blur39{ filter:blur(17px); transition-delay:0s; }
-body.connecting .blur39{ filter:blur(39px); transition-delay:0s; }
+body.connecting .blur39{ filter:blur(17px); transition-delay:0s; }
 /* 정적 장면에서 .field 를 움직이면 어떻게든 검정이 드러난다. 고정.
    (검은 화면 장면에선 배경 블롭도 모두 꺼져 있다) */
 body:not(.idle) .field{ animation:none; translate:0 0; scale:1; rotate:0deg; border-radius:50%; }
@@ -820,20 +821,32 @@ const stroke = document.querySelector('.stroke');
 const sdisc = document.querySelector('.sdisc');
 const RING = [[0, 405], [.05, 413], [.1, 415], [.15, 420], [.2, 422], [.25, 428], [.3, 433], [.35, 445],
               [.4, 453], [.45, 477], [.5, 492], [.55, 511], [.6, 512], [.65, 515], [.7, 516]];   // 영상 시각(s) → 링 반지름(영상 px)
-const ringAt = t => {
-  const i = RING.findIndex(([s]) => s > t);
-  if (i < 0) return RING.at(-1)[1];
-  const [t0, r0] = RING[i - 1], [t1, r1] = RING[i];
-  return r0 + (r1 - r0) * (t - t0) / (t1 - t0);
+const lerpAt = (tab, t) => {
+  const i = tab.findIndex(([s]) => s > t);
+  if (i < 0) return tab.at(-1)[1];
+  const [t0, v0] = tab[i - 1], [t1, v1] = tab[i];
+  return v0 + (v1 - v0) * (t - t0) / (t1 - t0);
+};
+const ringAt = t => lerpAt(RING, t);
+// 등장 밝기 : 영상은 0.4~0.5s 에 밝기가 두 배로 뛰었다가 안정값(21.5)보다 14% 솟는다 → 번쩍.
+// 실측 밝기(E)로 나눠 겉보기 밝기가 매끄러운 곡선(smoothstep 0 → 0.72s)을 따르게 투명도를 준다
+const ENERGY = [[0, .22], [.05, .6], [.1, 3.35], [.15, 5.42], [.2, 8.67], [.25, 9.78], [.3, 11.19], [.35, 11.69],
+                [.4, 13.51], [.45, 16.12], [.5, 24.23], [.55, 24.54], [.6, 22.6], [.65, 21.93], [.7, 21.43]];
+const sglow = document.querySelector('.sglow');
+// 재생 시각과 화면에 뜬 프레임은 몇십 ms 어긋난다 → 앞뒤 0.1s 안에서 가장 밝은 프레임 기준으로 (넉넉히 누른다)
+const glowAt = t => {
+  const x = Math.min(1, t / .72), goal = 21.5 * x * x * (3 - 2 * x);
+  return Math.min(1, ...[-.1, -.05, 0, .05, .1].map(d => goal / lerpAt(ENERGY, Math.max(0, t + d))));
 };
 const discLoop = () => {
   requestAnimationFrame(discLoop);
   const t = stroke.currentTime;
-  if (t < .7) {
+  if (t < .72) {
     sdisc.style.animation = 'none';
     sdisc.style.setProperty('--dr', (ringAt(t) * .8 - 17).toFixed(1) + 'px');   // .8 = 영상 축소 비율
+    sglow.style.opacity = glowAt(t).toFixed(3);
   } else if (sdisc.style.animation) {
-    sdisc.style.animation = ''; sdisc.style.removeProperty('--dr');
+    sdisc.style.animation = ''; sdisc.style.removeProperty('--dr'); sglow.style.opacity = '';
   }
 };
 discLoop();
@@ -1017,11 +1030,14 @@ const go = n => {
   clearTimeout(timer);
   // idle 에서 나갈 때 : 배회 애니메이션을 끊으면 translate 가 0 으로 튀어 다른 물체처럼 보인다.
   // 지금 값을 인라인으로 물려 class 를 바꾸고, 다음 프레임에 지워 전환(1.2s)이 그 자리에서 이어지게 한다
-  if (body.classList.contains('idle') && STEPS[n] !== 'idle') {
-    const cs = getComputedStyle(field);
+  const freeze = body.classList.contains('idle') && STEPS[n] !== 'idle';
+  const cs = freeze && getComputedStyle(field);
+  field.style.translate = field.style.rotate = field.style.borderRadius = '';
+  if (freeze) {
     field.style.translate = cs.translate; field.style.rotate = cs.rotate;
     field.style.borderRadius = cs.borderRadius;
-    requestAnimationFrame(() => requestAnimationFrame(() => {
+    // 엄지척(connecting)으로 바로 가면 그 자세 그대로 옅어지게 둔다. 다른 장면은 다음 프레임에 풀어 전환이 이어지게
+    if (STEPS[n] !== 'connecting') requestAnimationFrame(() => requestAnimationFrame(() => {
       field.style.translate = field.style.rotate = field.style.borderRadius = '';
     }));
   }
