@@ -339,7 +339,7 @@ body:not(.idle):not(.connecting) .cyan{ animation:none !important; }
 .headline{ opacity:0; }
 body.fill    .l-greet,
 body.connecting .l-nav,
-body.connected .l-hi,
+body.connected .l-greet, body.connected .l-hi,
 body.message .l-msg,
 body.followup .l-fu,
 body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
@@ -401,8 +401,9 @@ body.followup .l-msg em .c{ animation:emGlow 2.4s ease-in-out infinite alternate
 body.fill .l-greet .c{ animation:letterIn 1s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 1750ms); }
 body.fill .l-greet.cyc .c{ animation-delay:calc(var(--t) * 1ms + 500ms); }
 body.fill .l-greet.out .c{ animation:out 1.1s cubic-bezier(.4,0,.6,1) both; animation-delay:calc(var(--t) * .35ms); }   /* 말한 속도보다 빨리 걷힌다 */
-/* 영어 인사 : 기기 번호(Nav 808)가 사라지고 스트로크가 켜진 뒤 1.3s 부터 한 글자씩 천천히 */
-body.connected .l-hi .c{ animation:letterIn 1.05s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 1300ms); }
+/* 영어 인사 : 기기 번호(Nav 808)가 사라지고 스트로크가 켜지면, 엄지척 전 마지막 한국어 문장이 다시 떠 있다가
+   왼→오로 지워지는 흐름을 따라 1.7s 부터 한 글자씩 천천히 */
+body.connected .l-hi .c{ animation:letterIn 1.05s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 1700ms); }
 /* 기기 번호 : 별 모션이 끝난 검정 위에 (호텔 로봇의 Nav/ptn 과 같은 결). 머문 뒤 통째로 사라지고 다음으로 */
 body.connecting .l-nav .c{ animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 2500ms); }
 body.connecting.out .l-nav{ opacity:0; transition:opacity .9s ease; }
@@ -427,9 +428,9 @@ body.follow .navto .c, body.follow .navdest .c, body.bye .navto .c, body.bye .na
   from{ opacity:0; transform:translateY(.42em); filter:blur(10px); }
   to  { opacity:1; transform:none;              filter:blur(0);    }
 }
-/* 인사 전환 (connecting 5600ms) : 글자는 제자리. 움직이는 건 마스크 경계와 투명도.
+/* 인사 전환 (connected 5600ms, 스트로크가 켜지면서) : 글자는 제자리. 움직이는 건 마스크 경계와 투명도.
    바뀌는 건 엄지척 순간 떠 있던 마지막 문구 (한 줄이든 두 줄이든 줄마다)
-     0 ~  900  엄지척 직후 : 구가 아래에서 바로 올라와 화면을 채운다 + 투명한 파장(.ripple)
+     0 ~  900  엄지척 직후 : 구가 아래에서 바로 올라와 화면을 채운다
    900 ~ 1900  스트로크가 가장자리에 차오른다 (0.8배 재생이라 링이 차는 데 1s)
   1100 ~ 3600  윗줄 : 흐린 경계가 왼→오로 천천히 지나가며 한국어를 지운다
   1700 ~ 4400  윗줄 : 같은 속도로 600ms 뒤따르며 영어를 드러낸다 (2.7s : 이름이 천천히 드러나게).
@@ -443,11 +444,11 @@ body.follow .navto .c, body.follow .navdest .c, body.bye .navto .c, body.bye .na
    flex 세로 배치로 겹침을 막아 위아래 여백이 정확히 상쇄되게 */
 .l-greet, .l-hi{ display:flex; flex-direction:column; }   /* stretch : 줄 폭 780 유지 (마스크 경계 정렬) */
 .l-greet .ln, .l-hi .ln{ padding:18px 0; margin:-18px 0; }
-body.connecting .l-greet .ln{
+body.connected .l-greet .ln{
   -webkit-mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
   animation:deLine 5600ms linear both; }
-body.connecting .l-greet .ln + .ln{ animation-delay:600ms; }
+body.connected .l-greet .ln + .ln{ animation-delay:600ms; }
 @keyframes deLine{
   0%, 19.64%   { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
   41.96%       { opacity:.5; }
@@ -479,11 +480,11 @@ body.followup .l-msg em.glim::before, body.followup .l-msg em.glim::after{ opaci
   12% { opacity:1; }
   to  { opacity:1; -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }
 }
-body.connecting .l-greet .ln.glim::before, body.connecting .l-greet .ln.glim::after{ animation:glimKo 5600ms linear both; }
-body.connecting .ln + .ln.glim::before, body.connecting .ln + .ln.glim::after{ animation-delay:600ms; }
+body.connected .l-greet .ln.glim::before, body.connected .l-greet .ln.glim::after{ animation:glimKo 5600ms linear both; }
+body.connected .ln + .ln.glim::before, body.connected .ln + .ln.glim::after{ animation-delay:600ms; }
 @keyframes glimKo{ 0%, 19.64%{ opacity:0; } 41.96%{ opacity:.9; } 64.29%, 100%{ opacity:0; } }
-/* connected 로 넘어갈 때 마스크가 풀리며 한국어가 비치지 않게 즉시 끈다 */
-body.connected .l-greet{ transition:none; }
+/* 지워진 뒤 다음 장면으로 넘어갈 때 마스크가 풀리며 한국어가 비치지 않게 즉시 끈다 (별 모션·기기 번호 동안에도 숨김) */
+body:not(.fill):not(.connected) .l-greet{ transition:none; }
 
 /* ---------- connecting : AE 별 모션 ----------
    검정 위에 얹으므로 screen : 영상의 검은 부분은 배경 그라디언트가 그대로 비친다 */
@@ -491,24 +492,7 @@ body.connected .l-greet{ transition:none; }
        opacity:0; transition:opacity .45s ease; mix-blend-mode:screen; pointer-events:none; }
 /* 새 엄지척 영상(별_1.mp4)은 크롭 단계에서 중심·크기를 맞췄으므로 CSS 보정이 없다.
    실측(인코딩 결과) : 절정 1.9s 에 중심 540.4,541.5 · R 521.7 (스크린 반지름 520) */
-body.connecting .star{ opacity:1; }
-/* 파장 : 구가 아래에서 올라오는 방향 그대로 투명한 물결 앞머리가 화면을 훑는다 (Siri 호출).
-   뒤에 있는 글자와 구를 흐리고 밝혀 굴절처럼 보이게. 중심을 화면 아래 멀리 둔 큰 타원의
-   윗호만 띠로 남겨 가운데가 먼저 올라가는 곡선이 된다 */
-.ripple{ position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0;
-  -webkit-backdrop-filter:blur(5px) brightness(1.2) saturate(1.3);
-          backdrop-filter:blur(5px) brightness(1.2) saturate(1.3);   /* 9px 이면 글자가 통째로 뭉개진다 */
-  -webkit-mask:radial-gradient(110% 105% at 50% 140%, transparent 72%, #000 79%, #000 84%, transparent 91%);
-          mask:radial-gradient(110% 105% at 50% 140%, transparent 72%, #000 79%, #000 84%, transparent 91%); }
-.ripple::after{ content:''; position:absolute; inset:0;
-  background:radial-gradient(110% 105% at 50% 140%, transparent 80%, rgba(255,255,255,.10) 82.5%, transparent 85%); }
-body.connecting .ripple{ animation:rippleUp 1.5s cubic-bezier(.45,0,.25,1) .1s both; }
-@keyframes rippleUp{
-  0%   { opacity:0; transform:translateY(58%); }
-  14%  { opacity:1; }
-  78%  { opacity:1; }
-  100% { opacity:0; transform:translateY(-72%); }
-}
+body.connecting .star{ opacity:1; }   /* 엄지척 뒤엔 영상만 (파장 효과는 뺐다) */
 /* connected · message : 스크린 가장자리에 붙인 스트로크 (가장 밝은 선 약 518 = 가장자리 520, 바깥 글로우는 잘린다) */
 /* z-index 3 : 스크린 안 콘텐츠보다 위, 노치(.bezel z4)보다 아래. screen 합성이라 링 글로우가 아래 것 위에 얹힌다 */
 /* 스트로크 링 (레퍼런스 : 링 빛이 크게 번지고 안쪽은 검은 원이 또렷하게 자른다)
@@ -656,7 +640,6 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
       <div class="pb pb1"></div><div class="pb pb2"></div><div class="pb pb3"></div>
       <div class="sdisc"></div>
     </div>
-    <div class="ripple" aria-hidden="true"></div>
     <!-- 의사 장면 배경 : 피그마 export 를 그대로 옮겼다 (경로·필터·그라디언트 동일) -->
     <div class="sheen"></div>
     <div class="core"></div>
@@ -1000,7 +983,7 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow','bye'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 5200, 5200, 5000, 5200, 6200, 0, 5600];   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 5200, 5600, 5000, 5200, 6200, 0, 5600];   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer, strokeTimer;
 
