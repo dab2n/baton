@@ -114,6 +114,16 @@ body.bare .ring{ display:none; }
 body.bare .toggle .sw{ background:#d6d6d6; }
 body.bare .toggle .sw::after{ transform:none; }
 body.kiosk .toggle, body.shot .toggle{ display:none; }   /* 전체화면·내보내기에선 숨김 */
+/* 장면 바로 가기 : 구간별로 골라 그 자리부터 재생 (디자인 확인용) */
+.jump{ position:fixed; left:16px; top:50%; translate:0 -50%; z-index:10; display:flex; flex-direction:column; gap:4px;
+  padding:6px; border-radius:22px; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,.14); }   /* 왼쪽 세로 (오른쪽 목업 토글과 짝) : 스크린과 겹치지 않게 */
+.jump button{ text-align:left; }
+.jump button{ font:inherit; font-size:12px; font-weight:500; line-height:1; padding:9px 14px; border:0; border-radius:999px;
+  background:transparent; color:#000; cursor:pointer; }
+.jump button:hover{ background:#f2f2f2; }
+.jump button.on{ background:#000; color:#fff; }
+body.device .jump, body.shot .jump{ display:none; }   /* 전체화면에서도 보이고, 실기기(#screen)·내보내기에서만 숨김 */
+.jump, .jump button{ cursor:pointer; }
 body.kiosk{ cursor:none; background:#0B0F18; }   /* 터치/마우스 없는 스크린 */
 body.kiosk .ring{ display:none; }             /* 전체화면 : 목업은 항상 숨김 */
 
@@ -509,7 +519,10 @@ body.connecting .star{ opacity:1; }   /* 엄지척 뒤엔 영상만 (파장 효�
 .pb3{ -webkit-backdrop-filter:blur(11px); backdrop-filter:blur(11px);
   -webkit-mask:radial-gradient(circle at 540px 540px, transparent 436px, #000 470px); mask:radial-gradient(circle at 540px 540px, transparent 436px, #000 470px); }
 /* 검은 원 : 링보다 살짝 작게. 반지름이 숨쉬듯 조금씩 드나들어 빛의 안쪽 경계가 가장자리를 따라 일렁인다 */
-.sdisc{ position:absolute; inset:0; background:#000; clip-path:circle(400px at 540px 540px); }   /* 일렁이는 모양은 JS discLoop */
+/* 일렁이는 모양은 안쪽 <i> 를 자르고(JS discLoop) 바깥을 흐려 가장자리를 부드럽게 : 검은 도형이 있다는 인상 없이 빛이 안쪽으로 스며들게.
+   (한 요소에 흐림과 자르기를 같이 주면 흐린 뒤 잘라 경계가 다시 또렷해진다) */
+.sdisc{ position:absolute; inset:0; filter:blur(10px); }
+.sdisc > i{ position:absolute; inset:0; background:#000; clip-path:circle(398px at 540px 540px); }
 /* 링 빛도 아주 살짝 타원으로 흔들려 검은 원과 어긋나며 굵기가 둘레를 따라 달라진다 */
 .sglow{ animation:ringWob 4.3s ease-in-out infinite; }
 @keyframes ringWob{ 0%, 100%{ scale:1 1; } 25%{ scale:1.012 .992; } 50%{ scale:.994 1.01; } 75%{ scale:1.008 .996; } }
@@ -561,10 +574,12 @@ body.follow .nav > *{ opacity:1; }
 .navarrow{ transform-origin:540px 538.5px; transition:rotate 1.4s cubic-bezier(.4,0,.2,1); }
 /* 도트 : 흰색에 글리밍 (#FEFFF9 번짐 두 겹) */
 .navarrow circle{ fill:#fff; opacity:0; transform-box:fill-box; transform-origin:50% 50%; }
-.navarrow{ filter:drop-shadow(0 0 7px rgba(254,255,249,.5)) drop-shadow(0 0 18px rgba(254,255,249,.25)); }
+.navarrow circle.hollow{ fill:none; stroke:#fff; stroke-width:1.4; }   /* .ring 은 목업 테두리 클래스라 이름을 달리 */
+.navarrow circle.dim{ --o:.22; }
+.navarrow{ filter:drop-shadow(0 0 5px rgba(254,255,249,.45)) drop-shadow(0 0 14px rgba(254,255,249,.2)); }   /* 실루엣처럼 은은한 번짐 */
 /* 첫 등장 : 순서와 간격을 흩어 다다닥 튀어나오게 (--d 는 JS 가 뿌린다) */
 body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
-@keyframes pop{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes pop{ from{ opacity:0; } to{ opacity:var(--o, 1); } }
 /* 위를 향할 땐 가만두지 않고 위로 두 번 쿡쿡 찌르고 쉰다 : 계속 직진.
    translate 는 rotate 바깥에서 먹으므로 화면 기준 위로 움직인다.
    1.2s 늦춰 시작 : 처음엔 도트 등장, 대각선에서 돌아올 땐 회전(1.4s)이 끝나갈 때 */
@@ -605,6 +620,13 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 </head>
 <body class="idle bare">
 
+<nav class="jump" aria-label="장면 바로 가기">
+  <button type="button" data-go="idle">디폴트</button>
+  <button type="button" data-go="connecting">엄지척 인식</button>
+  <button type="button" data-go="connected">스트로크 모션 시작</button>
+  <button type="button" data-go="follow">길안내 시작</button>
+  <button type="button" data-go="end">길안내 끝</button>
+</nav>
 <button class="toggle" type="button" aria-pressed="false">
   <span class="sw"></span><span class="lb">제품 목업</span>
 </button>
@@ -641,7 +663,7 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
       </video>
       </div>
       <div class="pb pb1"></div><div class="pb pb2"></div><div class="pb pb3"></div>
-      <div class="sdisc"></div>
+      <div class="sdisc"><i></i></div>
     </div>
     <!-- 의사 장면 배경 : 피그마 export 를 그대로 옮겼다 (경로·필터·그라디언트 동일) -->
     <div class="sheen"></div>
@@ -708,7 +730,7 @@ const kiosk = () => {
 };
 addEventListener('fullscreenchange', kiosk);
 fs.addEventListener('change', kiosk);
-if (SCREEN) document.body.classList.add('bare');
+if (SCREEN) document.body.classList.add('bare', 'device');
 
 // scale() 은 단위 없는 수만 받으므로 JS로 계산 (CSS calc 로는 px/숫자 → px 라 불가)
 const FILL = .92;   // 미리보기 여백. 실기기(#screen)는 항상 꽉 채움
@@ -819,7 +841,7 @@ const stroke = document.querySelector('.stroke');
 // 검은 원 : 링 안쪽을 또렷하게 자르며 보이스 UI 처럼 일렁인다. 반지름이 숨쉬고(396~405),
 // 둘레는 몇 개의 느린 물결(2·3·5번 굽이)이 서로 다른 속도로 흘러 정원이 아닌 살아 있는 고리가 된다.
 // 영상 속 링의 등장(0~0.75s)은 쓰지 않는다 : 등장은 CSS ringIn 이 가운데에서 부드럽게 키운다
-const sdisc = document.querySelector('.sdisc');
+const sdisc = document.querySelector('.sdisc > i');
 const RSTART = .75;
 stroke.currentTime = RSTART;
 const discLoop = () => {
@@ -854,17 +876,28 @@ const setGauge = v => { gfill.style.strokeDashoffset = v; gglow.style.strokeDash
 const navm  = NAV.querySelector('.navm');
 const navto = NAV.querySelector('.navto');
 
-// 화살표 : 9열 x 11행, 간격 31.5 (예전 5x6 · 63 의 두 배 촘촘), 중심 (540,538). 크기는 예전과 같다
+// 화살표 : 실루엣과 같은 결의 도트 패턴 (칸 17px). 화살표 안은 크고 밝은 원·링이 촘촘히, 둘레는 아주 작고 어두운 점
 {
-  const cells = [];
-  ['....X....', '...XXX...', '..XXXXX..', '.XXXXXXX.', 'XXXXXXXXX',
-   '..XXXXX..', '..XXXXX..', '..XXXXX..', '..XXXXX..', '..XXXXX..', '..XXXXX..'].forEach((row, r) =>
-    [...row].forEach((ch, c) => {
-      if (ch === 'X') cells.push(dot(540 + (c - 4) * 31.5, 380.5 + r * 31.5, 10.5));
-    }));
-  // 등장 순서와 간격을 흩는다 : 규칙적으로 번지지 않고 다다닥 튀어나오게 (도트가 늘어 간격은 좁게)
+  const inArrow = (x, y) => {   // 머리(삼각형) + 몸통 : 크기는 예전 5x6 화살표와 같다
+    if (y >= 505 && y <= 706) return Math.abs(x - 540) <= 64;
+    if (y < 368 || y > 505) return false;
+    return Math.abs(x - 540) <= (y - 368) / 137 * 138;
+  };
+  const C = 17, cells = [];
+  for (let y = 538 - 16 * C; y <= 538 + 16 * C; y += C) for (let x = 540 - 16 * C; x <= 540 + 16 * C; x += C) {
+    const d = Math.hypot(x - 540, y - 538);
+    if (d > 270) continue;
+    const h = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453, f = h - Math.floor(h), g = (f * 7.3) % 1;
+    const inside = inArrow(x, y);
+    const r = inside ? 2.6 + 1.8 * g : .9;
+    const c = dot(x, y, r);
+    if (inside && f < .28) c.classList.add('hollow');   // 실루엣처럼 원의 약 1/4 은 가는 링
+    if (!inside) c.classList.add('dim');
+    cells.push(c);
+  }
+  // 등장 순서와 간격을 흩는다 : 규칙적으로 번지지 않고 다다닥 튀어나오게 (도트가 많아 간격은 촘촘히)
   cells.map(c => [Math.random(), c]).sort((a, b) => a[0] - b[0])
-    .forEach(([, c], i) => c.style.setProperty('--d', (180 + i * 5 + Math.random() * 30 | 0) + 'ms'));
+    .forEach(([, c], i) => c.style.setProperty('--d', (180 + i * 1.6 + Math.random() * 40 | 0) + 'ms'));
   arrowSvg.append(...cells);
 }
 
@@ -930,7 +963,8 @@ const navRun = () => {
   [gfill, gglow].forEach(p => { p.style.transition = ''; });
   shown = -1;
   navto.dataset.t = '';
-  let k = 0;
+  let k = window.__navEnd ? SEQ.length : 0;   // 길안내 끝 버튼 : 도착으로 바로
+  window.__navEnd = false;
   const tick = () => {
     if (k >= SEQ.length) {
       setGauge(0);
@@ -1133,6 +1167,23 @@ if (SOLO !== null) { body.classList.add('bare','shot'); fit(); go(+SOLO); clearT
 else go(0);   // 접속하자마자 자동 시퀀스 시작
 
 // 목업 테두리 토글 : --fit 이 바뀌므로 fit() 재계산
+const jump = document.querySelector('.jump');
+jump.addEventListener('pointerdown', e => e.stopPropagation());
+jump.addEventListener('click', e => {
+  const k = e.target.dataset?.go;
+  if (!k) return;
+  if (k === 'end') window.__navEnd = true;
+  go(STEPS.indexOf(k === 'end' ? 'follow' : k));
+});
+const markJump = () => {
+  const cur = STEPS[step()], navEnd = cur === 'follow' && NAV.classList.contains('arrived') || cur === 'bye';
+  for (const b of jump.children) b.classList.toggle('on',
+    b.dataset.go === 'end' ? navEnd :
+    b.dataset.go === 'connected' ? ['connected', 'message', 'followup', 'guide'].includes(cur) :
+    b.dataset.go === 'follow' ? cur === 'follow' && !navEnd :
+    b.dataset.go === 'idle' ? ['idle', 'fill'].includes(cur) : b.dataset.go === cur);
+};
+setInterval(markJump, 250);
 const toggle = document.querySelector('.toggle');
 toggle.addEventListener('pointerdown', e => e.stopPropagation());
 toggle.addEventListener('click', () => {
