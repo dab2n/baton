@@ -206,10 +206,14 @@ body.idle       .field{ transform:translate(1px,145.5px) scale(.22); }
 /* 1.14 = 1022x1053 타원이 지름 1080 원을 완전히 덮는 배율(블러 39px 여유 포함) */
 /* 기본 화면은 검정 : 구슬은 idle 크기 그대로 조용히 사라진다 */
 /* 얼굴이 가까워지면(fill) 구슬이 사라지지 않고 화면을 채우며 커진다. 대신 옅게 해서 화면은 어둡게 유지 */
-body.fill       .field{ transform:translate(1px,145.5px) scale(.06); opacity:0; }   /* 원은 그 자리에서 어두워지며 작아져 사라진다 (커지며 흰 원이 되던 것 대신) */
+body.fill       .field{ transform:translate(1px,145.5px) scale(.16); opacity:0; }   /* 원은 조금 작아지고 흐려지며 어두워진다 : 뒤로 물러나는 느낌. 돌아올 땐 반대로 뒤에서 앞으로 */
+body.fill       .blur39{ filter:blur(30px); transition-delay:0s; }
 /* 구슬이 커질 때도 위아래 띠는 보여야 한다. 다만 구슬과 겹쳐 색이 뜨지 않게 살짝만 낮춘다 */
-body.fill .screen::before, body.fill .screen::after{ opacity:.85; }
-body.fill .rimlight{ opacity:.35; }
+body.fill .screen::before, body.fill .screen::after{ opacity:0; transition:none; }   /* 얼굴 근접 : 띠는 캔버스(.bandc)가 12시부터 한 바퀴 그리며 */
+.bandc{ position:absolute; inset:0; width:1080px; height:1080px; pointer-events:none; opacity:0; }
+body.fill .bandc{ opacity:.85; }
+@keyframes rimIn{ 0%, 15%{ opacity:0; } 100%{ opacity:.35; } }
+body.fill .rimlight{ opacity:.35; animation:rimIn 2s both, rimOrbit 18s linear infinite; }
 /* connecting : 엄지척 순간 구슬은 그 자리·그 모습(노랑) 그대로 옅어지며 사라진다.
    예전엔 커지고(.58) 더 흐려지며(39px) 흰 덩어리로 번져 별 모션을 흐렸다 */
 body.connecting .field{ transform:translate(1px,145.5px) scale(.22); transition-duration:1.8s, .6s, 1.2s, 1.2s, 1.2s, 1.2s; }
@@ -315,7 +319,7 @@ body:not(.idle):not(.connecting) .cyan{ animation:none !important; }
 .headline{
   position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   margin:0; width:780px; text-align:center;
-  font-size:39px; font-weight:500; line-height:1.8; color:#fff;   /* 링(R 380) 안 : 가장 긴 줄 끝이 중심에서 300 이내 */
+  font-size:36px; font-weight:500; line-height:1.8; color:#fff;   /* 영문 문장은 모두 36px (링 R 410 안 : 가장 긴 줄 끝이 중심에서 330 이내) */
   transition:opacity .8s ease;
 }
 /* inline-block : 인라인 em 의 박스는 줄 상자보다 10px 아래에서 시작해 글리밍 겹이 그만큼 내려갔다.
@@ -341,9 +345,9 @@ body:not(.idle):not(.connecting) .cyan{ animation:none !important; }
   -webkit-mask-image:linear-gradient(90deg,transparent 5%,#000 45%), linear-gradient(90deg,#000 0 68%, transparent 100%);
           mask-image:linear-gradient(90deg,transparent 5%,#000 45%), linear-gradient(90deg,#000 0 68%, transparent 100%); }
 /* 기록 → 재진 : 카드 없이 문장만. 첫 문장은 화면 가운데 한 줄, 다음 문장이 나오면 첫 문장이 위로 한 칸
-   올라가 두 줄이 되고 둘이 함께 화면 가운데에 놓인다 (32px × 행간 1.8 = 줄 상자 57.6 → 반씩 ±28.8) */
-.l-msg, .l-fu{ width:auto; white-space:nowrap; font-size:32px; }   /* 링(R 380) 안쪽 흐림에 닿지 않게 : 긴 줄 끝이 중심에서 300 이내 */
-.l-fu{ translate:0 28.8px; }
+   올라가 두 줄이 되고 둘이 함께 화면 가운데에 놓인다 (36px × 행간 1.8 = 줄 상자 64.8 → 반씩 ±32.4) */
+.l-msg, .l-fu{ width:auto; white-space:nowrap; font-size:36px; }
+.l-fu{ translate:0 32.4px; }
 
 /* 장면당 한 문장. 들어올 때는 즉시, 나갈 때만 천천히 사라진다 */
 .headline{ opacity:0; }
@@ -353,11 +357,11 @@ body.message .l-msg,
 body.followup .l-fu,
 body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
 /* 첫 문장은 켠 채로 위로 올라간다 (다음 문장의 첫 글자보다 먼저 자리를 비켜 준다) */
-body.followup .l-msg{ opacity:1; translate:0 -28.8px;
+body.followup .l-msg{ opacity:1; translate:0 -32.4px;
   transition:translate .8s cubic-bezier(.45,0,.2,1), opacity .15s ease; }
 /* 다음 장면으로 넘어가며 사라질 때도 윗줄은 제자리 : 이 규칙이 없으면 translate 가 0 으로 튀어
    두 줄 간격이 갑자기 좁아진 채 흐려졌다. 강조어 번짐도 그대로 이어서 흐려지게 */
-body.guide .l-msg{ translate:0 -28.8px; }
+body.guide .l-msg{ translate:0 -32.4px; }
 body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-out infinite alternate; animation-delay:calc(var(--ei) * 90ms); }
 
 /* 기본 화면 문구 (피그마 3124:17778) : Delight Semi Bold 67.3px.
@@ -367,6 +371,7 @@ body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-o
                   font-size:67.319px; font-weight:600; line-height:1.5; }
 .l-greet, .l-hi{ font-size:48px; line-height:1.6; }   /* 두 줄 : 한국어·영어가 줄끼리 겹친다 */
 .l-greet{ line-height:1.42; }   /* 한글은 행간을 좁게 : 두 언어의 차(0.18)를 유지해 줄끼리 겹치게 */
+.l-hi{ font-size:36px; line-height:1.8; }   /* 영문 문장은 모두 36px · 행간 1.8 */
 /* 두 문구의 박스를 같은 폭으로 : 지우개 경계가 화면 같은 x 를 지나가게 */
 .l-greet, .l-hi{ width:780px; }
 /* 피그마 원본은 아래로 #353046 까지 어두워지는 그라디언트인데, 검은 화면에선 글자 아랫부분이 배경에 묻혀
@@ -407,7 +412,7 @@ body.message .l-msg em .c, body.followup .l-fu em .c, body.guide .l-guide em .c{
   animation-delay:calc(var(--t) * 1ms + var(--base)), calc(var(--ei) * 90ms + var(--t0) * 1ms + var(--base) + .95s); }
 body.followup .l-msg em .c{ animation:emGlow 2.4s ease-in-out infinite alternate; animation-delay:calc(var(--ei) * 90ms); }
 /* 한국어 문구 : 원이 다 찬 뒤(1.75s) 한 글자씩. 교체 때는 앞 문구가 한 글자씩 사라지는 동안 다음 문구가 한 글자씩 */
-body.fill .l-greet .c{ animation:letterIn 1s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 1100ms); }
+body.fill .l-greet .c{ animation:letterIn 1s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 2000ms); }   /* 색 띠가 한 바퀴 돈 뒤 */
 body.fill .l-greet.cyc .c{ animation-delay:calc(var(--t) * 1ms + 500ms); }
 /* 반응이 없으면(15s) 또는 사람이 보이지 않으면(4s) 문구가 아래로 빠지며 기본 화면으로 */
 body.fill.leave .l-greet{ translate:0 110px; opacity:0; transition:translate .8s cubic-bezier(.55,0,.8,.35), opacity .7s ease; }
@@ -422,6 +427,12 @@ body.connecting .silc{ opacity:1; }
 body.connecting .silc:not(.glow){ animation:silFocus 1.6s cubic-bezier(.3,0,.2,1) 2.2s both; }
 @keyframes silFocus{ from{ filter:blur(6px); } to{ filter:blur(0); } }   /* 초점이 잡히듯 */
 body.connecting .silc.glow{ opacity:.32; }
+/* 두 줄 문장 원칙 : 첫 줄이 스크린 가운데에 먼저 쓰이고, 둘째 줄이 나오기 직전 반 줄(0.5lh) 위로 올라간다 */
+@keyframes lineUp{ from{ translate:0 .5lh; } to{ translate:0 0; } }
+body.fill .l-greet.two{ animation:lineUp .6s cubic-bezier(.4,0,.2,1) both; animation-delay:calc(var(--t2) * 1ms + 1880ms); }
+body.fill .l-greet.two.cyc{ animation-delay:calc(var(--t2) * 1ms + 380ms); }
+body.connected .l-hi.two{ animation:lineUp .6s cubic-bezier(.4,0,.2,1) both; animation-delay:calc(var(--t2) * .77ms + 780ms); }
+body.guide .l-guide.two{ animation:lineUp .6s cubic-bezier(.4,0,.2,1) both; animation-delay:calc(var(--t2) * 1ms + 580ms); }
 /* 길안내 라벨 */
 body.follow .navto .c, body.follow .navdest .c, body.bye .navto .c, body.bye .navdest .c{ animation:letterIn .75s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 200ms); }
 /* 인사 문구는 제자리에서 나타나고 사라진다 (위→아래·왼→오른쪽 순서는 --i 그대로).
@@ -448,7 +459,7 @@ body.follow .navto .c, body.follow .navdest .c, body.bye .navto .c, body.bye .na
                한 자리에 두 언어가 같이 보이는 순간이 없다
   +600ms       아랫줄은 0.6초 늦게 : 위→아래 순서
    마스크는 줄(.ln)마다. 폭 300% 그라디언트(가운데 10% 가 흐린 경계)를 85%→15% 로 민다 */
-.l-greet .ln, .l-hi .ln{ display:block; }
+.l-greet .ln, .l-hi .ln, .l-guide .ln{ display:block; }
 /* 번짐이 줄 박스(마스크 영역) 위아래에서 잘리지 않게 여유를 준다. 배치는 그대로.
    블록끼리는 줄 사이 음수 여백이 겹쳐(margin collapse) 18px 이 한 번만 빠져 줄 간격이 벌어진다 →
    flex 세로 배치로 겹침을 막아 위아래 여백이 정확히 상쇄되게 */
@@ -621,9 +632,9 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 <body class="idle bare">
 
 <nav class="jump" aria-label="장면 바로 가기">
-  <button type="button" data-go="idle">디폴트</button>
-  <button type="button" data-go="connecting">엄지척 인식</button>
-  <button type="button" data-go="connected">스트로크 모션 시작</button>
+  <button type="button" data-go="idle">대기 상태</button>
+  <button type="button" data-go="connecting">맥락 전달</button>
+  <button type="button" data-go="connected">대화 시작</button>
   <button type="button" data-go="follow">길안내 시작</button>
   <button type="button" data-go="end">길안내 끝</button>
 </nav>
@@ -643,6 +654,7 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
   <div class="ring"></div>
 
   <div class="screen">
+    <canvas class="bandc" width="540" height="540" aria-hidden="true"></canvas>
     <div class="rimlight" aria-hidden="true"></div>
     <div class="blur39"><div class="field"></div></div>
     <canvas class="silc glow" width="1080" height="1080" aria-hidden="true"></canvas>
@@ -678,10 +690,7 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
     <p class="headline l-msg reveal">Your last appointment was on <em>July&nbsp;20.</em></p>
     <p class="headline l-fu reveal">Today is your <em>2nd</em> follow-up.</p>
 
-    <p class="headline l-guide reveal">
-      I&rsquo;ll take you to the <em>waiting area.</em><br>
-      Please follow me slowly.
-    </p>
+    <p class="headline l-guide reveal"><span class="ln">I&rsquo;ll take you to the <em>waiting area.</em></span><span class="ln">Please follow me slowly.</span></p>
 
 
     <div class="nav">
@@ -823,6 +832,10 @@ const letters = (el, rate = 1) => {
     const pause = Math.max(/[.?!]$/.test(text) ? 450 : 0, lineBreak ? 380 : 0);
     t += (STEP + pause) * rate;   // 띄어쓰기 한 칸 + (문장 끝·줄바꿈이면) 한 박자
   });
+  // 두 줄 : 둘째 줄 첫 글자 시각(--t2). 그때 문장이 반 줄 위로 올라가 두 줄이 함께 가운데에 선다
+  const lns = el.querySelectorAll('.ln');
+  el.classList.toggle('two', lns.length > 1);
+  if (lns.length > 1) el.style.setProperty('--t2', lns[1].querySelector('.c')?.style.getPropertyValue('--t') ?? 0);
   el.querySelectorAll('em').forEach(em => {
     const cs = [...em.querySelectorAll('.c')];
     if (!cs.length) return;
@@ -1016,6 +1029,7 @@ const setAsk = (k, first) => {
     return l;
   }));
   split(cur); letters(cur);
+  cur.style.animation = 'none'; cur.offsetWidth; cur.style.animation = '';   // 새 문구 : 두 줄 이동도 처음부터
   clearTimeout(clearTimer);
   if (!first) clearTimer = setTimeout(() => prev.replaceChildren(), 2000);   // 다 사라진 뒤 비운다
   askSlot = i;
@@ -1113,6 +1127,65 @@ const silRun = () => {
   frame();
 };
 
+// ---------- 얼굴 근접(fill) 의 색 띠 (캔버스, 호텔 로봇 연결 장면과 같은 그리기) ----------
+// 0.3s : 12시부터 시계 방향으로 1.7s 동안 한 바퀴 (머리 30° 흐림, 한 바퀴를 채우면 꼬리도 메워 이음매 없이)
+//        도는 동안 두 띠를 옆구리까지 넓혀(ext 1) 둘레가 한 줄로 이어지게 → 2.0s 부터 1.4s 동안 원래 위·아래로 물러남
+// leave : 문구가 빠질 때 .8s 동안 옅어진다
+const bandc = document.querySelector('.bandc'), bx = bandc.getContext('2d');
+const bandTmp = new OffscreenCanvas(540, 540), tx = bandTmp.getContext('2d');
+const bez = (x1, y1, x2, y2) => x => {   // CSS cubic-bezier 와 같은 곡선
+  let lo = 0, hi = 1, t = x;
+  for (let i = 0; i < 24; i++) { t = (lo + hi) / 2; const bx = 3 * x1 * t * (1 - t) ** 2 + 3 * x2 * t * t * (1 - t) + t ** 3; bx < x ? lo = t : hi = t; }
+  return 3 * y1 * t * (1 - t) ** 2 + 3 * y2 * t * t * (1 - t) + t ** 3;
+};
+const sweepEase = bez(.45, .05, .25, 1), extEase = bez(.4, 0, .2, 1);
+const clamp01 = v => Math.min(1, Math.max(0, v));
+const BANDS = [
+  { stops: [[.68, 'rgba(22,33,58,0)'], [.86, 'rgba(20,29,50,.4)'], [.97, '#16213A'], [1, '#16213A']],
+    lin: e => [[0, 1], [.07 + .29 * e, 1], [.18 + .32 * e, .7], [.32 + .34 * e, 0]], top: true },
+  { stops: [[.70, 'rgba(43,49,60,0)'], [.87, 'rgba(39,45,55,.4)'], [.97, '#2B313C'], [1, '#2B313C']],
+    lin: e => [[0, 1], [.06 + .30 * e, 1], [.17 + .33 * e, .72], [.30 + .36 * e, 0]], top: false },
+];
+const drawBands = (a0, a1, ext, alpha) => {
+  bx.clearRect(0, 0, 540, 540);
+  if (alpha <= 0 || a1 <= a0) return;
+  // 원뿔 마스크 (각도는 12시 기준, 시계 방향) : 꼬리 a0 → +30° 불투명 … 머리 a1-30° → a1 투명
+  const p = a => clamp01(a / 360);
+  const o1 = p(Math.min(a0 + 30, a1 - 30)), o2 = Math.max(o1, p(a1 - 30)), o3 = Math.max(o2, p(a1));
+  const cone = tx.createConicGradient(-Math.PI / 2, 270, 270);
+  cone.addColorStop(p(a0), 'rgba(0,0,0,0)'); cone.addColorStop(Math.max(p(a0), o1), '#000');
+  cone.addColorStop(o2, '#000'); cone.addColorStop(o3, 'rgba(0,0,0,0)');
+  for (const B of BANDS) {
+    tx.globalCompositeOperation = 'source-over'; tx.clearRect(0, 0, 540, 540);
+    const rg = tx.createRadialGradient(270, 270, 0, 270, 270, 265);
+    B.stops.forEach(([o, c]) => rg.addColorStop(o, c));
+    tx.fillStyle = rg; tx.fillRect(0, 0, 540, 540);
+    tx.globalCompositeOperation = 'destination-in';
+    const lg = B.top ? tx.createLinearGradient(0, 0, 0, 540) : tx.createLinearGradient(0, 540, 0, 0);
+    B.lin(ext).forEach(([o, a]) => lg.addColorStop(clamp01(o), `rgba(0,0,0,${a})`));
+    tx.fillStyle = lg; tx.fillRect(0, 0, 540, 540);
+    tx.fillStyle = cone; tx.fillRect(0, 0, 540, 540);
+    bx.globalAlpha = alpha; bx.drawImage(bandTmp, 0, 0); bx.globalAlpha = 1;
+  }
+};
+let bandRAF;
+const bandsRun = () => {
+  cancelAnimationFrame(bandRAF);
+  const t0 = performance.now(); let outAt = 0;
+  const frame = () => {
+    if (!body.classList.contains('fill')) { bx.clearRect(0, 0, 540, 540); return; }
+    const t = (performance.now() - t0) / 1000;
+    const a1 = 390 * sweepEase(clamp01((t - .3) / 1.7));
+    const a0 = t < 1.7 ? 0 : -30 * clamp01((t - 1.7) / .3);
+    const ext = t < 2 ? 1 : 1 - extEase(clamp01((t - 2) / 1.4));
+    if (body.classList.contains('leave') && !outAt) outAt = t;
+    const alpha = outAt ? 1 - clamp01((t - outAt) / .8) : 1;
+    drawBands(a0, a1, ext, alpha);
+    bandRAF = requestAnimationFrame(frame);
+  };
+  frame();
+};
+
 const go = n => {
   clearTimeout(timer);
   // idle 에서 나갈 때 : 배회 애니메이션을 끊으면 translate 가 0 으로 튀어 다른 물체처럼 보인다.
@@ -1129,7 +1202,7 @@ const go = n => {
     }));
   }
   body.classList.remove('out', 'leave');
-  if (STEPS[n] === 'fill') { window.__fillAt = performance.now(); timer = setTimeout(leaveFill, 15000); }
+  if (STEPS[n] === 'fill') { window.__fillAt = performance.now(); timer = setTimeout(leaveFill, 15000); requestAnimationFrame(bandsRun); }
   body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|followup|guide|follow|bye)\b/, STEPS[n]);
   if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); silRun(); }
