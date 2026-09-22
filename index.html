@@ -586,24 +586,24 @@ body.bye .nav > *, body.bye .screen::before, body.bye .screen::after, body.bye .
 body.follow .nav > *{ opacity:1; }
 .navgauge, .navglow, .navarrow, .navdigits{ position:absolute; inset:0; width:1080px; height:1080px; }
 
-/* 게이지 : 화면 중심(540,540) 반지름 475 원호. 아래 정중앙 → 우측 목적지 */
+/* 게이지 : 피그마 3499:7361 — 중심 (535.5,539.5) 반지름 481.7 굵기 23.6. 아래 정중앙 → 위 끝(1014.6,589) 은 핀 꼭짓점 바로 아래.
+   남은 길(트랙)은 채움과 이어 붙지 않고 틈(GAP)을 두고 끊겨 있다 */
 .navgauge{ fill:none; stroke-linecap:round; }
-.gtrack{ stroke:rgba(255,255,255,.07); stroke-width:28; }   /* 채움이 흰색으로 도드라지게 트랙은 거의 안 보이도록 */
+.gtrack{ stroke:rgba(255,255,255,.2); stroke-width:23.6; stroke-dasharray:0 200; transition:stroke-dasharray .5s cubic-bezier(.3,.9,.3,1), stroke-dashoffset .5s cubic-bezier(.3,.9,.3,1); }
 /* 채움 글리밍 : 글자와 같은 #FEFFF9 겹을 흐리게 깔고, 화면 오른쪽(진행 방향)으로 갈수록 짙게 */
 .navglow{ pointer-events:none; filter:blur(8px);
   -webkit-mask:linear-gradient(90deg,transparent 10%,#000 90%); mask:linear-gradient(90deg,transparent 10%,#000 90%); }
 .navglow{ filter:blur(6px); }
-.gglow{ fill:none; stroke:#FEFFF9; stroke-width:34; stroke-linecap:round; opacity:.8;
+.gglow{ fill:none; stroke:#FEFFF9; stroke-width:28; stroke-linecap:round; opacity:.8;
         stroke-dasharray:100; stroke-dashoffset:100; transition:stroke-dashoffset .5s cubic-bezier(.3,.9,.3,1); }
-.gfill { stroke:#fff; stroke-width:30; stroke-dasharray:100; stroke-dashoffset:100;
+.gfill { stroke:#fff; stroke-width:23.6; stroke-dasharray:100; stroke-dashoffset:100;
           transition:stroke-dashoffset .5s cubic-bezier(.3,.9,.3,1); }
 
 /* 화살표 도트 : 그룹째 회전한다 (다리가 바뀔 때 부드럽게) */
 .navarrow{ transform-origin:540px 538.5px; transition:rotate 1.4s cubic-bezier(.4,0,.2,1); }
 /* 도트 : 흰색에 글리밍 (#FEFFF9 번짐 두 겹) */
 .navarrow circle{ fill:#fff; opacity:0; transform-box:fill-box; transform-origin:50% 50%; }
-.navarrow circle.hollow{ fill:none; stroke:#fff; stroke-width:1.4; }   /* .ring 은 목업 테두리 클래스라 이름을 달리 */
-.navarrow{ filter:drop-shadow(0 0 5px rgba(254,255,249,.45)) drop-shadow(0 0 14px rgba(254,255,249,.2)); }   /* 실루엣처럼 은은한 번짐 */
+.navarrow{ filter:drop-shadow(0 0 7px rgba(254,255,249,.5)) drop-shadow(0 0 18px rgba(254,255,249,.25)); }
 /* 첫 등장 : 순서와 간격을 흩어 다다닥 튀어나오게 (--d 는 JS 가 뿌린다) */
 body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 @keyframes pop{ from{ opacity:0; } to{ opacity:var(--o, 1); } }
@@ -717,10 +717,10 @@ html:not(.fb-dot) .navdigits{ display:none; }
 
     <div class="nav">
       <!-- 게이지 : 스크린 아래 정중앙(540,1015 · 반지름 475 원의 90°)에서 출발해 오른쪽 목적지 핀까지 -->
-      <svg class="navglow" viewBox="0 0 1080 1080" aria-hidden="true"><path class="gglow" d="M540 1015A475 475 0 0 0 1011.2 600.4" pathLength="100"/></svg>
+      <svg class="navglow" viewBox="0 0 1080 1080" aria-hidden="true"><path class="gglow" d="M535.5 1021.2A481.7 481.7 0 0 0 1014.6 589" pathLength="100"/></svg>
       <svg class="navgauge" viewBox="0 0 1080 1080" aria-hidden="true">
-        <path class="gtrack" d="M540 1015A475 475 0 0 0 1011.2 600.4"/>
-        <path class="gfill"  d="M540 1015A475 475 0 0 0 1011.2 600.4" pathLength="100"/>
+        <path class="gtrack" d="M535.5 1021.2A481.7 481.7 0 0 0 1014.6 589" pathLength="100"/>
+        <path class="gfill"  d="M535.5 1021.2A481.7 481.7 0 0 0 1014.6 589" pathLength="100"/>
       </svg>
       <svg class="navarrow"  viewBox="0 0 1080 1080" aria-hidden="true"></svg>
       <svg class="navdigits" viewBox="0 0 1080 1080" aria-hidden="true"></svg>
@@ -909,29 +909,28 @@ const arrowSvg  = NAV.querySelector('.navarrow');
 const digitsSvg = NAV.querySelector('.navdigits');
 const gfill = NAV.querySelector('.gfill');
 const gglow = NAV.querySelector('.gglow');
-const setGauge = v => { gfill.style.strokeDashoffset = v; gglow.style.strokeDashoffset = v; };
+const gtrack = NAV.querySelector('.gtrack');
+const GAP = 4.5;   // 채움 끝과 남은 길 사이 틈 (둥근 끝 두 개가 약 6px 떨어져 보이는 길이, 전체 100 기준)
+const setGauge = v => {
+  gfill.style.strokeDashoffset = v; gglow.style.strokeDashoffset = v;
+  const done = 100 - v;   // 채워진 길이 → 남은 길은 그 뒤 틈을 두고 끝까지
+  gtrack.style.strokeDasharray = `${Math.max(0, 100 - done - GAP)} 200`;
+  gtrack.style.strokeDashoffset = -(done + GAP);
+};
 const navm  = NAV.querySelector('.navm');
 const navnum = NAV.querySelector('.navnum');
 const navto = NAV.querySelector('.navto');
 
-// 화살표 : 실루엣과 같은 결의 도트 패턴 (칸 12.5px). 화살표 안만 원이 촘촘히, 링은 드물게
+// 화살표 : 원본 (피그마) 5열 x 6행 · 도트 18개, 간격 62.914, 중심 (540,538.5)
 {
-  const inArrow = (x, y) => {   // 머리(삼각형) + 몸통 : 크기는 예전 5x6 화살표와 같다
-    if (y >= 505 && y <= 706) return Math.abs(x - 540) <= 64;
-    if (y < 368 || y > 505) return false;
-    return Math.abs(x - 540) <= (y - 368) / 137 * 138;
-  };
-  const C = 12.5, cells = [];
-  for (let y = 538 - 22 * C; y <= 538 + 22 * C; y += C) for (let x = 540 - 22 * C; x <= 540 + 22 * C; x += C) {
-    const h = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453, f = h - Math.floor(h), g = (f * 7.3) % 1;
-    if (!inArrow(x, y)) continue;   // 배경 점은 깔지 않는다
-    const c = dot(x, y, 2.3 + 1.5 * g);   // 크기는 조금씩 다르게
-    if (f < .08) c.classList.add('hollow');   // 링은 드물게
-    cells.push(c);
-  }
-  // 등장 순서와 간격을 흩는다 : 규칙적으로 번지지 않고 다다닥 튀어나오게 (도트가 많아 간격은 촘촘히)
+  const cells = [];
+  ['..X..', '.XXX.', 'XXXXX', '.XXX.', '.XXX.', '.XXX.'].forEach((row, r) =>
+    [...row].forEach((ch, c) => {
+      if (ch === 'X') cells.push(dot(540 + (c - 2) * 62.914, 380.5 + r * 62.914, 25.4652));
+    }));
+  // 등장 순서와 간격을 흩는다 : 규칙적으로 번지지 않고 다다닥 튀어나오게
   cells.map(c => [Math.random(), c]).sort((a, b) => a[0] - b[0])
-    .forEach(([, c], i) => c.style.setProperty('--d', (180 + i * 1.6 + Math.random() * 40 | 0) + 'ms'));
+    .forEach(([, c], i) => c.style.setProperty('--d', (180 + i * 13 + Math.random() * 34 | 0) + 'ms'));
   arrowSvg.append(...cells);
 }
 
@@ -994,9 +993,10 @@ const navRun = () => {
   NAV.classList.remove('arrived');
   // 게이지는 반드시 빈 상태에서 시작 : 지난 바퀴의 가득 찬 값(0)에서 transition 으로 줄어드는 모습이
   // 등장하자마자 보이던 오류. transition 을 끈 채 100 으로 되돌리고 다시 켠다
-  [gfill, gglow].forEach(p => { p.style.transition = 'none'; p.style.strokeDashoffset = 100; });
+  [gfill, gglow, gtrack].forEach(p => { p.style.transition = 'none'; });
+  setGauge(100);
   gfill.getBoundingClientRect();
-  [gfill, gglow].forEach(p => { p.style.transition = ''; });
+  [gfill, gglow, gtrack].forEach(p => { p.style.transition = ''; });
   shown = -1;
   navto.dataset.t = '';
   let k = window.__navEnd ? SEQ.length : 0;   // 길안내 끝 버튼 : 도착으로 바로
