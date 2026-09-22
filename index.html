@@ -29,6 +29,9 @@ body.shot{ --fit: 1080; }
 
 /* 한국어 : SF Pro KR. 재배포 불가 라이선스라 fonts/ 는 저장소에 올리지 않는다(.gitignore).
    파일이 없으면(배포본) Pretendard 로 떨어진다. 한글·한글 문장부호만 이 폰트로 */
+/* 길안내 숫자 OffBit Dot Bold(체험판) · 'min' Helvetica Now Display Bold : 이 맥에 설치된 것만 쓴다 (없으면 숫자는 도트 SVG 로) */
+@font-face{ font-family:'OffBit Dot'; font-weight:700; src:local('OffBitTrial-DotBold'), local('OffBit Trial Dot Bold'); }
+@font-face{ font-family:'Helvetica Now Bold'; font-weight:700; src:local('HelveticaNowDisplay-Bold'), local('Helvetica Now Display Bold'); }
 @font-face{ font-family:'SF Pro KR'; font-weight:600; font-display:block;
   src:url('fonts/SFProKR-Semibold.otf') format('opentype');
   unicode-range:U+1100-11FF, U+3130-318F, U+AC00-D7A3; }
@@ -54,7 +57,8 @@ body{
    글자 크기가 다른 곳에서 비율이 어긋난다. 요소마다 em 을 다시 풀어준다 */
 .device, .device *{ letter-spacing:0.03em; }
 /* 영문 문장·길안내 라벨 : Magnetik 자간 -2% (한글 안내는 위 값 그대로) */
-.headline:not(.l-greet), .headline:not(.l-greet) *, .navm, .navto, .navto *, .navdest, .navdest *{ letter-spacing:-0.02em; }
+.headline:not(.l-greet), .headline:not(.l-greet) *, .navto, .navto *, .navdest, .navdest *{ letter-spacing:-0.02em; }
+.navm{ letter-spacing:-0.01em; }
 
 /* ---------- 폰트 대체 : 배포 링크를 다른 컴퓨터에서 열 때 ----------
    Magnetik(영문)이나 SF Pro KR(한글)이 없으면 JS 가 html 에 fb-en / fb-ko 를 달고 그 글자만 Pretendard 로.
@@ -380,11 +384,11 @@ body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-o
 /* Magnetik 의 T·J 등은 글자 상자 밖으로 삐져나와 background-clip:text 에 잘린다 → 칠할 영역만 양옆으로 넓힌다 (배치는 그대로) */
 .headline:not(.l-greet) .c{ padding:0 .08em; margin:0 -.08em; }
 /* 스트로크가 켜진 뒤의 문장 : 링 빛처럼 흰빛에서 아래로 옅은 청록, 은은한 번짐. 강조어는 같은 계열의 색 번짐 */
-.l-hi .c, .l-msg .c, .l-fu .c, .l-guide .c{ background:linear-gradient(180deg,#fff 0 38%,#e3f8fd 64%,rgba(186,232,246,.8) 100%); }
-.l-hi em .c, .l-msg em .c, .l-fu em .c, .l-guide em .c{ background:none; color:#f4feff; }
-.l-hi, .l-msg, .l-fu, .l-guide{ filter:drop-shadow(0 0 .2em rgba(150,222,244,.26)); }
-.l-msg em.glim::before, .l-msg em.glim::after, .l-fu em.glim::before, .l-fu em.glim::after,
-.l-guide em.glim::before, .l-guide em.glim::after{ color:#9fe9ff; }
+.l-hi .c, .l-msg .c, .l-fu .c, .l-guide .c{ background:linear-gradient(180deg,#fff 0 32%,#fcf9ea 52%,#e2f6fb 74%,rgba(186,232,246,.8) 100%); }   /* 흰빛 → 아주 옅은 노랑 → 옅은 청록 */
+.l-hi em .c, .l-msg em .c, .l-fu em .c, .l-guide em .c{ background:none; color:#fffdf0; }   /* 강조어 : 아주 옅은 노란 흰빛 */
+.l-hi, .l-msg, .l-fu, .l-guide{ filter:drop-shadow(0 0 .18em rgba(160,222,242,.16)) drop-shadow(0 0 .34em rgba(255,236,172,.16)); }
+.l-msg em.glim::before, .l-fu em.glim::before, .l-guide em.glim::before{ color:#d9f5ff; }   /* 안쪽 겹 : 옅은 청록 */
+.l-msg em.glim::after,  .l-fu em.glim::after,  .l-guide em.glim::after { color:#ffe9a8; }   /* 바깥 번짐 : 아주 옅은 노랑 */
 
 /* 모션: DOM 순서 = 위 → 아래, 왼 → 오른쪽 */
 .w{ display:inline-block; }   /* 단어는 줄바꿈 묶음만. 보이기·애니메이션은 글자(.c)에서 */
@@ -407,8 +411,8 @@ body.message .l-msg .c, body.followup .l-fu .c, body.guide .l-guide .c{
 .l-guide{ --base:700ms; }   /* 앞 두 줄이 사라진 뒤 */
 /* 강조어 : 켜진 뒤에도 비눗방울 번짐이 글자를 따라 물결처럼 일렁인다 (글자마다 90ms 씩 늦게 시작해 흐른다) */
 @keyframes emGlow{
-  from{ filter:blur(0) drop-shadow(0 0 .5px var(--g1)) drop-shadow(0 0 1.2px var(--g2)); }
-  to  { filter:blur(0) drop-shadow(0 0 1.6px var(--g1)) drop-shadow(0 0 4px var(--g2)); }   /* 가장자리만 얇게 일렁인다 */
+  from{ filter:blur(0) drop-shadow(0 0 .4px var(--g1)) drop-shadow(0 0 1px var(--g2)); }
+  to  { filter:blur(0) drop-shadow(0 0 1.1px var(--g1)) drop-shadow(0 0 2.6px var(--g2)); }   /* 가장자리만 얇게 일렁인다 (가독성을 위해 약하게) */
 }
 body.message .l-msg em .c, body.followup .l-fu em .c, body.guide .l-guide em .c{
   animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both, emGlow 2.4s ease-in-out infinite alternate;
@@ -495,14 +499,15 @@ body.connected .l-greet .ln + .ln{ animation-delay:460ms; }
 body.message  .l-msg em.glim::before,  body.message  .l-msg em.glim::after,
 body.followup .l-fu em.glim::before,   body.followup .l-fu em.glim::after,
 body.guide    .l-guide em.glim::before, body.guide   .l-guide em.glim::after{
-  animation:glimWipe calc(var(--tn) * 1ms + 500ms) cubic-bezier(.3,.5,.4,1) both;
+  animation:glimWipe calc(var(--tn) * 1ms + 1300ms) cubic-bezier(.3,.5,.4,1) both;
   animation-delay:calc(var(--t0) * 1ms + var(--base)); }
 body.followup .l-msg em.glim::before, body.followup .l-msg em.glim::after{ opacity:1;
   -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }
 @keyframes glimWipe{
   from{ opacity:0; -webkit-mask-size:100% 100%, 0% 100%;   mask-size:100% 100%, 0% 100%;   }
-  12% { opacity:1; }
-  to  { opacity:1; -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }
+  8%  { opacity:1; }
+  65% { opacity:1; -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }
+  to  { opacity:.42; -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }   /* 단어가 다 쓰이면 번짐을 줄여 읽히게 */
 }
 body.connected .l-greet .ln.glim::before, body.connected .l-greet .ln.glim::after{ animation:glimKo 5600ms linear both; }
 body.connected .ln + .ln.glim::before, body.connected .ln + .ln.glim::after{ animation-delay:460ms; }
@@ -607,19 +612,25 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 /* 남은 시간(분) : NDOT 47 대신 같은 도트로 직접 그린다 */
 /* 색 : 주 정보는 흰색, 보조 문구는 #E7E7E7 (기록 카드와 같은 위계) */
 .navdigits circle{ fill:#fff; }
-.navm { position:absolute; left:205px; top:515px; font-size:42px; font-weight:700;
-        line-height:1; color:#fff; }
-.navto{ position:absolute; left:75px; top:592px; font-size:24px; line-height:1.04;   /* 숫자 아래 약 28px 띄움 */
-        white-space:nowrap; color:#E7E7E7; }
-.navdest{ position:absolute; right:93px; top:517px; font-size:28px; line-height:1.04;
-          text-align:right; white-space:nowrap; color:#fff; font-weight:600; }
+/* 배치는 피그마 3499:7361 (02 · Detected · Call) : 왼쪽 여백 60, 오른쪽 목적지 글자 끝 979 · 핀 996~1032 */
+.navnum{ position:absolute; left:60px; top:512.33px; font-family:'OffBit Dot'; font-weight:700; font-size:77.211px;
+         line-height:.93; letter-spacing:-0.05em; color:#fff; white-space:nowrap; }
+html.fb-dot .navnum{ visibility:hidden; }   /* 폰트가 없으면 도트 SVG(.navdigits) 로 */
+html:not(.fb-dot) .navdigits{ display:none; }
+.navm { position:absolute; left:111px; top:534px; font-family:'Helvetica Now Bold', var(--ff-en, 'Magnetik'), sans-serif; font-size:28px; font-weight:700;
+        line-height:1.6; color:#fff; }
+.navto{ position:absolute; left:60px; top:584px; font-size:24px; font-weight:300; line-height:1.04;
+        white-space:nowrap; color:rgba(255,255,255,.5); }
+.navdest{ position:absolute; right:100.65px; top:514px; font-size:28px; line-height:1.04;
+          text-align:right; white-space:nowrap; color:#fff; font-weight:500; }
 /* 라벨도 한 글자씩 (규칙은 위 '모든 문장' 블록). navto 는 바뀔 때마다 새로 쪼개 다시 쓴다 */
 /* 핀 중심을 게이지 호 중심선(반지름 475) 위에 : 핀 높이(y≈543)에서 호의 x = 540 + √(475² − 3²) ≈ 1015.
    핀 중심 = left + 20.95 → right 44. 목적지 문구도 같은 간격(7px)을 두고 4px 왼쪽으로 */
-.navpin{ position:absolute; right:44px; top:522px; width:41.9px; height:48px; }
+.navpin{ position:absolute; right:48px; top:522px; width:36.65px; height:42px; }   /* 글자와 16px */
 
 /* 도착 : 거리는 지우고 문구만 크게, 핀이 뛴다 */
 .nav.arrived .navdigits,
+.nav.arrived .navnum,
 .nav.arrived .navm,
 .nav.arrived .navarrow{ opacity:0; transition:opacity .4s ease; }
 /* 숫자와 화살표가 사라지면 Arrived 가 아래에 혼자 남는다 : 목적지와 같은 중심선(546)으로 */
@@ -704,9 +715,10 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
       </svg>
       <svg class="navarrow"  viewBox="0 0 1080 1080" aria-hidden="true"></svg>
       <svg class="navdigits" viewBox="0 0 1080 1080" aria-hidden="true"></svg>
+      <span class="navnum"></span>
       <span class="navm">min</span>
       <span class="navto">Building A, 6F</span>
-      <span class="navdest reveal">Rehabilitation<br>Center</span>
+      <span class="navdest reveal">Rehabilitation<br>Center 5F</span>
       <svg class="navpin" viewBox="0 0 41.897 48.0068" aria-hidden="true"><path fill="#E5E5E5" d="M20.9485 0C32.4961 0.000150891 41.8967 9.39648 41.8967 20.9385C41.975 37.8193 23.253 46.9338 22.467 47.5098C22.022 47.8499 21.4721 48.0068 20.9485 48.0068C20.4249 48.0068 19.875 47.8237 19.4299 47.5098C18.6444 46.934 -0.0779867 37.8195 0.000244478 20.9385C0.000244478 9.39638 9.40076 0 20.9485 0ZM20.467 9.44141C14.382 9.44141 9.44849 14.3749 9.44849 20.46C9.44871 26.5448 14.3821 31.4775 20.467 31.4775C26.5519 31.4774 31.4844 26.5448 31.4846 20.46C31.4846 14.375 26.552 9.44153 20.467 9.44141Z"/></svg>
     </div>
 
@@ -761,6 +773,7 @@ const PAUSE = 7;   // 문장 경계에서 건너뛸 칸 수 (1칸 = 스태거 1�
   const cx = document.createElement('canvas').getContext('2d');
   const w = f => (cx.font = f, cx.measureText('Good Afternoon 0123').width);
   if (q !== null ? q.includes('en') : w('500 40px Magnetik, monospace') === w('500 40px monospace')) root.add('fb-en');
+  if (q !== null ? q.includes('dot') : w("700 40px 'OffBit Dot', monospace") === w('700 40px monospace')) root.add('fb-dot');
   const noKo = () => root.add('fb-ko');
   if (q !== null) { if (q.includes('ko')) noKo(); }
   else document.fonts.load('600 48px "SF Pro KR"', '가').then(f => { if (!f.length) noKo(); }, noKo);
@@ -808,9 +821,9 @@ document.querySelectorAll('.l-greet .ln, .l-hi .ln').forEach(l => { l.classList.
 //    띄어쓰기마다 뜸을 들이면 어색했다
 //  · rate : 문장마다 흐르는 속도 (영어 인사 1.8 = 천천히, 길안내 라벨 .8)
 // 일반 글자의 번짐은 옅은 색, 강조어(em)는 짙은 색. 강조어에는 첫 글자 시각 --t0, 길이 --tn, 강조어 안 순서 --ei
-const GLOW_EM   = [['rgba(245,252,131,.95)', 'rgba(113,172,251,.8)'],    // 연두 · 파랑
-                   ['rgba(138,255,243,.95)', 'rgba(176,150,255,.7)'],    // 하늘 · 라벤더
-                   ['rgba(255,250,222,.95)', 'rgba(113,220,251,.75)']];  // 흰 핵 · 하늘
+const GLOW_EM   = [['rgba(255,244,196,.95)', 'rgba(140,212,250,.65)'],  // 옅은 노랑 · 하늘
+                   ['rgba(190,240,255,.95)', 'rgba(255,236,172,.6)'],    // 옅은 청록 · 옅은 노랑
+                   ['rgba(255,250,222,.95)', 'rgba(150,224,250,.6)']];   // 흰 핵 · 하늘 (파란끼만 쓰지 않는다)
 const GLOW_SOFT = GLOW_EM.map(pair => pair.map(c => c.replace(/[\d.]+\)$/, a => (parseFloat(a) * .35).toFixed(2) + ')')));
 const letters = (el, rate = 1) => {
   let t = 0;
@@ -889,6 +902,7 @@ const gfill = NAV.querySelector('.gfill');
 const gglow = NAV.querySelector('.gglow');
 const setGauge = v => { gfill.style.strokeDashoffset = v; gglow.style.strokeDashoffset = v; };
 const navm  = NAV.querySelector('.navm');
+const navnum = NAV.querySelector('.navnum');
 const navto = NAV.querySelector('.navto');
 
 // 화살표 : 실루엣과 같은 결의 도트 패턴 (칸 12.5px). 화살표 안만 원이 촘촘히, 링은 드물게
@@ -940,7 +954,9 @@ const setDist = n => {
       if (b === '1') g.append(dot(79 + i * 61 + c * 13, 480 + r * 13, 5.2));
     })));
   digitsSvg.replaceChildren(g);
-  navm.style.left = (79 + t.length * 61 + 4) + 'px';
+  navnum.textContent = t;
+  // 'min' 은 숫자 바로 뒤 5px (피그마 : 숫자 60~106, min 111~)
+  navm.style.left = (document.documentElement.classList.contains('fb-dot') ? 79 + t.length * 61 + 4 : 60 + navnum.offsetWidth + 13) + 'px';   // 피그마 : 숫자 '5' 상자(글자 38 + 자간) 뒤 min 이 111 에서 시작
 };
 
 // 도착까지 남은 시간 8분(초 단위로 깎고 분은 올림해 보여준다). 아래 문구는 지나가는 장소,
