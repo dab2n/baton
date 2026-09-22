@@ -338,7 +338,6 @@ body:not(.idle):not(.connecting) .cyan{ animation:none !important; }
 /* 장면당 한 문장. 들어올 때는 즉시, 나갈 때만 천천히 사라진다 */
 .headline{ opacity:0; }
 body.fill    .l-greet,
-body.connecting .l-nav,
 body.connected .l-greet, body.connected .l-hi,
 body.message .l-msg,
 body.followup .l-fu,
@@ -401,17 +400,14 @@ body.followup .l-msg em .c{ animation:emGlow 2.4s ease-in-out infinite alternate
 body.fill .l-greet .c{ animation:letterIn 1s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 1750ms); }
 body.fill .l-greet.cyc .c{ animation-delay:calc(var(--t) * 1ms + 500ms); }
 body.fill .l-greet.out .c{ animation:out 1.1s cubic-bezier(.4,0,.6,1) both; animation-delay:calc(var(--t) * .35ms); }   /* 말한 속도보다 빨리 걷힌다 */
-/* 영어 인사 : 기기 번호(Nav 808)가 사라지고 스트로크가 켜지면, 엄지척 전 마지막 한국어 문장이 다시 떠 있다가
+/* 영어 인사 : 실루엣이 사라지고 스트로크가 켜지면, 엄지척 전 마지막 한국어 문장이 다시 떠 있다가
    왼→오로 지워지는 흐름을 따라 1.7s 부터 한 글자씩 천천히 */
 body.connected .l-hi .c{ animation:letterIn 1.05s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 1700ms); }
-/* 기기 번호 : 별 모션이 끝난 검정 위에 (호텔 로봇의 Nav/ptn 과 같은 결). 머문 뒤 통째로 사라지고 다음으로 */
-body.connecting .l-nav .c{ animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 2500ms); }
-body.connecting.out .l-nav{ opacity:0; transition:opacity .9s ease; }
-.l-nav{ font-size:48px; width:auto; white-space:nowrap; color:#e9eff4; filter:drop-shadow(0 0 .14em rgba(196,226,255,.38)); }
-.headline.l-nav .c{ background:linear-gradient(180deg,#fff 0 30%,#dce5ec 62%,#a9b7c4 100%); -webkit-background-clip:text; background-clip:text; }
-.headline.l-nav .dg .c{ background:none; color:inherit; }
-.dotch{ display:inline-block; height:.7em; width:calc(.7em * 119 / 169); margin:0 .06em; vertical-align:baseline; overflow:visible; }
-.dotch circle{ fill:currentColor; r:12px; }
+/* 실루엣 : 별 모션이 끝난 검정 위에 웹캠 속 사람을 작은 도형 격자로 (그리기는 JS silRun). 머문 뒤 가운데부터 가장자리로 사라진다 */
+.silc{ position:absolute; inset:0; width:1080px; height:1080px; pointer-events:none; opacity:0; transition:opacity .5s ease; }
+.silc.glow{ filter:blur(12px); }   /* 촘촘한(사람) 부분만 따로 그려 흐리게 : 은은한 번짐 */
+body.connecting .silc{ opacity:1; }
+body.connecting .silc.glow{ opacity:.32; }
 /* 길안내 라벨 */
 body.follow .navto .c, body.follow .navdest .c, body.bye .navto .c, body.bye .navdest .c{ animation:letterIn .75s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 200ms); }
 /* 인사 문구는 제자리에서 나타나고 사라진다 (위→아래·왼→오른쪽 순서는 --i 그대로).
@@ -622,6 +618,8 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
   <div class="screen">
     <div class="rimlight" aria-hidden="true"></div>
     <div class="blur39"><div class="field"></div></div>
+    <canvas class="silc glow" width="1080" height="1080" aria-hidden="true"></canvas>
+    <canvas class="silc" width="2160" height="2160" aria-hidden="true"></canvas>
     <!-- 연결 인식 모션. 원본 AE : ~/Desktop/grad_motion1.aep
          내보낸 별.mp4(1920x1080)를 구가 중앙에 오도록 crop=1080:1080:10:0 해서 넣었다 -->
     <video class="star" muted playsinline preload="auto" aria-hidden="true">
@@ -650,7 +648,6 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 
     <p class="headline l-greet reveal nopause"><span class="ln">안녕하세요.</span><span class="ln">도움이 필요하신가요?</span></p>
     <p class="headline l-hi reveal nopause"><span class="ln">Good Afternoon!</span><span class="ln">Leo.</span></p>
-    <p class="headline l-nav reveal nopause">Nav <span class="dg">808</span></p>
     <p class="headline l-msg reveal">Your last appointment was on <em>July&nbsp;20.</em></p>
     <p class="headline l-fu reveal">Today is your <em>2nd</em> follow-up.</p>
 
@@ -892,20 +889,6 @@ const GLYPH = {
   8: '01110,10001,10001,01110,10001,10001,01110',
   9: '01110,10001,10001,01111,00001,00010,01100',
 };
-// 문장 속 숫자 한 글자 = 도트 한 칸 (Nav 808). 대문자 높이 ≈ .7em
-const dotGlyph = ch => {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('class', 'dotch');
-  svg.setAttribute('viewBox', '-9.5 -9.5 119 169');
-  const bits = GLYPH[ch].replaceAll(',', '');
-  for (let r = 0; r < 7; r++) for (let c = 0; c < 5; c++) if (bits[r * 5 + c] === '1') {
-    const d = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    d.setAttribute('cx', c * 25); d.setAttribute('cy', r * 25); d.setAttribute('r', 9.5);
-    svg.append(d);
-  }
-  return svg;
-};
-document.querySelectorAll('.l-nav .dg .c').forEach(c => c.replaceChildren(dotGlyph(c.textContent)));
 let shown = -1;
 const setTo = t => {
   if (navto.dataset.t === t) return;
@@ -1026,6 +1009,80 @@ const askRun = on => {
 };
 
 const field = document.querySelector('.field');
+
+// ---------- 실루엣 : 웹캠 속 사람을 작은 도형(점·링·삼각형·십자) 격자로 ----------
+// 사람이 있는 칸만 크고 밝게, 나머지는 아주 작은 점. 사람 칸은 흐린 겹(.silc.glow)에도 그려 은은하게 번진다.
+// 마스크는 카메라 모듈이 connecting 동안 MediaPipe selfie segmenter 로 채운다(window.__silMask).
+// 카메라가 없으면(탭 조작·이미지 내보내기) 머리·어깨 모양을 대신 그린다.
+const SIL = { cell: 28, t0: 2.2, fadeIn: .7 };   // 칸 간격(px) · 나타나는 시각(별 모션이 끝날 때) · 나타나는 시간
+const [silGlow, silSharp] = document.querySelectorAll('.silc');
+const gx = silGlow.getContext('2d'), sx2 = silSharp.getContext('2d');
+const silCells = [];
+for (let y = SIL.cell / 2; y < 1080; y += SIL.cell) for (let x = SIL.cell / 2; x < 1080; x += SIL.cell) {
+  const d = Math.hypot(x - 540, y - 540);
+  if (d > 530) continue;
+  const h = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+  const f = h - Math.floor(h);
+  silCells.push({ x, y, d, kind: Math.floor(f * 4), var: .78 + .4 * ((f * 7.3) % 1), m: 0 });   // 칸마다 도형·크기 차이 고정
+}
+const smooth = (a, b, v) => { const t = Math.min(1, Math.max(0, (v - a) / (b - a))); return t * t * (3 - 2 * t); };
+// 대신 쓰는 실루엣 (u,v : 화면 기준 -1~1) : 머리 · 목 · 어깨
+const fakeSil = (u, v, t) => {
+  const bob = Math.sin(t * 1.3) * .02;
+  const head = 1 - smooth(.85, 1.05, Math.hypot(u / .27, (v + .2 + bob) / .34));
+  const neck = (1 - smooth(.13, .18, Math.abs(u))) * smooth(.05, .12, v) * (1 - smooth(.3, .4, v));
+  const hw = .2 + .62 * smooth(.28, .78, v);
+  const body = (1 - smooth(hw - .06, hw + .02, Math.abs(u))) * smooth(.26, .36, v);
+  return Math.max(head, neck, body);
+};
+const maskAt = (u, v, t) => {
+  const M = window.__silMask;
+  if (!M) return fakeSil(u, v, t);
+  // 640x480 영상의 가운데 정사각형(가로 .125~.875)을 스크린에 맞추고, 거울처럼 좌우를 뒤집는다
+  const mx = Math.round(((1 - (u + 1) / 2) * .75 + .125) * (M.w - 1));
+  const my = Math.round(((v + 1) / 2) * (M.h - 1));
+  return M.data[my * M.w + mx] ?? 0;
+};
+const drawShape = (c, kind, x, y, r) => {
+  c.beginPath();
+  if (kind === 0) { c.arc(x, y, r, 0, 6.2832); c.fill(); }
+  else if (kind === 1) { c.lineWidth = Math.max(.8, r * .38); c.arc(x, y, r * .9, 0, 6.2832); c.stroke(); }
+  else if (kind === 2) { c.moveTo(x, y - r * 1.1); c.lineTo(x + r, y + r * .75); c.lineTo(x - r, y + r * .75); c.closePath(); c.fill(); }
+  else { c.lineWidth = Math.max(.8, r * .36); c.moveTo(x - r, y); c.lineTo(x + r, y); c.moveTo(x, y - r); c.lineTo(x, y + r); c.stroke(); }
+};
+let silRAF;
+const silRun = () => {
+  cancelAnimationFrame(silRAF);
+  window.__silMask = null;
+  silCells.forEach(c => { c.m = 0; });
+  const start = performance.now(); let outAt = 0;
+  const frame = () => {
+    const t = (performance.now() - start) / 1000;
+    gx.clearRect(0, 0, 1080, 1080); sx2.clearRect(0, 0, 2160, 2160);
+    if (!body.classList.contains('connecting')) return;
+    silRAF = requestAnimationFrame(frame);
+    if (t < SIL.t0) return;
+    if (body.classList.contains('out') && !outAt) outAt = t;
+    const inK = smooth(0, 1, (t - SIL.t0) / SIL.fadeIn);
+    const front = outAt ? 600 * smooth(0, 1, (t - outAt) / 1) : -1;   // 사라짐 : 가운데에서 가장자리로 번지는 경계
+    sx2.save(); sx2.scale(2, 2);
+    sx2.fillStyle = sx2.strokeStyle = gx.fillStyle = gx.strokeStyle = '#fff';
+    for (const c of silCells) {
+      c.m += (maskAt((c.x - 540) / 540, (c.y - 540) / 540, t) - c.m) * .25;   // 살짝 뒤따라 부드럽게
+      const gone = front < 0 ? 0 : smooth(0, 90, front - c.d);
+      const k = inK * (1 - gone);
+      if (k <= 0) continue;
+      const m = c.m;
+      const r = (1.2 + 6.4 * m * c.var) * k;
+      sx2.globalAlpha = (.28 + .72 * m) * k;
+      drawShape(sx2, c.kind, c.x, c.y, r);   // 바깥은 아주 작게·어둡게, 사람 안은 크게·밝게
+      if (m > .45) { gx.globalAlpha = m * k; drawShape(gx, 0, c.x, c.y, r * 1.3); }
+    }
+    sx2.restore();
+  };
+  frame();
+};
+
 const go = n => {
   clearTimeout(timer);
   // idle 에서 나갈 때 : 배회 애니메이션을 끊으면 translate 가 0 으로 튀어 다른 물체처럼 보인다.
@@ -1044,7 +1101,7 @@ const go = n => {
   body.classList.remove('out');
   body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|followup|guide|follow|bye)\b/, STEPS[n]);
   if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
-  if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); }
+  if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); silRun(); }
   else star.pause();
   // 스트로크 : 기기 번호가 사라진 뒤 connected 에서 처음부터 켜져 I'll take you 까지 끊지 않고 (영상 26s, 쓰는 구간 약 20s)
   if (['connected', 'message', 'followup', 'guide'].includes(STEPS[n])) stroke.play().catch(() => {});
@@ -1055,8 +1112,8 @@ const go = n => {
   // (카메라가 없으면 idle 은 탭으로 넘길 수 있다)
   if (HOLD[n] && !['idle', 'fill'].includes(STEPS[n])) timer = setTimeout(() => {
     if (STEPS[n] !== 'connecting') return go((n + 1) % STEPS.length);
-    body.classList.add('out');   // 기기 번호를 먼저 다 지우고(.9s) 스트로크로
-    timer = setTimeout(() => go(n + 1), 900);
+    body.classList.add('out');   // 실루엣이 가운데부터 가장자리로 다 사라진 뒤(1.1s) 스트로크로
+    timer = setTimeout(() => go(n + 1), 1100);
   }, HOLD[n]);
 };
 const step = () => STEPS.findIndex(s => body.classList.contains(s));
@@ -1106,7 +1163,7 @@ const cv    = document.getElementById('camc');
 const cx    = cv.getContext('2d');
 const say   = t => { stat.textContent = t; };
 
-let fd, gr, hits = 0, last = -1;
+let fd, gr, seg, hits = 0, last = -1;
 
 const loop = () => {
   requestAnimationFrame(loop);
@@ -1140,6 +1197,11 @@ const loop = () => {
   }
 
   const n = window.__step();
+  if (n === 2 && seg) {   // connecting 동안만 : 사람 모양 마스크
+    const r = seg.segmentForVideo(video, t), m = r.confidenceMasks?.[0];
+    if (m) window.__silMask = { w: m.width, h: m.height, data: m.getAsFloat32Array().slice() };
+    r.close?.();
+  }
   say('얼굴 ' + (ratio ? Math.round(ratio * 100) + '%' : '—') + ' / ' + Math.round(NEAR * 100) + '%\n'
     + '제스처 ' + (g ? g.categoryName + ' ' + g.score.toFixed(2) : '—') + '\n'
     + (n === 0 ? '얼굴을 가까이 또는 엄지척' : n === 1 ? '엄지척을 올리세요' : '진행 중'));
@@ -1154,7 +1216,7 @@ const loop = () => {
 // ?s=N (이미지 내보내기) 에서만 끈다
 if (new URLSearchParams(location.search).has('s')) document.querySelector('.cam').remove();
 else try {
-  const { FilesetResolver, FaceDetector, GestureRecognizer } = await import(V + '/vision_bundle.mjs');
+  const { FilesetResolver, FaceDetector, GestureRecognizer, ImageSegmenter } = await import(V + '/vision_bundle.mjs');
   const vision = await FilesetResolver.forVisionTasks(V + '/wasm');
   [fd, gr] = await Promise.all([
     FaceDetector.createFromOptions(vision, { runningMode: 'VIDEO',
@@ -1164,6 +1226,10 @@ else try {
       cannedGesturesClassifierOptions: { scoreThreshold: .2 },
       baseOptions: { modelAssetPath: M + '/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task' } }),
   ]);
+  // 실루엣용 사람 분리 : 늦게 뜨거나 실패해도 나머지 인식은 그대로 (실루엣은 대신 그린 모양으로)
+  ImageSegmenter.createFromOptions(vision, { runningMode: 'VIDEO', outputConfidenceMasks: true, outputCategoryMask: false,
+    baseOptions: { modelAssetPath: M + '/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite' } })
+    .then(x => { seg = x; }).catch(e => console.warn('[seg]', e));
   say('카메라 권한을 허용해 주세요');
   video.srcObject = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } });
   await video.play();
