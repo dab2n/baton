@@ -44,8 +44,8 @@ html,body{ height:100%; margin:0; overflow:hidden; background:#0B0F18; }
 html:has(.shot), html:has(.shot) body{ background:transparent; }
 body{
   display:flex; align-items:center; justify-content:center;
-  /* 영문 Delight(이 맥에 설치) · 한글 SF Pro KR(fonts/, 공개 저장소엔 없음). 없는 쪽만 Pretendard 로 (아래 fb-en / fb-ko) */
-  font-family:var(--ff-en,'Delight'), var(--ff-ko,'SF Pro KR'), 'Pretendard Web', system-ui, sans-serif;
+  /* 영문 Magnetik(이 맥에 설치, 유료라 저장소엔 없음) · 한글 SF Pro KR(fonts/, 공개 저장소엔 없음). 없는 쪽만 Pretendard 로 (아래 fb-en / fb-ko) */
+  font-family:var(--ff-en,'Magnetik'), var(--ff-ko,'SF Pro KR'), 'Pretendard Web', system-ui, sans-serif;
 
   -webkit-font-smoothing:antialiased;
   cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none;
@@ -53,9 +53,11 @@ body{
 /* 자간 -1% : letter-spacing 은 계산된 px 로 상속돼서 body 에만 주면
    글자 크기가 다른 곳에서 비율이 어긋난다. 요소마다 em 을 다시 풀어준다 */
 .device, .device *{ letter-spacing:0.03em; }
+/* 영문 문장·길안내 라벨 : Magnetik 자간 -2% (한글 안내는 위 값 그대로) */
+.headline:not(.l-greet), .headline:not(.l-greet) *, .navm, .navto, .navto *, .navdest, .navdest *{ letter-spacing:-0.02em; }
 
 /* ---------- 폰트 대체 : 배포 링크를 다른 컴퓨터에서 열 때 ----------
-   Delight(영문)나 SF Pro KR(한글)이 없으면 JS 가 html 에 fb-en / fb-ko 를 달고 그 글자만 Pretendard 로.
+   Magnetik(영문)이나 SF Pro KR(한글)이 없으면 JS 가 html 에 fb-en / fb-ko 를 달고 그 글자만 Pretendard 로.
    Pretendard 는 OFL 이라 pretendard/ 에 KS X 1001 서브셋을 둔다 (필요한 굵기만 받는다).
    자간은 실제 문구 폭을 원래 폰트와 재서 맞춘다 : 보정 = (원래 폭 − Pretendard 폭) ÷ (글자 수 × 크기).
    확인용 ?fb=ko,en 로 강제할 수 있다 */
@@ -71,13 +73,6 @@ html.fb-ko{ --ff-ko:'Pretendard Web'; }
 html.fb-en{ --ff-en:var(--ff-ko,'SF Pro KR'); }   /* 영문만 없으면 한글은 SF Pro KR 그대로, 둘 다 없으면 Pretendard */
 /* 한글 600 48px : Pretendard 가 7.6% 넓다 → −0.054em */
 html.fb-ko .l-greet, html.fb-ko .l-greet *{ letter-spacing:-0.024em; }
-/* 영문 : 굵기·크기마다 Delight 와 폭 차이가 달라 따로 (괄호 안이 보정값) */
-html.fb-en .headline:not(.l-greet), html.fb-en .headline:not(.l-greet) *{ letter-spacing:0.0256em; }   /* 500 42 (−0.0044) */
-html.fb-en .headline:not(.l-greet) em, html.fb-en .headline:not(.l-greet) em *{ letter-spacing:0.0366em; }   /* 600 42 (+0.0066) */
-html.fb-en .headline.l-hi, html.fb-en .headline.l-hi *{ letter-spacing:0.04em; }   /* 600 48 (+0.0100) */
-html.fb-en .navm{ letter-spacing:0.0283em; }   /* 700 42 (−0.0017) */
-html.fb-en .navto, html.fb-en .navto *{ letter-spacing:0.0248em; }   /* 400 24 (−0.0052) */
-html.fb-en .navdest, html.fb-en .navdest *{ letter-spacing:0.0437em; }   /* 600 28 (+0.0137) */
 
 .device{ position:relative; width:1080px; height:1080px; flex:none; transform:scale(var(--s,1)); }
 
@@ -371,7 +366,7 @@ body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-o
                   font-size:67.319px; font-weight:600; line-height:1.5; }
 .l-greet, .l-hi{ font-size:48px; line-height:1.6; }   /* 두 줄 : 한국어·영어가 줄끼리 겹친다 */
 .l-greet{ line-height:1.42; }   /* 한글은 행간을 좁게 : 두 언어의 차(0.18)를 유지해 줄끼리 겹치게 */
-.l-hi{ font-size:36px; line-height:1.8; }   /* 영문 문장은 모두 36px · 행간 1.8 */
+.l-hi{ font-size:36px; line-height:1.8; font-weight:500; }   /* 영문 문장은 모두 36px · 행간 1.8 · Medium */
 /* 두 문구의 박스를 같은 폭으로 : 지우개 경계가 화면 같은 x 를 지나가게 */
 .l-greet, .l-hi{ width:780px; }
 /* 피그마 원본은 아래로 #353046 까지 어두워지는 그라디언트인데, 검은 화면에선 글자 아랫부분이 배경에 묻혀
@@ -382,6 +377,14 @@ body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-o
 .headline:not(.l-greet) .c{ background:linear-gradient(180deg,#fff 0 66%,rgba(255,255,255,.55) 100%);
                        -webkit-background-clip:text; background-clip:text; color:transparent; }
 .headline:not(.l-greet) em .c{ background:none; color:#fff; }
+/* Magnetik 의 T·J 등은 글자 상자 밖으로 삐져나와 background-clip:text 에 잘린다 → 칠할 영역만 양옆으로 넓힌다 (배치는 그대로) */
+.headline:not(.l-greet) .c{ padding:0 .08em; margin:0 -.08em; }
+/* 스트로크가 켜진 뒤의 문장 : 링 빛처럼 흰빛에서 아래로 옅은 청록, 은은한 번짐. 강조어는 같은 계열의 색 번짐 */
+.l-hi .c, .l-msg .c, .l-fu .c, .l-guide .c{ background:linear-gradient(180deg,#fff 0 38%,#e3f8fd 64%,rgba(186,232,246,.8) 100%); }
+.l-hi em .c, .l-msg em .c, .l-fu em .c, .l-guide em .c{ background:none; color:#f4feff; }
+.l-hi, .l-msg, .l-fu, .l-guide{ filter:drop-shadow(0 0 .2em rgba(150,222,244,.26)); }
+.l-msg em.glim::before, .l-msg em.glim::after, .l-fu em.glim::before, .l-fu em.glim::after,
+.l-guide em.glim::before, .l-guide em.glim::after{ color:#9fe9ff; }
 
 /* 모션: DOM 순서 = 위 → 아래, 왼 → 오른쪽 */
 .w{ display:inline-block; }   /* 단어는 줄바꿈 묶음만. 보이기·애니메이션은 글자(.c)에서 */
@@ -586,7 +589,6 @@ body.follow .nav > *{ opacity:1; }
 /* 도트 : 흰색에 글리밍 (#FEFFF9 번짐 두 겹) */
 .navarrow circle{ fill:#fff; opacity:0; transform-box:fill-box; transform-origin:50% 50%; }
 .navarrow circle.hollow{ fill:none; stroke:#fff; stroke-width:1.4; }   /* .ring 은 목업 테두리 클래스라 이름을 달리 */
-.navarrow circle.dim{ --o:.22; }
 .navarrow{ filter:drop-shadow(0 0 5px rgba(254,255,249,.45)) drop-shadow(0 0 14px rgba(254,255,249,.2)); }   /* 실루엣처럼 은은한 번짐 */
 /* 첫 등장 : 순서와 간격을 흩어 다다닥 튀어나오게 (--d 는 JS 가 뿌린다) */
 body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
@@ -752,13 +754,13 @@ kiosk();
 
 // 텍스트를 단어 단위로 쪼개고 DOM 순서대로 딜레이 부여
 const PAUSE = 7;   // 문장 경계에서 건너뛸 칸 수 (1칸 = 스태거 1단위)
-// 폰트 대체 판별 : Delight 는 설치 폰트라 폭으로, SF Pro KR 은 파일을 실제로 불러와 본다. ?fb=ko,en 로 강제
+// 폰트 대체 판별 : Magnetik 은 설치 폰트라 폭으로, SF Pro KR 은 파일을 실제로 불러와 본다. ?fb=ko,en 로 강제
 {
   const q = new URLSearchParams(location.search).get('fb');
   const root = document.documentElement.classList;
   const cx = document.createElement('canvas').getContext('2d');
   const w = f => (cx.font = f, cx.measureText('Good Afternoon 0123').width);
-  if (q !== null ? q.includes('en') : w('500 40px Delight, monospace') === w('500 40px monospace')) root.add('fb-en');
+  if (q !== null ? q.includes('en') : w('500 40px Magnetik, monospace') === w('500 40px monospace')) root.add('fb-en');
   const noKo = () => root.add('fb-ko');
   if (q !== null) { if (q.includes('ko')) noKo(); }
   else document.fonts.load('600 48px "SF Pro KR"', '가').then(f => { if (!f.length) noKo(); }, noKo);
@@ -889,23 +891,19 @@ const setGauge = v => { gfill.style.strokeDashoffset = v; gglow.style.strokeDash
 const navm  = NAV.querySelector('.navm');
 const navto = NAV.querySelector('.navto');
 
-// 화살표 : 실루엣과 같은 결의 도트 패턴 (칸 17px). 화살표 안은 크고 밝은 원·링이 촘촘히, 둘레는 아주 작고 어두운 점
+// 화살표 : 실루엣과 같은 결의 도트 패턴 (칸 12.5px). 화살표 안만 원이 촘촘히, 링은 드물게
 {
   const inArrow = (x, y) => {   // 머리(삼각형) + 몸통 : 크기는 예전 5x6 화살표와 같다
     if (y >= 505 && y <= 706) return Math.abs(x - 540) <= 64;
     if (y < 368 || y > 505) return false;
     return Math.abs(x - 540) <= (y - 368) / 137 * 138;
   };
-  const C = 17, cells = [];
-  for (let y = 538 - 16 * C; y <= 538 + 16 * C; y += C) for (let x = 540 - 16 * C; x <= 540 + 16 * C; x += C) {
-    const d = Math.hypot(x - 540, y - 538);
-    if (d > 270) continue;
+  const C = 12.5, cells = [];
+  for (let y = 538 - 22 * C; y <= 538 + 22 * C; y += C) for (let x = 540 - 22 * C; x <= 540 + 22 * C; x += C) {
     const h = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453, f = h - Math.floor(h), g = (f * 7.3) % 1;
-    const inside = inArrow(x, y);
-    const r = inside ? 2.6 + 1.8 * g : .9;
-    const c = dot(x, y, r);
-    if (inside && f < .28) c.classList.add('hollow');   // 실루엣처럼 원의 약 1/4 은 가는 링
-    if (!inside) c.classList.add('dim');
+    if (!inArrow(x, y)) continue;   // 배경 점은 깔지 않는다
+    const c = dot(x, y, 2.3 + 1.5 * g);   // 크기는 조금씩 다르게
+    if (f < .08) c.classList.add('hollow');   // 링은 드물게
     cells.push(c);
   }
   // 등장 순서와 간격을 흩는다 : 규칙적으로 번지지 않고 다다닥 튀어나오게 (도트가 많아 간격은 촘촘히)
