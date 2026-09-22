@@ -1029,7 +1029,7 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow','bye'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 10500, 4800, 5000, 5200, 6200, 0, 4200];   // bye : 인사가 사라진 뒤(4.0s) 대기 상태로   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 10500, 4800, 2900, 4300, 6200, 0, 4200];   // message 는 첫 문장이 다 쓰인 뒤(1.5s) 한 호흡만 : 둘째 문장이 곧바로 이어진다   // bye : 인사가 사라진 뒤(4.0s) 대기 상태로   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer, strokeTimer;
 
