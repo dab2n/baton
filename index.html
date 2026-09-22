@@ -338,7 +338,7 @@ body:not(.idle):not(.connecting) .cyan{ animation:none !important; }
 /* 장면당 한 문장. 들어올 때는 즉시, 나갈 때만 천천히 사라진다 */
 .headline{ opacity:0; }
 body.fill    .l-greet,
-body.connected .l-greet, body.connected .l-hi,
+body.connected .l-hi,
 body.message .l-msg,
 body.followup .l-fu,
 body.guide   .l-guide{ opacity:1; transition-duration:.15s; }
@@ -402,7 +402,7 @@ body.fill .l-greet.cyc .c{ animation-delay:calc(var(--t) * 1ms + 500ms); }
 body.fill .l-greet.out .c{ animation:out 1.1s cubic-bezier(.4,0,.6,1) both; animation-delay:calc(var(--t) * .35ms); }   /* 말한 속도보다 빨리 걷힌다 */
 /* 영어 인사 : 실루엣이 사라지고 스트로크가 켜지면, 엄지척 전 마지막 한국어 문장이 다시 떠 있다가
    왼→오로 지워지는 흐름을 따라 1.7s 부터 한 글자씩 천천히 */
-body.connected .l-hi .c{ animation:letterIn .8s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * .77ms + 760ms); }   /* 1.3배 빠르게 */
+body.connected .l-hi .c{ animation:letterIn .8s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * .77ms + 900ms); }   /* 한국어 없이 검정 위에 바로, 1.3배 빠르게 */
 /* 실루엣 : 별 모션이 끝난 검정 위에 웹캠 속 사람을 작은 도형 격자로 (그리기는 JS silRun). 머문 뒤 가운데부터 가장자리로 사라진다 */
 .silc{ position:absolute; inset:0; width:1080px; height:1080px; pointer-events:none; opacity:0; transition:opacity .5s ease; }
 .silc.glow{ filter:blur(12px); }   /* 촘촘한(사람) 부분만 따로 그려 흐리게 : 은은한 번짐 */
@@ -968,7 +968,7 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow','bye'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 5200, 4800, 5000, 5200, 6200, 0, 5600];   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 6800, 4800, 5000, 5200, 6200, 0, 5600];   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer, strokeTimer;
 
@@ -1016,7 +1016,7 @@ const field = document.querySelector('.field');
 // 사람이 있는 칸만 크고 밝게, 나머지는 아주 작은 점. 사람 칸은 흐린 겹(.silc.glow)에도 그려 은은하게 번진다.
 // 마스크는 카메라 모듈이 connecting 동안 MediaPipe selfie segmenter 로 채운다(window.__silMask).
 // 카메라가 없으면(탭 조작·이미지 내보내기) 머리·어깨 모양을 대신 그린다.
-const SIL = { cell: 17, t0: 2.2, focus: 1.6 };   // 칸 간격(px) · 나타나는 시각(별 모션이 끝날 때) · 초점이 잡히는 시간
+const SIL = { cell: 17, t0: 2.2, focus: 1.6, lit: .5 };   // 칸 간격(px) · 나타나는 시각(별 모션이 끝날 때) · 초점이 잡히는 시간 · 인식되어 밝아지는 시간
 const [silGlow, silSharp] = document.querySelectorAll('.silc');
 const gx = silGlow.getContext('2d'), sx2 = silSharp.getContext('2d');
 const silCells = [];
@@ -1028,7 +1028,7 @@ for (let y = SIL.cell / 2; y < 1080; y += SIL.cell) for (let x = SIL.cell / 2; x
   // 초점 : 성긴 격자(3칸마다)가 먼저, 사이 칸이 차례로 채워지며 촘촘해진다 (rank 0 → 1)
   const i = Math.round(x / SIL.cell), j = Math.round(y / SIL.cell);
   const rank = i % 3 === 0 && j % 3 === 0 ? 0 : i % 2 === 0 && j % 2 === 0 ? .25 : .4 + .45 * g;
-  silCells.push({ x, y, d, ring: f < .28, var: .7 + .6 * g, rank, m: 0 });   // 원만 : 속 찬 원 · 가는 링, 크기는 칸마다 조금씩
+  silCells.push({ x, y, d, ring: f < .28, var: .7 + .6 * g, rank, off: ((f * 13.7) % 1) * .9, m: 0 });   // off : 사라지는 차례 (무작위)   // 원만 : 속 찬 원 · 가는 링, 크기는 칸마다 조금씩
 }
 const smooth = (a, b, v) => { const t = Math.min(1, Math.max(0, (v - a) / (b - a))); return t * t * (3 - 2 * t); };
 // 대신 쓰는 실루엣 (u,v : 화면 기준 -1~1) : 머리 · 목 · 어깨
@@ -1067,19 +1067,22 @@ const silRun = () => {
     if (t < SIL.t0) return;
     if (body.classList.contains('out') && !outAt) outAt = t;
     const f = smooth(0, 1, (t - SIL.t0) / SIL.focus);   // 초점 0 → 1
-    const front = outAt ? 600 * smooth(0, 1, (t - outAt) / 1) : -1;   // 사라짐 : 가운데에서 가장자리로 번지는 경계
+    const out = outAt ? (t - outAt) / 1 : -1;   // 사라짐 : 도형이 제각각 하나씩 꺼진다 (1s)
+    // 인식됨 : 초점이 다 잡히면 어둡던 도형이 밝아진다 (살짝 부풀었다 가라앉으며)
+    const lit = smooth(0, 1, (t - SIL.t0 - SIL.focus + .15) / SIL.lit);
+    const pop = 1 + .14 * Math.sin(Math.PI * lit);
     sx2.save(); sx2.scale(2, 2);
     sx2.fillStyle = sx2.strokeStyle = gx.fillStyle = gx.strokeStyle = '#fff';
     for (const c of silCells) {
       c.m += (maskAt((c.x - 540) / 540, (c.y - 540) / 540, t) - c.m) * .25;   // 살짝 뒤따라 부드럽게
-      const gone = front < 0 ? 0 : smooth(0, 90, front - c.d);
+      const gone = out < 0 ? 0 : smooth(c.off, c.off + .1, out);
       const k = smooth(c.rank, c.rank + .3, f) * (1 - gone);   // 이 칸이 켜지는 정도 (촘촘해지는 순서)
       if (k <= 0) continue;
       const m = c.m * smooth(.15, .9, f);   // 사람 모양은 초점이 잡혀 가며 드러난다
-      const r = (.75 + 3.3 * m) * c.var * k;
-      sx2.globalAlpha = (.26 + .74 * m) * k;
+      const r = (.75 + 3.3 * m * pop) * c.var * k;
+      sx2.globalAlpha = (.18 + .82 * m) * (.42 + .58 * lit) * k;
       drawDot(sx2, c.ring, c.x, c.y, r);   // 바깥은 아주 작게·어둡게, 사람 안은 크게·밝게
-      if (m > .45) { gx.globalAlpha = m * k; drawDot(gx, false, c.x, c.y, r * 1.5); }
+      if (m > .45) { gx.globalAlpha = m * lit * k; drawDot(gx, false, c.x, c.y, r * 1.5); }   // 번짐도 인식된 뒤에
     }
     sx2.restore();
   };
@@ -1115,7 +1118,7 @@ const go = n => {
   // (카메라가 없으면 idle 은 탭으로 넘길 수 있다)
   if (HOLD[n] && !['idle', 'fill'].includes(STEPS[n])) timer = setTimeout(() => {
     if (STEPS[n] !== 'connecting') return go((n + 1) % STEPS.length);
-    body.classList.add('out');   // 실루엣이 가운데부터 가장자리로 다 사라진 뒤(1.1s) 스트로크로
+    body.classList.add('out');   // 실루엣 도형이 하나씩 다 꺼진 뒤(1.1s) 스트로크로
     timer = setTimeout(() => go(n + 1), 1100);
   }, HOLD[n]);
 };
