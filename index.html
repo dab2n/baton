@@ -121,7 +121,8 @@ body.kiosk .toggle, body.shot .toggle{ display:none; }   /* 전체화면·내보
   background:transparent; color:#000; cursor:pointer; }
 .jump button:hover{ background:#f2f2f2; }
 .jump button.on{ background:#000; color:#fff; }
-body.device .jump, body.shot .jump{ display:none; }   /* 전체화면에서도 보이고, 실기기(#screen)·내보내기에서만 숨김 */
+body.device .jump, body.shot .jump{ display:none; }
+body.rec .cam, body.rec .toggle{ display:none; }   /* 전체화면에서도 보이고, 실기기(#screen)·내보내기에서만 숨김 */
 .jump, .jump button{ cursor:pointer; }
 body.kiosk{ cursor:none; background:#0B0F18; }   /* 터치/마우스 없는 스크린 */
 body.kiosk .ring{ display:none; }             /* 전체화면 : 목업은 항상 숨김 */
@@ -421,7 +422,7 @@ body.message .l-msg em .c, body.followup .l-fu em .c, body.guide .l-guide em .c{
 body.followup .l-msg em .c{ animation:emGlow 2.4s ease-in-out infinite alternate; animation-delay:calc(var(--ei) * 90ms); }
 /* 한국어 문구 : 원이 다 찬 뒤(1.75s) 한 글자씩. 교체 때는 앞 문구가 한 글자씩 사라지는 동안 다음 문구가 한 글자씩 */
 body.fill .l-greet .c{ animation:letterIn 1s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 2000ms); }   /* 색 띠가 한 바퀴 돈 뒤 */
-body.fill .l-greet.cyc .c{ animation-delay:calc(var(--t) * 1ms + 500ms); }
+body.fill .l-greet.cyc .c{ animation-delay:calc(var(--t) * 1.4ms + 900ms); }   /* 앞 문구가 걷히는 동안 조금 늦게·천천히 */
 /* 반응이 없으면(15s) 또는 사람이 보이지 않으면(4s) 문구가 아래로 빠지며 기본 화면으로 */
 body.fill.leave .l-greet{ translate:0 110px; opacity:0; transition:translate .8s cubic-bezier(.55,0,.8,.35), opacity .7s ease; }
 body.fill .l-greet.out .c{ animation:out 1.1s cubic-bezier(.4,0,.6,1) both; animation-delay:calc(var(--t) * .35ms); }   /* 말한 속도보다 빨리 걷힌다 */
@@ -437,7 +438,7 @@ body.connected .silc{ opacity:0; transition:opacity .9s ease 2.3s; }   /* 빛이
 /* 두 줄 문장 원칙 : 첫 줄이 스크린 가운데에 먼저 쓰이고, 둘째 줄이 나오기 직전 반 줄(0.5lh) 위로 올라간다 */
 @keyframes lineUp{ from{ translate:0 .5lh; } to{ translate:0 0; } }
 body.fill .l-greet.two{ animation:lineUp .6s cubic-bezier(.4,0,.2,1) both; animation-delay:calc(var(--t2) * 1ms + 1880ms); }
-body.fill .l-greet.two.cyc{ animation-delay:calc(var(--t2) * 1ms + 380ms); }
+body.fill .l-greet.two.cyc{ animation-delay:calc(var(--t2) * 1.4ms + 780ms); }
 body.connected .l-hi.two{ animation:lineUp .6s cubic-bezier(.4,0,.2,1) both; animation-delay:calc(var(--t2) * .77ms + 780ms); }
 body.guide .l-guide.two{ animation:lineUp .6s cubic-bezier(.4,0,.2,1) both; animation-delay:calc(var(--t2) * 1ms + 580ms); }
 /* 길안내 라벨 */
@@ -537,7 +538,7 @@ body.connecting .star{ opacity:1; }   /* 엄지척 뒤엔 영상만 (파장 효�
    z-index 0 : 뒤에 오는 문구보다 아래 (검은 원이 글자를 가리지 않게) */
 .sring{ position:absolute; inset:0; z-index:0; pointer-events:none; opacity:0; transition:opacity .6s ease; }
 .sglow{ position:absolute; inset:0; filter:blur(4px) brightness(1.25); }   /* 영상을 먼저 원형으로 자른 뒤 흐린다 : 사각 테두리 없이 번짐이 바깥으로 퍼진다 */
-.pb{ position:absolute; inset:0; }
+.pb{ position:absolute; inset:0; opacity:var(--pb, 1); transition:opacity .5s ease; }   /* 커지는 동안(--pb 0) 꺼서 등장이 매끄럽게 */
 /* progressive : 링(R 410)에서 바깥으로 갈수록 흐림이 세진다 */
 .pb1{ -webkit-backdrop-filter:blur(3px);  backdrop-filter:blur(3px);
   -webkit-mask:radial-gradient(circle at 540px 540px, transparent 404px, #000 420px); mask:radial-gradient(circle at 540px 540px, transparent 404px, #000 420px); }
@@ -753,6 +754,7 @@ if (!CAM) {
 // 전체화면일 때만 하우징/카메라/토글을 감추고 스크린이 화면을 꽉 채운다.
 // F11·맥 초록버튼 전체화면은 fullscreenchange 가 안 오므로 display-mode 도 같이 본다.
 const SCREEN = location.hash === '#screen';
+if (new URLSearchParams(location.search).has('rec')) document.body.classList.add('device', 'rec');   // ?rec=1 : 영상용 (버튼·썸네일 숨김)
 const fs = matchMedia('(display-mode: fullscreen)');
 const kiosk = () => {
   const filled = innerWidth >= screen.width - 1 && innerHeight >= screen.height - 1;
@@ -1027,9 +1029,10 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow','bye'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 10500, 4800, 2900, 4300, 6200, 0, 4200];   // message 는 첫 문장이 다 쓰인 뒤(1.5s) 한 호흡만 : 둘째 문장이 곧바로 이어진다   // bye : 인사가 사라진 뒤(4.0s) 대기 상태로   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, new URLSearchParams(location.search).has('nosil') ? 2900 : 10500, 4800, 2900, 4300, 6200, 0, 4200];   // message 는 첫 문장이 다 쓰인 뒤(1.5s) 한 호흡만 : 둘째 문장이 곧바로 이어진다   // bye : 인사가 사라진 뒤(4.0s) 대기 상태로   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
 const body = document.body;
-let timer, strokeTimer;
+let timer, strokeTimer, pbTimer;
+const sring = document.querySelector('.sring');
 
 // fill : 엄지척 전까지 6초 간격으로 문구가 바뀐다. | 는 줄바꿈
 const ASK = ['안녕하세요.|도움이 필요하신가요?', '찾고 계신 장소나|오늘의 일정을 말해주세요', '기다림 없이 빠르게|접수를 도와드릴 수 있어요.'];
@@ -1100,20 +1103,28 @@ const fakeLum = (u, v) => {
   const neck = v > .05 && v < .3 ? .45 : 1;   // 턱 아래 그림자
   return Math.max(.08, (.78 - .32 * (u + .8) / 1.6 - .25 * Math.max(0, v - .5)) * neck);   // 몸 : 왼쪽이 밝고 아래로 어두워진다
 };
+// 화면 좌표(-1~1) → 영상 좌표(0~1) : 사람 영역(__silBox)을 화면 높이의 78% 로 맞추고 거울처럼 뒤집는다
+const srcAt = (u, v) => {
+  const B = window.__silBox;
+  if (!B) return [(1 - (u + 1) / 2) * .75 + .125, (v + 1) / 2];
+  const k = (B.y1 - B.y0) / 1.56;                       // 영상 속 사람 높이 → 화면 -0.78~0.78
+  const cx = (B.x0 + B.x1) / 2, cy = (B.y0 + B.y1) / 2;
+  return [cx - u * k, cy + v * k];                      // 좌우 반전
+};
 const lumAt = (u, v) => {
   const Lm = window.__silLum;
   if (!Lm) return fakeLum(u, v);
-  const mx = Math.round(((1 - (u + 1) / 2) * .75 + .125) * (Lm.w - 1));
-  const my = Math.round(((v + 1) / 2) * (Lm.h - 1));
-  return Lm.data[my * Lm.w + mx] ?? .5;
+  const [sx, sy] = srcAt(u, v);
+  if (sx < 0 || sx > 1 || sy < 0 || sy > 1) return .5;
+  return Lm.data[Math.round(sy * (Lm.h - 1)) * Lm.w + Math.round(sx * (Lm.w - 1))] ?? .5;
 };
 const maskAt = (u, v, t) => {
   const M = window.__silMask;
-  if (!M) return fakeSil(u, v, t);
-  // 640x480 영상의 가운데 정사각형(가로 .125~.875)을 스크린에 맞추고, 거울처럼 좌우를 뒤집는다
-  const mx = Math.round(((1 - (u + 1) / 2) * .75 + .125) * (M.w - 1));
-  const my = Math.round(((v + 1) / 2) * (M.h - 1));
-  return M.data[my * M.w + mx] ?? 0;
+  if (!M || !window.__silBox) return fakeSil(u, v, t);   // 카메라가 없거나 사람이 안 보이면 대신 그린 머리·어깨
+  const [sx, sy] = srcAt(u, v);
+  if (sx < 0 || sx > 1 || sy < 0 || sy > 1) return 0;
+  const raw = M.data[Math.round(sy * (M.h - 1)) * M.w + Math.round(sx * (M.w - 1))] ?? 0;
+  return smooth(.45, .72, raw);   // 확실한 사람 자리만
 };
 let silRAF;
 // 스트로크 고리 반지름 (CSS ringIn 과 같은 곡선 : 1.7s 동안 scale .16 → 1, 링 반지름 약 405)
@@ -1123,9 +1134,11 @@ const ringR = ts => ts <= 0 ? 66 : 405 * (.16 + .84 * ringEase(ts / 1.7));
 const SILC = [[255, 252, 236], [255, 233, 168], [138, 255, 243], [113, 172, 251], [176, 246, 198]];   // 엄지척·스트로크에 쓰는 색
 const silBuf = new OffscreenCanvas(SIL.res, SIL.res), sb = silBuf.getContext('2d');
 const silImg = sb.createImageData(SIL.res, SIL.res);
+const NOSIL = new URLSearchParams(location.search).has('nosil');   // ?nosil=1 : 실루엣 장면을 건너뛴다 (영상 비교용)
 const silRun = () => {
   cancelAnimationFrame(silRAF);
-  window.__silMask = null; window.__silLum = null;
+  if (NOSIL) { sx2.clearRect(0, 0, 2160, 2160); return; }
+  window.__silMask = null; window.__silLum = null; window.__silBox = null;
   let lo = .2, hi = .8;   // 사람 안 밝기 범위 : 프레임마다 따라가며 명암을 끝까지 펼친다
   const start = performance.now(); let outAt = 0;
   const N = SIL.res, D = silImg.data;
@@ -1281,8 +1294,17 @@ const go = n => {
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); silRun(); }
   else star.pause();
   // 스트로크 : 기기 번호가 사라진 뒤 connected 에서 처음부터 켜져 I'll take you 까지 끊지 않고 (영상 26s, 쓰는 구간 약 20s)
-  if (['connected', 'message', 'followup', 'guide'].includes(STEPS[n])) stroke.play().catch(() => {});
+  // 스트로크는 connecting 부터 미리 돌려 둔다 (보이지 않는 동안 디코딩을 마쳐 등장 첫 프레임이 끊기지 않게)
+  if (STEPS[n] === 'connecting') stroke.currentTime = RSTART;
+  if (['connecting', 'connected', 'message', 'followup', 'guide'].includes(STEPS[n])) {
+    stroke.play().catch(() => {});
+    if (!['connected', 'message', 'followup', 'guide'].includes(STEPS[step()] ?? '')) {   // 들어오는 순간에만
+      sring.style.setProperty('--pb', 0);
+      clearTimeout(pbTimer); pbTimer = setTimeout(() => sring.style.removeProperty('--pb'), 1700);
+    }
+  }
   else { stroke.pause(); stroke.currentTime = RSTART; }
+  if (STEPS[n] === 'connecting') { sring.style.setProperty('--pb', 0); clearTimeout(pbTimer); }   // 등장 전까지 흐림 고리는 꺼 둔다
   askRun(STEPS[n] === 'fill');   // 엄지척(connecting)부터는 마지막 문구 그대로
   // idle 은 얼굴이 가까워져야, fill 은 엄지척이어야만 다음으로 : 별 모션은 반드시 엄지척이 인식된 뒤에만 재생
   // (카메라가 없으면 idle 은 탭으로 넘길 수 있다)
@@ -1401,7 +1423,24 @@ const loop = () => {
   if (n === 1 && t - Math.max(faceAt, window.__fillAt || 0) > 4000) window.__leaveFill();   // 안내를 보고 있지 않으면
   if (n === 2 && seg) {   // connecting 동안만 : 사람 모양 마스크
     const r = seg.segmentForVideo(video, t), m = r.confidenceMasks?.[0];
-    if (m) window.__silMask = { w: m.width, h: m.height, data: m.getAsFloat32Array().slice() };
+    if (m) {
+      const d = m.getAsFloat32Array().slice();
+      window.__silMask = { w: m.width, h: m.height, data: d };
+      // 사람 영역 : 가로는 가운데 60%, 세로는 위 5%~아래 100% 안에서 찾는다 (팔·배경 노이즈를 덜 타게)
+      let x0 = 1, y0 = 1, x1 = 0, y1 = 0, n = 0;
+      for (let j = 0; j < m.height; j += 2) for (let i = 0; i < m.width; i += 2) {
+        if (d[j * m.width + i] < .7) continue;
+        const u = i / m.width, v = j / m.height;
+        if (u < .1 || u > .9) continue;
+        x0 = Math.min(x0, u); x1 = Math.max(x1, u); y0 = Math.min(y0, v); y1 = Math.max(y1, v); n++;
+      }
+      if (n > 200) {
+        const b = window.__silBox ?? { x0, y0, x1, y1 };
+        const e = .15;   // 조금씩 따라가 실루엣이 떨리지 않게
+        window.__silBox = { x0: b.x0 + (x0 - b.x0) * e, y0: b.y0 + (y0 - b.y0) * e,
+                            x1: b.x1 + (x1 - b.x1) * e, y1: b.y1 + (y1 - b.y1) * e };
+      }
+    }
     lx.drawImage(video, 0, 0, 96, 72);
     const px = lx.getImageData(0, 0, 96, 72).data, L = new Float32Array(96 * 72);
     for (let i = 0; i < L.length; i++) L[i] = (.3 * px[i * 4] + .59 * px[i * 4 + 1] + .11 * px[i * 4 + 2]) / 255;
