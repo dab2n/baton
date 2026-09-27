@@ -76,7 +76,8 @@ body{
 html.fb-ko{ --ff-ko:'Pretendard Web'; }
 html.fb-en{ --ff-en:var(--ff-ko,'SF Pro KR'); }   /* 영문만 없으면 한글은 SF Pro KR 그대로, 둘 다 없으면 Pretendard */
 /* 한글 600 48px : Pretendard 가 7.6% 넓다 → −0.054em */
-html.fb-ko .l-greet, html.fb-ko .l-greet *{ letter-spacing:-0.024em; }
+/* 한국어 문구 : 헬스장 ui 와 같은 자간(-2%)·굵기(Medium) — 기본 +3% 자간은 한글에서 너무 벌어진다 */
+.l-greet, .l-greet *{ letter-spacing:-0.02em; }
 
 .device{ position:relative; width:1080px; height:1080px; flex:none; transform:scale(var(--s,1)); }
 
@@ -369,7 +370,7 @@ body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-o
 .l-greet, .l-hi{ width:auto; white-space:nowrap;
                   font-size:67.319px; font-weight:600; line-height:1.5; }
 .l-greet, .l-hi{ font-size:48px; line-height:1.6; }   /* 두 줄 : 한국어·영어가 줄끼리 겹친다 */
-.l-greet{ line-height:1.42; }   /* 한글은 행간을 좁게 : 두 언어의 차(0.18)를 유지해 줄끼리 겹치게 */
+.l-greet{ line-height:1.42; font-weight:500; }   /* 한글은 행간을 좁게 : 두 언어의 차(0.18)를 유지해 줄끼리 겹치게 · 굵기도 헬스장과 같이 Medium */
 .l-hi{ font-size:36px; line-height:1.8; font-weight:500; }   /* 영문 문장은 모두 36px · 행간 1.8 · Medium */
 /* 두 문구의 박스를 같은 폭으로 : 지우개 경계가 화면 같은 x 를 지나가게 */
 .l-greet, .l-hi{ width:780px; }
