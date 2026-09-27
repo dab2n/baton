@@ -575,17 +575,13 @@ body.eraseb .rimlight{ opacity:0; transition:opacity 1.2s ease; }
 .nav{ position:absolute; inset:0; pointer-events:none; z-index:2; }   /* 위아래 색 띠(.screen::after)보다 앞에 : 흰 게이지가 회색으로 덮이지 않게 */
 .nav > *{ opacity:0; transition:opacity .5s ease; }
 body.follow .nav > *{ opacity:1; }
-.navgauge, .navglow, .navfill, .navarrow, .navdigits{ position:absolute; inset:0; width:1080px; height:1080px; }
+.navgauge, .navfill, .navarrow, .navdigits{ position:absolute; inset:0; width:1080px; height:1080px; }
 
 /* 게이지 : 피그마 3499:7361 — 중심 (535.5,539.5) 반지름 481.7 굵기 23.6. 아래 정중앙 → 위 끝(1014.6,589) 은 핀 꼭짓점 바로 아래.
    남은 길(트랙)은 채움과 이어 붙지 않고 틈(GAP)을 두고 끊겨 있다 */
 .navgauge, .navfill{ fill:none; stroke-linecap:round; }
 .gtrack circle{ fill:#333; transition:opacity .45s ease; }   /* 남은 길은 도트 (피그마 3609:512) */
-/* 채움 글리밍 : 글자와 같은 #FEFFF9 겹을 흐리게 깔고, 화면 오른쪽(진행 방향)으로 갈수록 짙게 */
 /* 꼬리(호가 시작하는 아래 정중앙)에서 선이 흐려지며 풀린다 : 마스크는 SVG 로 — 시작점 기준이라 길이와 무관 */
-.navglow{ pointer-events:none; filter:blur(11px); }
-.gglow{ fill:none; stroke:#FEFFF9; stroke-width:20; stroke-linecap:round; opacity:.5;
-        stroke-dasharray:100 200; stroke-dashoffset:100; transition:stroke-dashoffset .5s cubic-bezier(.3,.9,.3,1); }
 .gfill { stroke:#fff; stroke-width:23.6; stroke-linecap:round; stroke-dasharray:100 200; stroke-dashoffset:100;
           transition:stroke-dashoffset .5s cubic-bezier(.3,.9,.3,1); }
 .gmask{ transition:stroke-dashoffset .5s cubic-bezier(.3,.9,.3,1); }
@@ -598,15 +594,13 @@ body.follow .nav > *{ opacity:1; }
 /* 첫 등장 : 순서와 간격을 흩어 다다닥 튀어나오게 (--d 는 JS 가 뿌린다) */
 body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 @keyframes pop{ from{ opacity:0; } to{ opacity:var(--o, 1); } }
-/* 위를 향할 땐 가만두지 않고 위로 두 번 쿡쿡 찌르고 쉰다 : 계속 직진.
-   translate 는 rotate 바깥에서 먹으므로 화면 기준 위로 움직인다.
+/* 가만두지 않고 가리키는 쪽으로 한 번 쿡 찌르고 쉰다 : 세로로 설 때도, 대각선일 때도 한 번씩.
+   translate 는 rotate 바깥에서 먹으므로 방향은 JS 가 --pkx/--pky 로 준다.
    1.2s 늦춰 시작 : 처음엔 도트 등장, 대각선에서 돌아올 땐 회전(1.4s)이 끝나갈 때 */
-.nav.up .navarrow{ animation:poke 2.6s cubic-bezier(.45,0,.35,1) 1.2s infinite; }
+body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0,.35,1) 1.2s infinite; }
 @keyframes poke{
-  0%, 52%, 100%{ translate:0 0; }
-  15%          { translate:0 -12px; }
-  29%          { translate:0 0; }
-  40%          { translate:0 -7px; }
+  0%, 42%, 100%{ translate:0 0; }
+  15%          { translate:var(--pkx, 0) var(--pky, -12px); }
 }
 
 /* 남은 시간(분) : NDOT 47 대신 같은 도트로 직접 그린다 */
@@ -638,7 +632,7 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
 
 @media (prefers-reduced-motion:reduce){
   .w, .c{ animation:none; opacity:1; filter:none; }
-  .field,.sheen,.core,.cyan,.nav.up .navarrow{ animation:none; }
+  .field,.sheen,.core,.cyan,.navarrow{ animation:none; }
 }
 </style>
 </head>
@@ -716,26 +710,8 @@ body.follow .navarrow circle{ animation:pop .16s linear both var(--d); }
         </mask>
         <g class="gtrack" mask="url(#mDots)" aria-hidden="true"></g>   <!-- 남은 길 도트 : 지나온 자리만 가려진다 -->
       </svg>
-      <!-- 번짐은 도트 위에 : 풀린 꼬리에서 도트가 비쳐 보이지 않게 -->
-      <svg class="navglow" viewBox="0 0 1080 1080" aria-hidden="true">
-        <defs>
-          <!-- 꼬리쪽(535.5,1021.2)에 번짐을 모아 둔다 : 끝까지 옅게 남겨 선두에도 옅은 빛이 돈다 -->
-          <radialGradient id="gTail" gradientUnits="userSpaceOnUse" cx="535.5" cy="1021.2" r="420">
-            <stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity=".08"/>
-          </radialGradient>
-          <mask id="mTail" maskUnits="userSpaceOnUse" x="0" y="0" width="1080" height="1080"><rect width="1080" height="1080" fill="url(#gTail)"/></mask>
-        </defs>
-        <path class="gglow" mask="url(#mTail)" d="M535.5 1021.2A481.7 481.7 0 0 0 1014.6 589" pathLength="100"/>
-      </svg>
-      <!-- 또렷한 심은 번짐 위에 : 꼬리(시작점 30~95px)에서만 풀린다 -->
       <svg class="navfill" viewBox="0 0 1080 1080" aria-hidden="true">
-        <defs>
-          <radialGradient id="gHead" gradientUnits="userSpaceOnUse" cx="535.5" cy="1021.2" r="95">
-            <stop offset=".3" stop-color="#fff" stop-opacity="0"/><stop offset=".85" stop-color="#fff"/>
-          </radialGradient>
-          <mask id="mHead" maskUnits="userSpaceOnUse" x="0" y="0" width="1080" height="1080"><rect width="1080" height="1080" fill="url(#gHead)"/></mask>
-        </defs>
-        <path class="gfill" mask="url(#mHead)" d="M535.5 1021.2A481.7 481.7 0 0 0 1014.6 589" pathLength="100"/>
+        <path class="gfill" d="M535.5 1021.2A481.7 481.7 0 0 0 1014.6 589" pathLength="100"/>
       </svg>
       <svg class="navarrow"  viewBox="0 0 1080 1080" aria-hidden="true"></svg>
       <svg class="navdigits" viewBox="0 0 1080 1080" aria-hidden="true"></svg>
@@ -923,7 +899,6 @@ const dot = (x, y, r, o) => {
 const arrowSvg  = NAV.querySelector('.navarrow');
 const digitsSvg = NAV.querySelector('.navdigits');
 const gfill = NAV.querySelector('.gfill');
-const gglow = NAV.querySelector('.gglow');
 const gtrack = NAV.querySelector('.gtrack');
 const GAP = 4.5;   // 채움 끝과 남은 길 사이 틈 (둥근 끝 두 개가 약 6px 떨어져 보이는 길이, 전체 100 기준)
 // 남은 길 도트 : 게이지 호(중심 535.5,539.5 · 반지름 481.7) 위에 2.78° 간격으로 (피그마 : 19개, Ø23.238)
@@ -935,15 +910,7 @@ for (let i = 0; i < GDOTS; i++) {
   gtrack.append(dot(535.5 + 481.7 * Math.cos(a), 539.5 + 481.7 * Math.sin(a), 11.619));
 }
 const gmask = NAV.querySelector('.gmask');
-const gHead = NAV.querySelector('#gHead'), gTail = NAV.querySelector('#gTail');
-const GLEN = 707.1;   // 호 전체 길이
-const setGauge = v => {
-  gfill.style.strokeDashoffset = v; gglow.style.strokeDashoffset = v; gmask.style.strokeDashoffset = v;
-  // 흐려지며 풀리는 꼬리와 번짐은 채워진 길이에 맞춰 조금씩 위로 올라간다
-  const L = (100 - v) / 100 * GLEN;
-  gHead.setAttribute('r', Math.min(260, 30 + L * .28).toFixed(1));
-  gTail.setAttribute('r', Math.min(650, 120 + L * .75).toFixed(1));
-};
+const setGauge = v => { gfill.style.strokeDashoffset = v; gmask.style.strokeDashoffset = v; };
 const navm  = NAV.querySelector('.navm');
 const navto = NAV.querySelector('.navto');
 
@@ -992,14 +959,14 @@ const navDotsFor = ch => {
     const cx = x0 + (i + .5) * pw, cy = y0 + (j + .5) * ph;
     if (ink(cx, cy)) dots.push({ x: cx - NPEN, y: cy - NBASE });
   }
-  return NDOTS[ch] = { dots, adv, r: ph * .53, left: x0 - NPEN, top: y0 - NBASE, h: y1 + 1 - y0 };
+  return NDOTS[ch] = { dots, adv, r: ph * .53, left: x0 - NPEN, top: y0 - NBASE, h: y1 + 1 - y0, w: x1 + 1 - x0 };
 };
 // 캔버스는 글꼴을 미리 불러와야 쓴다 : 준비되면 도트를 다시 뽑아 그린다
 document.fonts.load(`700 ${NF}px 'OffBit Dot'`, '0123456789').then(() => {
   for (const k of Object.keys(NDOTS)) delete NDOTS[k];
   const v = shown; shown = -1; if (v >= 0) setDist(v);
 });
-const NUMX = 62.16, NUMY = 513.13, NUMH = 54.2;   // 피그마 948:180 : 숫자 자리와 높이
+const NUMX = 62.16, NUMY = 513.13, NUMH = 54.2, NUMR = 103.85;   // 피그마 948:180 : 숫자 자리·높이와 오른쪽 끝('5' 기준, min 과 7.15 간격)
 const navPool = [...Array(190)].map(() => { const c = dot(NUMX, NUMY + NUMH / 2, 3); c.style.opacity = 0; digitsSvg.append(c); return c; });
 const setDist = n => {
   if (n === shown) return;
@@ -1007,7 +974,11 @@ const setDist = n => {
   const gs = [...String(n)].map(navDotsFor);
   const k = NUMH / gs[0].h;
   const pts = [];
-  let x = NUMX - gs[0].left * k;
+  // 글자 폭이 제각각이라(4 는 50, 1 은 25) 왼쪽에 맞추면 4 에서 min 에 붙는다 :
+  // 넓은 숫자만 왼쪽으로 밀어 오른쪽 끝(NUMR)을 지킨다
+  const wid = gs.reduce((a, g, i) => a + (i < gs.length - 1 ? g.adv : g.w) * k, 0);   // 잉크 폭
+  const x0 = Math.max(53.9, Math.min(NUMX, NUMR - wid));   // 왼쪽 여백은 4(가장 넓은 숫자) 자리까지만
+  let x = x0 - gs[0].left * k;
   gs.forEach(g => {
     for (const d of g.dots) pts.push([x + d.x * k, NUMY + (d.y - g.top) * k, g.r * k]);
     x += g.adv * k;
@@ -1046,10 +1017,10 @@ const navRun = () => {
   NAV.classList.remove('arrived');
   // 게이지는 반드시 빈 상태에서 시작 : 지난 바퀴의 가득 찬 값(0)에서 transition 으로 줄어드는 모습이
   // 등장하자마자 보이던 오류. transition 을 끈 채 100 으로 되돌리고 다시 켠다
-  [gfill, gglow, gtrack].forEach(p => { p.style.transition = 'none'; });
+  [gfill, gtrack].forEach(p => { p.style.transition = 'none'; });
   setGauge(100);
   gfill.getBoundingClientRect();
-  [gfill, gglow, gtrack].forEach(p => { p.style.transition = ''; });
+  [gfill, gtrack].forEach(p => { p.style.transition = ''; });
   shown = -1;
   navto.dataset.t = '';
   let k = window.__navEnd ? SEQ.length : 0;   // 길안내 끝 버튼 : 도착으로 바로
@@ -1069,6 +1040,9 @@ const navRun = () => {
     const min = Math.ceil(n / 60);
     setGauge(100 * n / TOTAL);
     arrowSvg.style.rotate = leg.deg + 'deg';
+    const a = leg.deg * Math.PI / 180;   // 찌르는 방향도 같이 기울인다
+    NAV.style.setProperty('--pkx', (12 * Math.sin(a)).toFixed(1) + 'px');
+    NAV.style.setProperty('--pky', (-12 * Math.cos(a)).toFixed(1) + 'px');
     NAV.classList.toggle('up', leg.deg === 0);
     setTo(leg.to);
     rollTo(min);
