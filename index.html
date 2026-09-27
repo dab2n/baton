@@ -590,7 +590,7 @@ body.follow .nav > *{ opacity:1; }
 /* 게이지 : 피그마 3499:7361 — 중심 (535.5,539.5) 반지름 481.7 굵기 23.6. 아래 정중앙 → 위 끝(1014.6,589) 은 핀 꼭짓점 바로 아래.
    남은 길(트랙)은 채움과 이어 붙지 않고 틈(GAP)을 두고 끊겨 있다 */
 .navgauge{ fill:none; stroke-linecap:round; }
-.gtrack{ stroke:rgba(255,255,255,.2); stroke-width:23.6; stroke-dasharray:0 200; transition:stroke-dasharray .5s cubic-bezier(.3,.9,.3,1), stroke-dashoffset .5s cubic-bezier(.3,.9,.3,1); }
+.gtrack circle{ fill:#333; transition:opacity .45s ease; }   /* 남은 길은 도트 (피그마 3609:512) */
 /* 채움 글리밍 : 글자와 같은 #FEFFF9 겹을 흐리게 깔고, 화면 오른쪽(진행 방향)으로 갈수록 짙게 */
 .navglow{ pointer-events:none; filter:blur(8px);
   -webkit-mask:linear-gradient(90deg,transparent 10%,#000 90%); mask:linear-gradient(90deg,transparent 10%,#000 90%); }
@@ -721,7 +721,7 @@ html:not(.fb-dot) .navdigits{ display:none; }
       <!-- 게이지 : 스크린 아래 정중앙(540,1015 · 반지름 475 원의 90°)에서 출발해 오른쪽 목적지 핀까지 -->
       <svg class="navglow" viewBox="0 0 1080 1080" aria-hidden="true"><path class="gglow" d="M535.5 1021.2A481.7 481.7 0 0 0 1014.6 589" pathLength="100"/></svg>
       <svg class="navgauge" viewBox="0 0 1080 1080" aria-hidden="true">
-        <path class="gtrack" d="M535.5 1021.2A481.7 481.7 0 0 0 1014.6 589" pathLength="100"/>
+        <g class="gtrack" aria-hidden="true"></g>
         <path class="gfill"  d="M535.5 1021.2A481.7 481.7 0 0 0 1014.6 589" pathLength="100"/>
       </svg>
       <svg class="navarrow"  viewBox="0 0 1080 1080" aria-hidden="true"></svg>
@@ -914,26 +914,38 @@ const gfill = NAV.querySelector('.gfill');
 const gglow = NAV.querySelector('.gglow');
 const gtrack = NAV.querySelector('.gtrack');
 const GAP = 4.5;   // 채움 끝과 남은 길 사이 틈 (둥근 끝 두 개가 약 6px 떨어져 보이는 길이, 전체 100 기준)
+// 남은 길 도트 : 게이지 호(중심 535.5,539.5 · 반지름 481.7) 위에 2.78° 간격으로 (피그마 : 19개, Ø23.238)
+const GA0 = 5.92, GA1 = 55.97, GDOTS = 19;   // 시작·끝 각도(도, 3시 기준 시계 방향) · 개수
+const trackDots = [...Array(GDOTS)].map((_, i) => {
+  const a = (GA0 + (GA1 - GA0) * i / (GDOTS - 1)) * Math.PI / 180;
+  const c = dot(535.5 + 481.7 * Math.cos(a), 539.5 + 481.7 * Math.sin(a), 11.619);
+  gtrack.append(c);
+  return c;
+});
 const setGauge = v => {
   gfill.style.strokeDashoffset = v; gglow.style.strokeDashoffset = v;
   const done = 100 - v;   // 채워진 길이 → 남은 길은 그 뒤 틈을 두고 끝까지
-  gtrack.style.strokeDasharray = `${Math.max(0, 100 - done - GAP)} 200`;
-  gtrack.style.strokeDashoffset = -(done + GAP);
+  // 채운 곳(+틈)을 지난 도트만 남긴다. 게이지는 아래(90°)에서 위(5.92°)로 차오르므로 각도로 환산한다
+  const edge = 90 - (90 - GA0) * (done + GAP) / 100;
+  trackDots.forEach((c, i) => {
+    const a = GA0 + (GA1 - GA0) * i / (GDOTS - 1);
+    c.style.opacity = a > edge ? 0 : 1;
+  });
 };
 const navm  = NAV.querySelector('.navm');
 const navnum = NAV.querySelector('.navnum');
 const navto = NAV.querySelector('.navto');
 
-// 화살표 : 원본 (피그마) 5열 x 6행 · 도트 18개, 간격 62.914, 중심 (540,538.5)
+// 화살표 : 피그마 3609:531 — 기둥 6개 + 좌우 화살촉 2개씩 (도트 Ø50.93 · 간격 62.914 · 대각 62.914x54.93)
 {
-  const cells = [];
-  ['..X..', '.XXX.', 'XXXXX', '.XXX.', '.XXX.', '.XXX.'].forEach((row, r) =>
-    [...row].forEach((ch, c) => {
-      if (ch === 'X') cells.push(dot(540 + (c - 2) * 62.914, 380.5 + r * 62.914, 25.4652));
-    }));
+  const R = 25.4652, P = 62.914;
+  const pts = [];
+  for (let i = -2.5; i <= 2.5; i++) pts.push([0, i * P]);            // 기둥 (가운데 6개)
+  for (const sx of [-1, 1]) { pts.push([sx * 54.93, -1.5 * P]); pts.push([sx * 109.86, -.5 * P]); }   // 화살촉
+  const cells = pts.map(([x, y]) => dot(540 + x, 538.5 + y, R));
   // 등장 순서와 간격을 흩는다 : 규칙적으로 번지지 않고 다다닥 튀어나오게
   cells.map(c => [Math.random(), c]).sort((a, b) => a[0] - b[0])
-    .forEach(([, c], i) => c.style.setProperty('--d', (180 + i * 13 + Math.random() * 34 | 0) + 'ms'));
+    .forEach(([, c], i) => c.style.setProperty('--d', (180 + i * 16 + Math.random() * 34 | 0) + 'ms'));
   arrowSvg.append(...cells);
 }
 
