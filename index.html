@@ -29,8 +29,7 @@ body.shot{ --fit: 1080; }
 
 /* 한국어 : SF Pro KR. 재배포 불가 라이선스라 fonts/ 는 저장소에 올리지 않는다(.gitignore).
    파일이 없으면(배포본) Pretendard 로 떨어진다. 한글·한글 문장부호만 이 폰트로 */
-/* 길안내 숫자 OffBit Dot Bold(체험판) · 'min' Helvetica Now Display Bold : 이 맥에 설치된 것만 쓴다 (없으면 숫자는 도트 SVG 로) */
-@font-face{ font-family:'OffBit Dot'; font-weight:700; src:local('OffBitTrial-DotBold'), local('OffBit Trial Dot Bold'), url('fonts/OffBitTrial-DotBold.woff') format('woff'); }
+/* 'min' Helvetica Now Display Bold : 이 맥에 설치된 것만 쓴다 (숫자는 폰트가 아니라 도트로 직접 그린다) */
 @font-face{ font-family:'Helvetica Now Bold'; font-weight:700; src:local('HelveticaNowDisplay-Bold'), local('Helvetica Now Display Bold'); }
 @font-face{ font-family:'SF Pro KR'; font-weight:600; font-display:block;
   src:url('fonts/SFProKR-Semibold.otf') format('opentype');
@@ -774,7 +773,6 @@ const PAUSE = 7;   // 문장 경계에서 건너뛸 칸 수 (1칸 = 스태거 1�
   const cx = document.createElement('canvas').getContext('2d');
   const w = f => (cx.font = f, cx.measureText('Good Afternoon 0123').width);
   if (q !== null ? q.includes('en') : w('500 40px Magnetik, monospace') === w('500 40px monospace')) root.add('fb-en');
-  if (q !== null ? q.includes('dot') : w("700 40px 'OffBit Dot', monospace") === w('700 40px monospace')) root.add('fb-dot');
   const noKo = () => root.add('fb-ko');
   if (q !== null) { if (q.includes('ko')) noKo(); }
   else document.fonts.load('600 48px "SF Pro KR"', '가').then(f => { if (!f.length) noKo(); }, noKo);
@@ -933,46 +931,39 @@ const setTo = t => {
   if (navto.dataset.t === t) return;
   navto.dataset.t = t; navto.textContent = t; split(navto); letters(navto, .8);
 };
-// 남은 시간 숫자 : OffBit Dot 글자를 크게 그린 뒤 도트 하나하나를 찾아(벡터화) 원으로 그린다.
+// 남은 시간 숫자 (피그마 948:180)
+// 숫자 도트 : DGM Composta Trial Regular (fonts.xyz 체험판) 의 5x7 격자를 그대로 옮겨 적었다.
+// 칸 100 · 도트 Ø94 · 글자 폭 494 · 보내기 650 (폰트 단위). 글자 모양이 곧 도트라 파일 없이도 어디서나 같다.
 // 숫자가 바뀌면 도트를 새로 그리지 않고 자리만 옮겨, 도트들이 다음 숫자로 흘러간다
-const NF = 580, NW = 1200, NP = NF * .05435;    // 크게 그린 뒤 도트 격자 간격으로 훑는다(글자 크기 비례, 측정값)
-const NPEN = 200, NBASE = 950;                  // 글자를 놓는 펜 자리
-const NCV = document.createElement('canvas'); NCV.width = NCV.height = NW;
-const ncx = NCV.getContext('2d', { willReadFrequently: true });
-const NDOTS = {};
-const navDotsFor = ch => {
-  if (NDOTS[ch]) return NDOTS[ch];
-  ncx.clearRect(0, 0, NW, NW);
-  ncx.font = `700 ${NF}px 'OffBit Dot', monospace`;
-  ncx.textAlign = 'left'; ncx.textBaseline = 'alphabetic'; ncx.fillStyle = '#fff';
-  ncx.fillText(ch, NPEN, NBASE);
-  const adv = ncx.measureText(ch).width;
-  const px = ncx.getImageData(0, 0, NW, NW).data;
-  const ink = (x, y) => px[(((y | 0) * NW) + (x | 0)) * 4 + 3] > 120;
-  let x0 = NW, x1 = -1, y0 = NW, y1 = -1;
-  for (let y = 0; y < NW; y++) for (let x = 0; x < NW; x++) if (ink(x, y)) {
-    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
-  }
-  // 도트는 서로 맞닿아 있어 덩어리로 세면 뭉친다 : 격자 칸 가운데를 찍어 도트를 가려낸다
-  const cols = Math.max(1, Math.round((x1 - x0 + 1) / NP)), rows = Math.max(1, Math.round((y1 - y0 + 1) / NP));
-  const pw = (x1 - x0 + 1) / cols, ph = (y1 - y0 + 1) / rows, dots = [];
-  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
-    const cx = x0 + (i + .5) * pw, cy = y0 + (j + .5) * ph;
-    if (ink(cx, cy)) dots.push({ x: cx - NPEN, y: cy - NBASE });
-  }
-  return NDOTS[ch] = { dots, adv, r: ph * .53, left: x0 - NPEN, top: y0 - NBASE, h: y1 + 1 - y0, w: x1 + 1 - x0 };
+const NUMDOT = {
+  '0': '01110,10001,10001,10001,10001,10001,01110',   // 원본의 가운데 대각선은 뺀다
+  '1': '11100,00100,00100,00100,00100,00100,11111',
+  '2': '01110,10001,00001,00110,01000,10000,11111',
+  '3': '01110,10001,00001,00110,00001,10001,01110',
+  '4': '00010,00110,01010,10010,11111,00010,00010',
+  '5': '11111,10000,10110,11001,00001,10001,01110',
+  '6': '00111,01000,10000,11110,10001,10001,01110',
+  '7': '11111,00001,00001,00010,00100,00100,00100',
+  '8': '01110,10001,10001,01110,10001,10001,01110',
+  '9': '01110,10001,10001,01111,00001,00010,11100',
 };
-// 캔버스는 글꼴을 미리 불러와야 쓴다 : 준비되면 도트를 다시 뽑아 그린다
-document.fonts.load(`700 ${NF}px 'OffBit Dot'`, '0123456789').then(() => {
-  for (const k of Object.keys(NDOTS)) delete NDOTS[k];
-  const v = shown; shown = -1; if (v >= 0) setDist(v);
-});
+const NUMP = 100, NUMDR = 47, NUMADV = 650;   // 칸 간격 · 도트 반지름 · 글자 보내기
+const NDOTS = {};
+const numDotsFor = ch => NDOTS[ch] ??= (() => {
+  const rows = NUMDOT[ch].split(',');
+  const dots = [];
+  rows.forEach((line, r) => [...line].forEach((b, c) => {
+    if (b === '1') dots.push({ x: c * NUMP + NUMDR, y: r * NUMP + NUMDR });
+  }));
+  return { dots, r: NUMDR, left: 0, top: 0, adv: NUMADV,
+           w: (rows[0].length - 1) * NUMP + 2 * NUMDR, h: (rows.length - 1) * NUMP + 2 * NUMDR };
+})();
 const NUMX = 62.16, NUMY = 513.13, NUMH = 54.2, NUMR = 103.85;   // 피그마 948:180 : 숫자 자리·높이와 오른쪽 끝('5' 기준, min 과 7.15 간격)
-const navPool = [...Array(190)].map(() => { const c = dot(NUMX, NUMY + NUMH / 2, 3); c.style.opacity = 0; digitsSvg.append(c); return c; });
+const navPool = [...Array(60)].map(() => { const c = dot(NUMX, NUMY + NUMH / 2, 3); c.style.opacity = 0; digitsSvg.append(c); return c; });
 const setDist = n => {
   if (n === shown) return;
   shown = n;
-  const gs = [...String(n)].map(navDotsFor);
+  const gs = [...String(n)].map(numDotsFor);
   const k = NUMH / gs[0].h;
   const pts = [];
   // 글자 폭이 제각각이라(4 는 50, 1 은 25) 왼쪽에 맞추면 4 에서 min 에 붙는다 :
