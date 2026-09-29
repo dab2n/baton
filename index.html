@@ -373,7 +373,7 @@ body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-o
                   font-size:67.319px; font-weight:600; line-height:1.5; }
 .l-greet, .l-hi{ font-size:48px; line-height:1.6; }   /* 두 줄 : 한국어·영어가 줄끼리 겹친다 */
 .l-greet{ line-height:1.42; font-weight:500; }   /* 한글은 행간을 좁게 : 두 언어의 차(0.18)를 유지해 줄끼리 겹치게 · 굵기도 헬스장과 같이 Medium */
-.l-hi{ font-size:36px; line-height:1.893; font-weight:500; }   /* 영문 문장은 36px · Medium. 행간은 한국어와 줄 상자가 같아지는 값 (48x1.42 = 36x1.893 = 68.16) */
+.l-hi{ line-height:1.42; font-weight:500; }   /* 인사는 한국어와 같은 크기·행간 (48 / 1.42) : 바뀌는 자리가 정확히 겹친다 */
 /* 두 문구의 박스를 같은 폭으로 : 지우개 경계가 화면 같은 x 를 지나가게 */
 .l-greet, .l-hi{ width:780px; }
 /* 피그마 원본은 아래로 #353046 까지 어두워지는 그라디언트인데, 검은 화면에선 글자 아랫부분이 배경에 묻혀
@@ -436,10 +436,14 @@ body.connected .l-hi .ln{
   -webkit-mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
   animation:reLine 5600ms linear both; }
-body.connected .l-hi .ln + .ln{ animation-delay:460ms; }
+body.connected .l-hi .ln + .ln{ animation-name:reLine2; }
 @keyframes reLine{
-  0%, 28.57%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }   /* 1.6s 까지 감춰 둔다 */
-  67.86%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }   /* 1.6s → 3.8s : 한국어 지우개와 같은 속도 */
+  0%, 16.96%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }   /* 0.95s 까지 감춰 둔다 */
+  45.54%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }   /* 0.95s → 2.55s : 지우개를 0.15s 뒤따라 같은 자리에 쓰인다 (지워지는 글자 위로 이어서 쓰이는 모습) */
+}
+@keyframes reLine2{   /* 아랫줄 : 2.95s → 4.55s */
+  0%, 52.68%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }
+  81.25%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }
 }
 /* 실루엣 : 별 모션이 끝난 검정 위에 웹캠 속 사람을 작은 도형 격자로 (그리기는 JS silRun). 머문 뒤 가운데부터 가장자리로 사라진다 */
 .silc{ position:absolute; inset:0; width:1080px; height:1080px; pointer-events:none; opacity:0; transition:opacity .5s ease; }
@@ -493,13 +497,20 @@ body.connected .l-greet .ln{
   -webkit-mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
   animation:deLine 5600ms linear both; }
-body.connected .l-greet .ln + .ln{ animation-delay:460ms; }
+body.connected .l-greet .ln + .ln{ animation-name:deLine2; }   /* 아랫줄 : 같이 떠오르되 지우기는 윗줄이 다 바뀐 뒤에 */
 @keyframes deLine{
   0%           { opacity:0; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:cubic-bezier(.25,.6,.3,1); }
   10.71%       { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; }   /* 0.6s 동안 떠오른다 (디졸브) */
-  17.86%       { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }   /* 1.0s : 한 박자 머문 뒤 지우기 시작 */
-  57.13%       { opacity:1; }
-  57.14%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }   /* 지우기 2.2s (1.0s → 3.2s) : 흐려지지 않고 경계가 지나간 자리부터 사라진다 */
+  14.29%       { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }   /* 0.8s : 한 박자 머문 뒤 지우기 시작 */
+  42.85%       { opacity:1; }
+  42.86%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }   /* 지우기 1.6s (0.8s → 2.4s) */
+}
+@keyframes deLine2{   /* 아랫줄 : 같이 떠오르고(0~0.6s) 지우기는 2.6s → 4.0s */
+  0%           { opacity:0; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:cubic-bezier(.25,.6,.3,1); }
+  10.71%       { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; }
+  50%          { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }   /* 2.8s : 윗줄이 다 바뀐 뒤 */
+  78.56%       { opacity:1; }
+  78.57%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }   /* 2.8s → 4.4s */
 }
 
 /* 줄 글리밍 겹 : 한국어는 지워지는 한가운데(2.35s), 영어는 드러나는 한가운데(3.05s)에 가장 밝다.
@@ -1061,7 +1072,7 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow','bye'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, new URLSearchParams(location.search).has('nosil') ? 2900 : 10500, 4800, 2900, 4300, 6200, 0, 4200];   // message 는 첫 문장이 다 쓰인 뒤(1.5s) 한 호흡만 : 둘째 문장이 곧바로 이어진다   // bye : 인사가 사라진 뒤(4.0s) 대기 상태로   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, new URLSearchParams(location.search).has('nosil') ? 2900 : 10500, 6200, 2900, 4300, 6200, 0, 4200];   // message 는 첫 문장이 다 쓰인 뒤(1.5s) 한 호흡만 : 둘째 문장이 곧바로 이어진다   // bye : 인사가 사라진 뒤(4.0s) 대기 상태로   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer, strokeTimer, pbTimer;
 const sring = document.querySelector('.sring');
