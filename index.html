@@ -547,7 +547,9 @@ body.connecting .star{ opacity:1; }   /* 엄지척 뒤엔 영상만 (파장 효�
 .sglow{ animation:ringWob 4.3s ease-in-out infinite; }
 @keyframes ringWob{ 0%, 100%{ scale:1 1; } 25%{ scale:1.012 .992; } 50%{ scale:.994 1.01; } 75%{ scale:1.008 .996; } }
 /* 등장 : 가운데의 작은 고리에서 부드럽게 커지며, 처음엔 어둡다가 다 커졌을 때 완전히 밝게 */
-@keyframes ringIn{ 0%{ scale:.16; filter:brightness(.22); } 55%{ filter:brightness(.55); } 100%{ scale:1; filter:brightness(1); } }
+/* 검은 화면 위라 brightness 와 보이는 결과는 같고, opacity 는 합성만 해서 매끄럽다.
+   .16/.22 로 시작하면 처음 0.5초가 눈에 안 보여 툭 튀어나오는 것처럼 보였다 → 처음부터 보이는 크기·밝기에서 자란다 */
+@keyframes ringIn{ 0%{ scale:.38; opacity:.28; } 55%{ opacity:.72; } 100%{ scale:1; opacity:1; } }
 .stroke{ position:absolute; inset:0; width:1080px; height:1080px; object-fit:cover;
          scale:.8;     /* 링을 가장자리가 아니라 안쪽에 : 밝은 선 R 513 × .8 ≈ 410 (스크린 520 의 75%, 레퍼런스 실측) */
          /* 줄이면 영상 프레임(1080) 끝이 사각으로 보인다 → 링 바로 바깥에서 원형으로 흐려 끊는다 (흐림은 부모 .sglow 에서) */
