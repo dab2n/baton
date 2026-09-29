@@ -1131,8 +1131,11 @@ const srcAt = (u, v) => {
   const B = window.__silBox;
   if (!B) return [(1 - (u + 1) / 2) * .75 + .125, (v + 1) / 2];
   const k = (B.y1 - B.y0) / 1.56;                       // 영상 속 사람 높이 → 화면 -0.78~0.78
+  // 마스크(정사각형)는 4:3 영상을 늘려 담은 것이라 그대로 훑으면 사람이 세로로 길고 좁아 보인다 :
+  // 가로를 영상 비율만큼 좁게 훑어 실제 몸 비율을 지킨다 (도트 자체는 그대로 원형)
+  const kx = k / (window.__silAR ?? 4 / 3);
   const cx = (B.x0 + B.x1) / 2, cy = (B.y0 + B.y1) / 2;
-  return [cx - u * k, cy + v * k];                      // 좌우 반전
+  return [cx - u * kx, cy + v * k];                     // 좌우 반전
 };
 const lumAt = (u, v) => {
   const Lm = window.__silLum;
@@ -1440,6 +1443,7 @@ const loop = () => {
   const n = window.__step();
   if (face) faceAt = t;
   if (n === 1 && t - Math.max(faceAt, window.__fillAt || 0) > 4000) window.__leaveFill();   // 안내를 보고 있지 않으면
+  window.__silAR = video.videoWidth / video.videoHeight;   // 실루엣 가로 비율 보정용
   if (n === 2 && seg) {   // connecting 동안만 : 사람 모양 마스크
     const r = seg.segmentForVideo(video, t), m = r.confidenceMasks?.[0];
     if (m) {
