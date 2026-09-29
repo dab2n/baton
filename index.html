@@ -110,8 +110,13 @@ body.bare .ring{ display:none; }
   content:''; display:block; width:16px; height:16px; margin:2px; border-radius:50%;
   background:#fff; transform:translateX(14px); transition:transform .2s;
 }
-body.bare .toggle .sw{ background:#d6d6d6; }
-body.bare .toggle .sw::after{ transform:none; }
+body.bare .toggle:not(.camt) .sw{ background:#d6d6d6; }
+body.bare .toggle:not(.camt) .sw::after{ transform:none; }
+/* 카메라 영역 토글 : 목업 토글 아래에. 끄면 썸네일만 감추고 인식은 계속한다 */
+.toggle.camt{ translate:0 calc(-50% + 46px); }
+body.nocam .toggle.camt .sw{ background:#d6d6d6; }
+body.nocam .toggle.camt .sw::after{ transform:none; }
+body.nocam .cam{ opacity:0; pointer-events:none; }
 body.kiosk .toggle, body.shot .toggle{ display:none; }   /* 전체화면·내보내기에선 숨김 */
 /* 장면 바로 가기 : 구간별로 골라 그 자리부터 재생 (디자인 확인용) */
 .jump{ position:fixed; left:16px; top:50%; translate:0 -50%; z-index:10; display:flex; flex-direction:column; gap:4px;
@@ -683,6 +688,9 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
 </nav>
 <button class="toggle" type="button" aria-pressed="false">
   <span class="sw"></span><span class="lb">제품 목업</span>
+</button>
+<button class="toggle camt" type="button" aria-pressed="true">
+  <span class="sw"></span><span class="lb">카메라 영역</span>
 </button>
 
 <div class="cam">
@@ -1408,6 +1416,12 @@ toggle.addEventListener('click', () => {
   const off = body.classList.toggle('bare');
   toggle.setAttribute('aria-pressed', String(!off));
   fit();
+});
+const camToggle = document.querySelector('.toggle.camt');
+camToggle.addEventListener('pointerdown', e => e.stopPropagation());
+camToggle.addEventListener('click', e => {
+  e.stopPropagation();
+  camToggle.setAttribute('aria-pressed', String(!body.classList.toggle('nocam')));
 });
 
 addEventListener('pointerdown', tap);
