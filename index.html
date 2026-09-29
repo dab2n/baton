@@ -121,7 +121,7 @@ body.kiosk .toggle, body.shot .toggle{ display:none; }   /* 전체화면·내보
   background:transparent; color:#000; cursor:pointer; }
 .jump button:hover{ background:#f2f2f2; }
 .jump button.on{ background:#000; color:#fff; }
-body.device .jump, body.shot .jump{ display:none; }
+body.rec .jump, body.shot .jump{ display:none; }   /* 'device' 는 기기 상자(.device)의 클래스라 body 에 붙이면 안 된다 (1080 상자로 축소됨) */
 body.rec .cam, body.rec .toggle{ display:none; }   /* 전체화면에서도 보이고, 실기기(#screen)·내보내기에서만 숨김 */
 .jump, .jump button{ cursor:pointer; }
 body.kiosk{ cursor:none; background:#0B0F18; }   /* 터치/마우스 없는 스크린 */
@@ -744,7 +744,7 @@ if (!CAM) {
 // 전체화면일 때만 하우징/카메라/토글을 감추고 스크린이 화면을 꽉 채운다.
 // F11·맥 초록버튼 전체화면은 fullscreenchange 가 안 오므로 display-mode 도 같이 본다.
 const SCREEN = location.hash === '#screen';
-if (new URLSearchParams(location.search).has('rec')) document.body.classList.add('device', 'rec');   // ?rec=1 : 영상용 (버튼·썸네일 숨김)
+if (new URLSearchParams(location.search).has('rec')) document.body.classList.add('rec');   // ?rec=1 : 영상용 (버튼·썸네일 숨김)
 const fs = matchMedia('(display-mode: fullscreen)');
 const kiosk = () => {
   const filled = innerWidth >= screen.width - 1 && innerHeight >= screen.height - 1;
