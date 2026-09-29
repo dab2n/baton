@@ -150,14 +150,16 @@ body.kiosk .cam{ opacity:0; pointer-events:none; }   /* 전체화면 : 사람 �
    위/아래 방향은 아주 긴 마스크로만 나눈다. 등색선이 테두리와 같은 곡률(가운데가 높고 옆이 낮다)로 휜다 */
 .screen::before, .screen::after{ content:''; position:absolute; inset:0; pointer-events:none;
   transition:opacity 1.4s ease; }   /* idle → fill 로 넘어갈 때 뚝 켜지지 않고 스며 나온다 */
+/* 색은 피그마 그라디언트 바 그대로 (9% #0F1627 → 33% 검정 → 80% 검정 → 98% #3D3D3D).
+   세지 않게, 경계가 길게 풀리도록 마스크를 넓혔다 */
 .screen::before{   /* 위 : 감청 */
-  background:radial-gradient(circle 530px at 540px 540px, rgba(22,33,58,0) 68%, rgba(20,29,50,.4) 86%, #16213A 97%, #16213A 100%);
-  -webkit-mask:linear-gradient(180deg,#000 0 7%, rgba(0,0,0,.7) 18%, transparent 32%);
-          mask:linear-gradient(180deg,#000 0 7%, rgba(0,0,0,.7) 18%, transparent 32%); }
-.screen::after{    /* 아래 : 밝은 회색 */
-  background:radial-gradient(circle 530px at 540px 540px, rgba(43,49,60,0) 70%, rgba(39,45,55,.4) 87%, #2B313C 97%, #2B313C 100%);
-  -webkit-mask:linear-gradient(0deg,#000 0 6%, rgba(0,0,0,.72) 17%, transparent 30%);
-          mask:linear-gradient(0deg,#000 0 6%, rgba(0,0,0,.72) 17%, transparent 30%); }
+  background:radial-gradient(circle 530px at 540px 540px, rgba(15,22,39,0) 44%, rgba(15,22,39,.3) 70%, rgba(15,22,39,.62) 88%, #0F1627 98%, #0F1627 100%);
+  -webkit-mask:linear-gradient(180deg,#000 0 6%, rgba(0,0,0,.9) 20%, rgba(0,0,0,.55) 32%, transparent 58%);
+          mask:linear-gradient(180deg,#000 0 6%, rgba(0,0,0,.9) 20%, rgba(0,0,0,.55) 32%, transparent 58%); }
+.screen::after{    /* 아래 : 회색 */
+  background:radial-gradient(circle 530px at 540px 540px, rgba(61,61,61,0) 52%, rgba(61,61,61,.12) 78%, rgba(61,61,61,.24) 92%, rgba(61,61,61,.62) 99%, rgba(61,61,61,.62) 100%);
+  -webkit-mask:linear-gradient(0deg,#000 0 2%, rgba(0,0,0,.5) 12%, rgba(0,0,0,.26) 26%, transparent 46%);
+          mask:linear-gradient(0deg,#000 0 2%, rgba(0,0,0,.5) 12%, rgba(0,0,0,.26) 26%, transparent 46%); }
 /* 기본 화면(얼굴 인식 전)은 위아래 아무것도 없이 순검정. 띠는 구슬이 커질 때부터 */
 body.idle .screen::before, body.idle .screen::after, body.idle .rimlight{ opacity:0; }
 /* 그 색이 가장자리를 따라 아주 천천히 돈다 : 원뿔 그라디언트를 테두리 쪽만 남기고 회전 */
@@ -1232,10 +1234,10 @@ const bez = (x1, y1, x2, y2) => x => {   // CSS cubic-bezier 와 같은 곡선
 const sweepEase = bez(.45, .05, .25, 1), extEase = bez(.4, 0, .2, 1);
 const clamp01 = v => Math.min(1, Math.max(0, v));
 const BANDS = [
-  { stops: [[.68, 'rgba(22,33,58,0)'], [.86, 'rgba(20,29,50,.4)'], [.97, '#16213A'], [1, '#16213A']],
-    lin: e => [[0, 1], [.07 + .29 * e, 1], [.18 + .32 * e, .7], [.32 + .34 * e, 0]], top: true },
-  { stops: [[.70, 'rgba(43,49,60,0)'], [.87, 'rgba(39,45,55,.4)'], [.97, '#2B313C'], [1, '#2B313C']],
-    lin: e => [[0, 1], [.06 + .30 * e, 1], [.17 + .33 * e, .72], [.30 + .36 * e, 0]], top: false },
+  { stops: [[.44, 'rgba(15,22,39,0)'], [.70, 'rgba(15,22,39,.3)'], [.88, 'rgba(15,22,39,.62)'], [.98, '#0F1627'], [1, '#0F1627']],
+    lin: e => [[0, 1], [.06 + .29 * e, 1], [.20 + .32 * e, .9], [.32 + .34 * e, .55], [.58 + .34 * e, 0]], top: true },
+  { stops: [[.52, 'rgba(61,61,61,0)'], [.78, 'rgba(61,61,61,.12)'], [.92, 'rgba(61,61,61,.24)'], [.99, 'rgba(61,61,61,.62)'], [1, 'rgba(61,61,61,.62)']],
+    lin: e => [[0, 1], [.02 + .30 * e, 1], [.12 + .33 * e, .5], [.26 + .36 * e, .26], [.46 + .36 * e, 0]], top: false },
 ];
 const drawBands = (a0, a1, ext, alpha, endFade = 0, bandAlpha = [1, 1]) => {
   bx.clearRect(0, 0, 540, 540);
