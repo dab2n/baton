@@ -373,7 +373,7 @@ body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-o
                   font-size:67.319px; font-weight:600; line-height:1.5; }
 .l-greet, .l-hi{ font-size:48px; line-height:1.6; }   /* 두 줄 : 한국어·영어가 줄끼리 겹친다 */
 .l-greet{ line-height:1.42; font-weight:500; }   /* 한글은 행간을 좁게 : 두 언어의 차(0.18)를 유지해 줄끼리 겹치게 · 굵기도 헬스장과 같이 Medium */
-.l-hi{ font-size:36px; line-height:1.8; font-weight:500; }   /* 영문 문장은 모두 36px · 행간 1.8 · Medium */
+.l-hi{ font-size:36px; line-height:1.893; font-weight:500; }   /* 영문 문장은 36px · Medium. 행간은 한국어와 줄 상자가 같아지는 값 (48x1.42 = 36x1.893 = 68.16) */
 /* 두 문구의 박스를 같은 폭으로 : 지우개 경계가 화면 같은 x 를 지나가게 */
 .l-greet, .l-hi{ width:780px; }
 /* 피그마 원본은 아래로 #353046 까지 어두워지는 그라디언트인데, 검은 화면에선 글자 아랫부분이 배경에 묻혀
@@ -429,7 +429,18 @@ body.fill.leave .l-greet{ translate:0 110px; opacity:0; transition:translate .8s
 body.fill .l-greet.out .c{ animation:out 1.1s cubic-bezier(.4,0,.6,1) both; animation-delay:calc(var(--t) * .35ms); }   /* 말한 속도보다 빨리 걷힌다 */
 /* 영어 인사 : 실루엣이 사라지고 스트로크가 켜지면, 엄지척 전 마지막 한국어 문장이 다시 떠 있다가
    왼→오로 지워지는 흐름을 따라 1.7s 부터 한 글자씩 천천히 */
-body.connected .l-hi .c{ animation:letterIn .8s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * .77ms + 1600ms); }   /* 지우개(1.0s)를 600ms 뒤따른다 */
+/* 영어도 글자는 제자리 : 한국어를 지우는 그 경계를 600ms 뒤따라 왼→오로 드러난다.
+   (글자마다 따로 켜면 한국어가 아직 남은 자리에 영어가 먼저 떠 두 언어가 겹쳐 보였다) */
+body.connected .l-hi .c{ animation:none; opacity:1; }
+body.connected .l-hi .ln{
+  -webkit-mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
+          mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
+  animation:reLine 5600ms linear both; }
+body.connected .l-hi .ln + .ln{ animation-delay:460ms; }
+@keyframes reLine{
+  0%, 28.57%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }   /* 1.6s 까지 감춰 둔다 */
+  67.86%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }   /* 1.6s → 3.8s : 한국어 지우개와 같은 속도 */
+}
 /* 실루엣 : 별 모션이 끝난 검정 위에 웹캠 속 사람을 작은 도형 격자로 (그리기는 JS silRun). 머문 뒤 가운데부터 가장자리로 사라진다 */
 .silc{ position:absolute; inset:0; width:1080px; height:1080px; pointer-events:none; opacity:0; transition:opacity .5s ease; }
 .silc.glow{ filter:blur(12px); }   /* 촘촘한(사람) 부분만 따로 그려 흐리게 : 은은한 번짐 */
@@ -442,7 +453,9 @@ body.connecting .silc.glow{ opacity:.32; }
 @keyframes lineUp{ from{ translate:0 .5lh; } to{ translate:0 0; } }
 body.fill .l-greet.two{ animation:lineUp .6s cubic-bezier(.4,0,.2,1) both; animation-delay:calc(var(--t2) * 1ms + 1880ms); }
 body.fill .l-greet.two.cyc{ animation-delay:calc(var(--t2) * 1.4ms + 780ms); }
-body.connected .l-hi.two{ animation:lineUp .6s cubic-bezier(.4,0,.2,1) both; animation-delay:calc(var(--t2) * .77ms + 1480ms); }
+/* 인사 전환은 한국어 두 줄이 이미 떠 있는 자리를 그대로 이어받는다 :
+   반 줄 올라오는 규칙(lineUp)을 쓰면 영어 첫 줄이 한국어 두 줄 사이를 가로질러 겹쳐 보인다 */
+body.connected .l-hi.two{ animation:none; translate:0 0; }
 body.guide .l-guide.two{ animation:lineUp .6s cubic-bezier(.4,0,.2,1) both; animation-delay:calc(var(--t2) * 1ms + 580ms); }
 /* 길안내 라벨 */
 body.follow .navto .c, body.follow .navdest .c, body.bye .navto .c, body.bye .navdest .c{ animation:letterIn .75s cubic-bezier(.25,.6,.3,1) both; animation-delay:calc(var(--t) * 1ms + 200ms); }
@@ -485,8 +498,8 @@ body.connected .l-greet .ln + .ln{ animation-delay:460ms; }
   0%           { opacity:0; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:cubic-bezier(.25,.6,.3,1); }
   10.71%       { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; }   /* 0.6s 동안 떠오른다 (디졸브) */
   17.86%       { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }   /* 1.0s : 한 박자 머문 뒤 지우기 시작 */
-  39.3%        { opacity:.5; }
-  57.14%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }   /* 지우기 2.2s (1.0s → 3.2s) */
+  57.13%       { opacity:1; }
+  57.14%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }   /* 지우기 2.2s (1.0s → 3.2s) : 흐려지지 않고 경계가 지나간 자리부터 사라진다 */
 }
 
 /* 줄 글리밍 겹 : 한국어는 지워지는 한가운데(2.35s), 영어는 드러나는 한가운데(3.05s)에 가장 밝다.
