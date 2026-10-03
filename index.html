@@ -442,10 +442,10 @@ body.connected .l-hi .c{ animation:none; opacity:1; }
 body.connected .l-hi{
   -webkit-mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,#000 0 45%,transparent 55% 100%) 85% 0 / 300% 100% no-repeat;
-  animation:reBlock 6400ms linear both; }
+  animation:reBlock 8000ms linear both; }
 @keyframes reBlock{
-  0%, 53.13%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }   /* 3.4s 까지 감춰 둔다 */
-  84.38%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }   /* 3.4s → 5.4s */
+  0%, 63.75%   { -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }   /* 5.1s 까지 감춰 둔다 */
+  86.25%, 100% { -webkit-mask-position:15% 0; mask-position:15% 0; }   /* 5.1s → 6.9s : 지우개를 0.6s 뒤따른다 */
 }
 /* 실루엣 : 별 모션이 끝난 검정 위에 웹캠 속 사람을 작은 도형 격자로 (그리기는 JS silRun). 머문 뒤 가운데부터 가장자리로 사라진다 */
 .silc{ position:absolute; inset:0; width:1080px; height:1080px; pointer-events:none; opacity:0; transition:opacity .5s ease; }
@@ -498,13 +498,13 @@ body.follow .navto .c, body.follow .navdest .c, body.bye .navto .c, body.bye .na
 body.connected .l-greet{
   -webkit-mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
           mask:linear-gradient(90deg,transparent 0 45%,#000 55% 100%) 85% 0 / 300% 100% no-repeat;
-  animation:deBlock 6400ms linear both; }
+  animation:deBlock 8000ms linear both; }
 @keyframes deBlock{
-  0%, 26.56%   { opacity:0; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:cubic-bezier(.25,.6,.3,1); }   /* 스트로크가 다 커질 때까지(1.7s) 기다린다 */
-  37.5%        { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; }   /* 1.7s → 2.4s 옅게 떠오른다 */
-  43.75%       { opacity:1; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }   /* 2.8s : 한 박자 머문 뒤 */
-  74.99%       { opacity:1; }
-  75%, 100%    { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }   /* 두 줄이 통째로 2.8s → 4.8s */
+  0%, 42.5%    { opacity:0; translate:0 16px; -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:cubic-bezier(.25,.6,.3,1); }   /* 3.4s 까지 : 스트로크가 다 커지고(1.7s) 모션만 더 머문다 */
+  51.25%       { opacity:1; translate:0 0;    -webkit-mask-position:85% 0; mask-position:85% 0; }   /* 3.4s → 4.1s 아래에서 위로 부드럽게 */
+  56.25%       { opacity:1; translate:0 0;    -webkit-mask-position:85% 0; mask-position:85% 0; animation-timing-function:ease-in-out; }   /* 4.5s : 오래 끌지 않고 바로 */
+  78.74%       { opacity:1; }
+  78.75%, 100% { opacity:0; -webkit-mask-position:15% 0; mask-position:15% 0; }   /* 두 줄이 통째로 4.5s → 6.3s */
 }
 
 /* 줄 글리밍 겹 : 한국어는 지워지는 한가운데(2.35s), 영어는 드러나는 한가운데(3.05s)에 가장 밝다.
@@ -533,8 +533,11 @@ body.followup .l-msg em.glim::before, body.followup .l-msg em.glim::after{ opaci
   65% { opacity:1; -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }
   to  { opacity:.42; -webkit-mask-size:100% 100%, 140% 100%; mask-size:100% 100%, 140% 100%; }   /* 단어가 다 쓰이면 번짐을 줄여 읽히게 */
 }
-body.connected .l-greet .ln.glim::before, body.connected .l-greet .ln.glim::after{ animation:glimKo 6400ms linear both; }
-@keyframes glimKo{ 0%, 29.7%{ opacity:0; } 43.75%{ opacity:.9; } 59.4%, 100%{ opacity:0; } }   /* 떠오른 뒤(1.9s) 밝아져 지워지는 한가운데(2.8s)에 가장 밝다 */
+body.connected .l-greet .ln.glim::before, body.connected .l-greet .ln.glim::after{ animation:glimKo 8000ms linear both; }
+@keyframes glimKo{ 0%, 46.25%{ opacity:0; } 67.5%{ opacity:.9; } 80%, 100%{ opacity:0; } }   /* 지워지는 한가운데(5.4s)에 가장 밝다 */
+/* 이름(Leo)만 : 지우개가 그 자리를 지날 때 번져 올랐다가 옅게 남는다 */
+body.connected .l-hi em.glim::before, body.connected .l-hi em.glim::after{
+  animation:glimWipe 1500ms cubic-bezier(.3,.5,.4,1) 6000ms both; }
 /* 지워진 뒤 다음 장면으로 넘어갈 때 마스크가 풀리며 한국어가 비치지 않게 즉시 끈다 (별 모션·기기 번호 동안에도 숨김) */
 body:not(.fill):not(.connected) .l-greet{ transition:none; }
 /* 엄지척(맥락 전달) : 떠 있던 한국어 문장이 그 자리에서 어두워지고, 그 위로 별 모션이 입혀지며 함께 사그라든다 */
@@ -726,7 +729,7 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
 
     <p class="headline l-greet reveal nopause"><span class="ln">안녕하세요.</span><span class="ln">도움이 필요하신가요?</span></p>
     <p class="headline l-bye reveal nopause">Take care, Leo!</p>
-    <p class="headline l-hi reveal nopause"><span class="ln">Good Afternoon!</span><span class="ln">Leo.</span></p>
+    <p class="headline l-hi reveal nopause"><span class="ln">Good Afternoon!</span><span class="ln"><em>Leo.</em></span></p>
     <p class="headline l-msg reveal">Your last appointment was on <em>July&nbsp;20.</em></p>
     <p class="headline l-fu reveal">Today is your <em>2nd</em> follow-up.</p>
 
@@ -1068,7 +1071,7 @@ const navRun = () => {
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
 const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow','bye'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, new URLSearchParams(location.search).has('nosil') ? 2900 : 10500, 7600, 2900, 4300, 6200, 0, 4200];   // message 는 첫 문장이 다 쓰인 뒤(1.5s) 한 호흡만 : 둘째 문장이 곧바로 이어진다   // bye : 인사가 사라진 뒤(4.0s) 대기 상태로   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, new URLSearchParams(location.search).has('nosil') ? 2900 : 10500, 9000, 2900, 4300, 6200, 0, 4200];   // message 는 첫 문장이 다 쓰인 뒤(1.5s) 한 호흡만 : 둘째 문장이 곧바로 이어진다   // bye : 인사가 사라진 뒤(4.0s) 대기 상태로   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
 const body = document.body;
 let timer, strokeTimer, pbTimer;
 const sring = document.querySelector('.sring');
