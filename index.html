@@ -395,7 +395,8 @@ body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-o
 /* 스트로크가 켜진 뒤의 문장 : 링 빛처럼 흰빛에서 아래로 옅은 청록, 은은한 번짐. 강조어는 같은 계열의 색 번짐 */
 .l-hi .c, .l-msg .c, .l-fu .c, .l-guide .c, .l-bye .c{ background:linear-gradient(180deg,#fff 0 32%,#fcf9ea 52%,#e2f6fb 74%,rgba(186,232,246,.8) 100%); }   /* 흰빛 → 아주 옅은 노랑 → 옅은 청록 */
 .l-hi em .c, .l-msg em .c, .l-fu em .c, .l-guide em .c, .l-bye em .c{ background:none; color:#fffdf0; }   /* 강조어 : 아주 옅은 노란 흰빛 */
-.l-hi, .l-msg, .l-fu, .l-guide, .l-bye{ filter:drop-shadow(0 0 .18em rgba(160,222,242,.16)) drop-shadow(0 0 .34em rgba(255,236,172,.16)); }
+.l-hi .ln, .l-msg .ln, .l-fu .ln, .l-guide .ln, .l-bye .ln,
+.l-hi, .l-msg, .l-fu, .l-guide, .l-bye{ animation:auraDrift 9.2s ease-in-out infinite; }
 .l-msg em.glim::before, .l-fu em.glim::before, .l-guide em.glim::before{ color:#d9f5ff; }   /* 안쪽 겹 : 옅은 청록 */
 .l-msg em.glim::after,  .l-fu em.glim::after,  .l-guide em.glim::after { color:#ffe9a8; }   /* 바깥 번짐 : 아주 옅은 노랑 */
 
@@ -408,9 +409,18 @@ body.guide .l-msg em .c, body.guide .l-fu em .c{ animation:emGlow 2.4s ease-in-o
    켜지기 전의 숨김은 animation-fill-mode:both 가 맡는다 (기본은 보임 → 장면이 바뀌면 문장이 통째로 흐려지며 사라진다) */
 @keyframes letterIn{
   0%   { opacity:0; filter:blur(2px) drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
-  38%  { opacity:1; filter:blur(0)   drop-shadow(0 0 3.5px var(--g1)) drop-shadow(0 0 8.5px var(--g2)); }
-  100% { opacity:1; filter:blur(0)    drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  38%  { opacity:1; filter:blur(0)   drop-shadow(0 0 5px var(--g1)) drop-shadow(0 0 13px var(--g2)); }
+  100% { opacity:1; filter:blur(0)   drop-shadow(0 0 2.1px var(--g1)) drop-shadow(0 0 6.5px var(--g2)); }   /* 번짐이 0 으로 꺼지지 않고 옅게 남는다 */
 }
+/* ---------- 글자에 남는 부드러운 컬러 글로우 ----------
+   색은 전체 플로우에 반복해 쓰는 것들 : 크림(#FFF5D3) · 민트(#8AFFF3) · 하늘(#B7E4FF).
+   밝기는 높게, 농도는 낮게 유지해 글자를 덮지 않고 뒤에서만 은은히 돈다 */
+@keyframes auraDrift{
+  0%, 100%{ filter:drop-shadow(0 0 .17em rgba(255,245,211,.26)) drop-shadow(0 0 .36em rgba(255,236,172,.17)); }
+  34%     { filter:drop-shadow(0 0 .18em rgba(190,247,240,.26)) drop-shadow(0 0 .38em rgba(138,255,243,.16)); }
+  67%     { filter:drop-shadow(0 0 .17em rgba(183,228,255,.28)) drop-shadow(0 0 .37em rgba(150,224,250,.17)); }
+}
+
 /* 기록 · 재진 · 안내 */
 body.message .l-msg .c, body.followup .l-fu .c, body.guide .l-guide .c{
   animation:letterIn .95s cubic-bezier(.25,.6,.3,1) both;
@@ -852,9 +862,9 @@ document.querySelectorAll('.l-greet .ln, .l-hi .ln').forEach(l => { l.classList.
 //    띄어쓰기마다 뜸을 들이면 어색했다
 //  · rate : 문장마다 흐르는 속도 (영어 인사 1.8 = 천천히, 길안내 라벨 .8)
 // 일반 글자의 번짐은 옅은 색, 강조어(em)는 짙은 색. 강조어에는 첫 글자 시각 --t0, 길이 --tn, 강조어 안 순서 --ei
-const GLOW_EM   = [['rgba(255,244,196,.95)', 'rgba(140,212,250,.65)'],  // 옅은 노랑 · 하늘
-                   ['rgba(190,240,255,.95)', 'rgba(255,236,172,.6)'],    // 옅은 청록 · 옅은 노랑
-                   ['rgba(255,250,222,.95)', 'rgba(150,224,250,.6)']];   // 흰 핵 · 하늘 (파란끼만 쓰지 않는다)
+const GLOW_EM   = [['rgba(255,245,211,.95)', 'rgba(140,212,250,.6)'],    // 크림 · 하늘
+                   ['rgba(190,247,240,.95)', 'rgba(255,236,172,.55)'],   // 민트 · 크림
+                   ['rgba(183,228,255,.95)', 'rgba(138,255,243,.5)']];   // 하늘 · 민트
 const GLOW_SOFT = GLOW_EM.map(pair => pair.map(c => c.replace(/[\d.]+\)$/, a => (parseFloat(a) * .35).toFixed(2) + ')')));
 const letters = (el, rate = 1) => {
   let t = 0;
