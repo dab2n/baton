@@ -31,6 +31,9 @@ body.shot{ --fit: 1080; }
    파일이 없으면(배포본) Pretendard 로 떨어진다. 한글·한글 문장부호만 이 폰트로 */
 /* 'min' Helvetica Now Display Bold : 이 맥에 설치된 것만 쓴다 (숫자는 폰트가 아니라 도트로 직접 그린다) */
 @font-face{ font-family:'Helvetica Now Bold'; font-weight:700; src:local('HelveticaNowDisplay-Bold'), local('Helvetica Now Display Bold'); }
+@font-face{ font-family:'Helvetica Now Med'; font-weight:500; src:local('HelveticaNowDisplay-Medium'), local('Helvetica Now Display Medium'); }
+/* 라틴까지 쓰는 SF Pro (피그마의 SF Pro +KR Display Medium) : 설치된 글꼴을 local 로만 */
+@font-face{ font-family:'SF Pro KR'; font-weight:500; src:local('SFProKRDisplay-Medium'), local('SFProKR-Medium'); }
 @font-face{ font-family:'SF Pro KR'; font-weight:600; font-display:block;
   src:url('fonts/SFProKR-Semibold.otf') format('opentype');
   unicode-range:U+1100-11FF, U+3130-318F, U+AC00-D7A3; }
@@ -184,131 +187,213 @@ body.idle .screen::before, body.idle .screen::after, body.idle .rimlight{ opacit
 .bez{ position:absolute; inset:0; border-radius:50%; border:40px solid #000; box-sizing:border-box;
   z-index:2; pointer-events:none; }
 
-/* ================= 맥락 출처 → 대화 (피그마 1636:653 NEW) =================
-   네 장면이 '같은 하나의 컴포넌트'를 늘이고 바꾸며 이어진다 :
-   로딩(157) → 출처(840) → 대화1(840) → 대화2(929x353)
-   쫀득한 맛은 살짝 넘어갔다 돌아오는 스프링 커브로 (시리 모션 참고) */
+/* ================= 맥락 출처 → 길안내 (피그마 1636:653 NEW · 여섯 프레임) =================
+   한 컴포넌트가 늘어나고(157 → 840 → 840x319 → 314) 안의 내용만 밀려 들어온다.
+   좌표는 모두 피그마 실측 : 프레임이 border 40px 이라 content 좌표 + 40 = 이 1080 상자 좌표 */
 .nv{ position:absolute; inset:0; width:1080px; height:1080px; z-index:3; pointer-events:none;
   opacity:0; visibility:hidden; transition:opacity .6s ease, visibility 0s linear .6s;
-  --spring:cubic-bezier(.34,1.32,.5,1);      /* 늘어나고 줄어드는 쫀득함 */
-  --bouncy:cubic-bezier(.22,1.45,.36,1); }   /* 위에서 아래로 톡 */
-body.src .nv, body.srcfull .nv, body.talk1 .nv, body.talk2 .nv{ opacity:1; visibility:visible; transition-delay:0s; }
-/* 바탕 : 흰 화면 위에 큰 타원(가운데 검정 → 가장자리 크림)을 하드라이트로 (피그마 Ellipse 31405) */
+  --spring:cubic-bezier(.34,1.32,.5,1); --bouncy:cubic-bezier(.22,1.45,.36,1); }
+body.src .nv, body.srcfull .nv, body.talk1 .nv, body.talk2 .nv, body.ask .nv, body.guide2 .nv{
+  opacity:1; visibility:visible; transition-delay:0s; }
+/* ---------- 바탕 : 흰 화면 + 큰 타원 ---------- */
 .nv-bg{ position:absolute; inset:0; background:#fff; isolation:isolate; }
+/* 피그마 Rectangle 1954137249 : 흰 점 격자 (4%) */
+.nv-dots{ position:absolute; inset:0; opacity:.04; pointer-events:none;
+  background-image:radial-gradient(circle at center, #fff 0 2.6px, rgba(255,255,255,0) 3.3px);
+  background-size:19.6px 19.6px; background-position:10.6px 6.9px; }
 .nv-bg i{ position:absolute; left:50%; translate:-50% 0; border-radius:50%; mix-blend-mode:hard-light;
-  /* 피그마 : 그라디언트 반지름은 도형보다 가로로 넓고 세로로 짧다 (translate…scale 실측) */
-  background:radial-gradient(839.3px 844px at 50% 50%, #000101 0%, #000101 95%, #E0DFA8 100%);
-  filter:blur(150px); width:1610.7px; height:1809.3px; top:-459.6px;
-  transition:width 1.1s var(--spring), height 1.1s var(--spring), top 1.1s var(--spring); }
+  /* 피그마 Ellipse 31405 (9d79d.svg) : 방사형 + 검정 20% 두 겹을 150 흐림 */
+  background:radial-gradient(839.3px 844px at 50% 50%, #000101 0 95%, #E0DFA8 100%);
+  filter:blur(150px); width:1610.74px; height:1809.3px; top:-459.6px;
+  transition:width 1.1s var(--spring), height 1.1s var(--spring), top 1.1s var(--spring),
+             background-color .8s ease, filter .8s ease; }
+/* 대화 두 장면 (be949.svg) */
 body.talk1 .nv-bg i, body.talk2 .nv-bg i{ width:1310px; height:1264px;
-  background:radial-gradient(682.6px 590px at 50% 50%, #000101 0%, #000101 95%, #E0DFA8 100%); }
+  background:radial-gradient(682.565px 590px at 50% 50%, #000101 0 95%, #E0DFA8 100%); }
 body.talk1 .nv-bg i{ top:-477px; }
 body.talk2 .nv-bg i{ top:-472px; }
-/* 문장 : 글자가 쓰이지 않고 위에서 아래로 톡 떨어진다 (배경 그래픽과 함께) */
-.nv-head{ position:absolute; left:0; right:0; margin:0; text-align:center; white-space:pre-line;
+/* 길안내 두 장면 : 단색 #0A0909 (c82ca/b67ac.svg · 흐림 없음).
+   같은 요소의 배경을 바꾸면 뚝 끊기므로 한 겹 더 두고 겹쳐 녹인다 */
+.nv-bg u{ position:absolute; left:50%; translate:-50% 0; width:1310px; height:1264px;
+  border-radius:50%; background:#0A0909; opacity:0; top:-32.32px;
+  transition:opacity .9s ease, top .95s var(--spring); }
+body.ask .nv-bg u{ opacity:1; top:-32.32px; }
+body.guide2 .nv-bg u{ opacity:1; top:-127.5px; }
+/* ---------- 문장 : 위에서 아래로 약간 bouncy (글 쓰는 모션 없음) ---------- */
+.nv-head{ position:absolute; left:50%; transform:translateX(-50%); width:max-content; margin:0;
+  text-align:center; white-space:pre; isolation:isolate;
   font-family:'Helvetica Now Bold', var(--ff-en,'Magnetik'), sans-serif; font-weight:700;
   font-size:50.974px; line-height:1.4; letter-spacing:-0.02em;
+  opacity:0; translate:0 -26px;
+  transition:opacity .5s ease, translate .72s var(--bouncy); }
+.nv-head.on{ opacity:1; translate:0 0; }
+/* 흐린 겹 + 또렷한 겹 : 피그마도 같은 글자를 두 장 겹쳐 둔다
+   (한 요소에 ::before 로 겹치면 크롬이 background-clip:text 를 놓친다) */
+.nv-head b{ display:block; font:inherit; letter-spacing:inherit; white-space:pre;
   background:linear-gradient(90deg,#fff 78.364%,#f8f8df 100%);
-  -webkit-background-clip:text; background-clip:text; color:transparent;
-  opacity:0; translate:0 -26px; filter:blur(8px);
-  transition:opacity .5s ease, translate .72s var(--bouncy), filter .5s ease; }
-.nv-head.on{ opacity:1; translate:0 0; filter:blur(0); }
-.nv-head{ isolation:isolate; }
-.nv-head::before{ content:attr(data-t); position:absolute; left:0; right:0; top:0; white-space:pre-line;
-  background:inherit; -webkit-background-clip:text; background-clip:text; color:transparent;
-  filter:blur(4.824px); text-shadow:0 0 34.772px #000; pointer-events:none; z-index:-1; }   /* 뒤에 번지는 한 겹 */
-.nv-h1{ bottom:730px; }    /* 대화1 : 글자 밑이 350 */
-.nv-h2{ bottom:700px; }    /* 대화2 : 380 */
-/* 공통 컴포넌트 : 가운데에서 길이가 변한다 */
+  -webkit-background-clip:text; background-clip:text; color:transparent; }
+.nv-head .bl{ position:absolute; left:0; right:0; top:0; filter:blur(1.6px); opacity:.5;
+  text-shadow:0 0 34.772px #000; }   /* 피그마 렌더와 같은 세기로 맞춘 값 */
+.nv-head .sh{ position:relative; }
+.nv-h1, .nv-h2{ bottom:730px; }            /* 대화1·2 : 글자 상자 208 ~ 350 */
+.nv-h3{ bottom:464px; line-height:1.5; }   /* 부상확인 : 464 ~ 616 · 행간 1.5 */
+.nv-h3 b{ background:linear-gradient(164.78deg,#fff 70.819%,#f8f8df 80.134%);
+  -webkit-background-clip:text; background-clip:text; }
+.nv-h3 .bl{ opacity:.3; text-shadow:none; margin-left:.5px; }
+/* ---------- 공통 컴포넌트 (늘어나는 알약) ---------- */
 .nv-pill{ position:absolute; left:50%; top:604px; translate:-50% -50%;
   width:157px; height:156px; border-radius:78px; overflow:hidden;
-  background:rgba(255,255,255,.05);
+  background:rgba(255,255,255,.06);
   transition:width .95s var(--spring), height .95s var(--spring), border-radius .95s var(--spring),
-             top .95s var(--spring), background-color .6s ease; }
-.nv-pill::after{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-  background:rgba(245,240,207,.05); }   /* 따뜻한 기운만 아주 옅게 (color 합성은 전체 합성을 흔든다) */
-body.srcfull .nv-pill{ width:840px; height:155.79px; border-radius:76.53px; }
-body.talk1 .nv-pill{ width:840px; height:155.79px; border-radius:76.53px; background:rgba(255,255,255,.1); }
-body.talk2 .nv-pill{ width:929px; height:353px; border-radius:120px; top:579.5px; background:rgba(255,255,255,.1);
-  box-shadow:inset 0 -26px 41.2px 1px #dbdaca; }
-body.talk2 .nv-pill::after{ background:rgba(245,237,179,.06); }
-/* 아바타 : 로딩 때는 가운데, 늘어나면 왼쪽에 그대로 남는다 */
+             top .95s var(--spring), background-color .6s ease, box-shadow .6s ease; }
+.nv-pill::after{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; }
+body.srcfull .nv-pill, body.talk1 .nv-pill{ width:840px; height:155.79px; border-radius:76.53px; top:603.9px;
+  background:rgba(255,255,255,.1); }
+body.talk2 .nv-pill{ width:840px; height:319.18px; border-radius:108.5px; top:598.59px;
+  /* 피그마 : 흰 10% + 따뜻한 틴트 multiply + 안쪽 그림자. 합성 결과를 픽셀로 맞춘 값 */
+  background:rgba(255,255,255,.06);
+  box-shadow:inset 0 8px 12px -7px rgba(219,218,202,.42), inset 0 -34px 44px -32px rgba(219,218,202,.7); }
+/* 길안내 칩 : 314 x 114 · 가운데 (383,166.4) → 중심 (540,223.4) */
+body.ask .nv-pill, body.guide2 .nv-pill{ width:314px; height:114px; border-radius:76.53px; top:223.4px;
+  background:rgba(255,255,255,.1); box-shadow:none; }
+/* ---------- 아바타 ---------- */
 .nv-ava{ position:absolute; left:14px; top:13px; width:129.371px; height:129.371px;
-  border-radius:50%; overflow:hidden; background:#D9D9CB;   /* 피그마 Ellipse 31404 */
+  border-radius:50%; overflow:hidden; background:#D9D9CB;
   transition:opacity .5s ease, scale .6s var(--spring); }
-.nv-ava .eye{ position:absolute; left:55.5px; top:32.2px; width:16.08px; height:3.45px;
-  border-radius:50%; background:#141414; opacity:0; transition:opacity .9s ease; }   /* 피그마 Ellipse 31407 */
-body.srcfull .nv-ava .eye, body.talk1 .nv-ava .eye, body.talk2 .nv-ava .eye{ opacity:1; }
-.nv-ava img{ position:absolute; left:30.2px; top:24.1px; width:68.93px; height:189.55px; object-fit:fill; object-position:bottom;
+.nv-ava .eye{ position:absolute; left:55.5px; top:32.17px; width:16.083px; height:3.446px;
+  border-radius:50%; background:#141414; opacity:0; transition:opacity .9s ease; }
+.nv-ava img{ position:absolute; left:30.22px; top:24.13px; width:68.926px; height:189.546px; object-fit:fill;
   opacity:0; transition:opacity .9s ease; }
-body.srcfull .nv-ava img, body.talk1 .nv-ava img, body.talk2 .nv-ava img{ opacity:1; }
-body.talk2 .nv-ava{ opacity:0; scale:.7; }
-/* 반짝이는 로딩 : 맥락 전달 그래픽과 같은 결 (screen 합성 · 돌면서 숨 쉰다) */
-.nv-spark{ position:absolute; left:50%; top:50%; translate:-50% -50%; width:150px; height:150px;
+body.srcfull .nv-ava .eye, body.talk1 .nv-ava .eye,
+body.srcfull .nv-ava img, body.talk1 .nv-ava img{ opacity:1; }
+body.src .nv-ava img{ opacity:.8; }   /* 로딩 중에도 사진이 비친다 (피그마 1640:1228) */
+body.talk2 .nv-ava, body.ask .nv-ava, body.guide2 .nv-ava{ opacity:0; scale:.7; }
+/* ---------- 반짝이는 로딩 (맥락 전달 그래픽과 같은 결) ---------- */
+.nv-spark{ position:absolute; left:14px; top:13px; width:129.371px; height:129.371px;
   mix-blend-mode:screen; opacity:0; transition:opacity .8s ease; }
-.nv-spark img{ display:block; width:100%; height:100%; border-radius:50%;
-  animation:nvSpin 3.6s linear infinite, nvPulse 1.6s ease-in-out infinite; }
+.nv-spark img{ display:block; width:113.4%; height:112.8%; margin:-6.5% 0 0 -6.4%; border-radius:50%;
+  animation:nvSpin 4.2s linear infinite, nvPulse 1.9s ease-in-out infinite; }
 body.src .nv-spark{ opacity:1; }
 @keyframes nvSpin{ to{ rotate:360deg; } }
-@keyframes nvPulse{ 0%,100%{ scale:.92; filter:brightness(.9); } 50%{ scale:1.06; filter:brightness(1.35); } }
-/* 아바타 이미지가 뜨기 전, 자리만 은은하게 */
-body.src .nv-ava{ opacity:1; }
-/* 컴포넌트 안 내용 : 오른쪽에서 왼쪽으로 밀려 들어온다 */
+@keyframes nvPulse{ 0%,100%{ scale:.95; filter:brightness(.95); } 50%{ scale:1.05; filter:brightness(1.3); } }
+/* ---------- 내용 : 오른쪽에서 밀려 들어온다 ---------- */
 .nv-body{ position:absolute; inset:0; }
 .nv-body > *{ position:absolute; opacity:0; translate:60px 0;
   transition:opacity .45s ease, translate .7s var(--spring); }
 .nv-body > *.on{ opacity:1; translate:0 0; }
 .nv-body > *.out{ opacity:0; translate:-60px 0; }
-/* 출처 : NAV 004 ( 도트 ) 와 닫는 괄호 */
-.nv-src{ left:163px; right:52px; top:50%; translate:60px -50%; display:flex; align-items:center; justify-content:space-between; }
-.nv-src.on{ translate:0 -50%; } .nv-src.out{ translate:-60px -50%; }
-.nv-src .dg{ display:flex; align-items:flex-end; gap:11px; }
-.nv-src .dg span{ display:flex; align-items:flex-end; }
+/* 출처 : NAV 004 ) — 피그마 (163,52) 625 x 52 */
+.nv-src{ left:163px; top:52px; width:625px; height:52px; display:flex; align-items:center; justify-content:space-between; }
+.nv-src .dg{ display:flex; align-items:center; gap:11px; }
 .nv-src svg{ display:block; height:30.3px; width:auto; overflow:visible; }
 .nv-src circle{ fill:#fff; }
-.nv-src .paren{ font-family:'Helvetica Now Bold', var(--ff-en,'Magnetik'), sans-serif; font-size:43.7px;
-  color:#fff; line-height:1.2; letter-spacing:-0.01em; }
-/* 대화1 : 기록 카드 */
-.nv-rec{ left:167.37px; top:29px; display:flex; flex-direction:column; gap:16px; align-items:flex-start; }
-.nv-rec b{ font-family:'Helvetica Now Bold', var(--ff-en,'Magnetik'), sans-serif; font-weight:500;
-  font-size:34px; line-height:1.2; letter-spacing:-0.01em; color:#fff; }
-.nv-rec small{ font-family:var(--ff-ko,'SF Pro KR'), 'Pretendard Web', sans-serif; font-weight:600;
-  font-size:24px; line-height:1.2; letter-spacing:-0.02em; color:rgba(255,255,255,.6); }
-/* 대화2 : 목적지 카드 + 지도 */
-.nv-dest{ left:68px; top:50%; translate:60px -50%; display:flex; flex-direction:column; gap:54px; align-items:flex-start; }
+.nv-src .paren{ font-family:'Helvetica Now Bold', var(--ff-en,'Magnetik'), sans-serif; font-weight:700;
+  font-size:43.3px; line-height:1.2; letter-spacing:-0.01em; color:#fff; }
+/* 대화1 : 기록 — 피그마 (167.37,29) 390 x 86 */
+.nv-rec{ left:167.37px; top:29px; display:flex; flex-direction:column; align-items:flex-start; }
+.nv-rec b{ font-family:'Helvetica Now Med', var(--ff-en,'Magnetik'), sans-serif; font-weight:500;
+  font-size:34px; line-height:1.2; letter-spacing:-0.01em; color:#fff; text-transform:capitalize; }
+.nv-rec small{ margin-top:16.2px; font-family:var(--ff-ko,'SF Pro KR'), 'Pretendard Web', sans-serif;
+  font-weight:500; font-size:24px; line-height:1.2; letter-spacing:-0.02em; color:rgba(255,255,255,.6); }
+/* 대화2 : 목적지 — 피그마 (61.49, 가운데) gap 48.827 */
+.nv-dest{ left:61.49px; top:calc(50% - .3px); translate:60px -50%;
+  display:flex; flex-direction:column; gap:48.827px; align-items:flex-start; }
 .nv-dest.on{ translate:0 -50%; } .nv-dest.out{ translate:-60px -50%; }
-.nv-dest .lab{ font-family:var(--ff-ko,'SF Pro KR'), sans-serif; font-weight:600; font-size:16px; line-height:1.2;
-  letter-spacing:-0.02em; color:rgba(255,255,255,.9); }
-.nv-dest .rm, .nv-dest .fl{ font-family:'Helvetica Now Bold', var(--ff-en,'Magnetik'), sans-serif; font-weight:700;
-  font-size:34px; line-height:1.2; letter-spacing:-0.01em; color:#fff; }
-.nv-dest .who{ display:flex; align-items:center; gap:11px; }
-.nv-dest .who img{ width:43px; height:43px; border-radius:50%; display:block; }
-.nv-dest .who span{ font-family:var(--ff-ko,'SF Pro KR'), sans-serif; font-weight:600; font-size:24px;
+.nv-dest .lab{ font-family:var(--ff-ko,'SF Pro KR'), sans-serif; font-weight:500; font-size:16px;
   line-height:1.2; letter-spacing:-0.02em; color:rgba(255,255,255,.9); }
-.nv-map{ left:378.7px; top:-58.7px; width:583px; height:559px; opacity:0; translate:0 0; }
-.nv-map.on{ opacity:1; }
-.nv-map img{ position:absolute; display:block; }
-.nv-map .m1{ left:133px; top:67px; width:582.5px; height:491.9px; }
-.nv-map .m2{ left:33px; top:0; width:377.9px; height:314.7px; }
-.nv-map .m3{ left:241px; top:128px; width:57.9px; height:94.3px; animation:nvPin 2.8s ease-in-out infinite; }
-.nv-map .m4{ left:440px; top:302px; width:38.2px; height:22.2px; }
-.nv-map .m5{ position:absolute; left:446.5px; top:240px; width:25.54px; height:76.24px; background:#fff3c8;
-  -webkit-mask:url(new/9edd8.png) 0 5.98px/25.54px 70.26px no-repeat;
-          mask:url(new/9edd8.png) 0 5.98px/25.54px 70.26px no-repeat; }   /* 출발지(로봇) */
-@keyframes nvPin{ 0%,100%{ translate:0 0; } 50%{ translate:0 -9px; } }
-/* 아래 안내 글 */
+.nv-dest .rm{ margin-top:16.17px; }
+.nv-dest .fl{ margin-top:-3.33px; }
+.nv-dest .rm, .nv-dest .fl{ font-family:'Helvetica Now Bold', var(--ff-en,'Magnetik'), sans-serif;
+  font-weight:700; font-size:34px; line-height:1.2; letter-spacing:-0.01em; color:#fff; }
+.nv-dest .who{ display:flex; align-items:center; gap:9.946px; }
+.nv-dest .who img{ width:38.881px; height:38.881px; border-radius:50%; display:block; }
+.nv-dest .who span{ font-family:var(--ff-ko,'SF Pro KR'), sans-serif; font-weight:500; font-size:20px;
+  line-height:1.2; letter-spacing:-0.02em; color:rgba(255,255,255,.9); text-transform:capitalize; }
+/* 대화2 : 지도 (좌표는 카드 840 x 319.18 기준) */
+.nv-map{ inset:0; }
+.nv-map .w{ position:absolute; display:flex; align-items:center; justify-content:center; }
+.nv-map .w > i{ position:relative; display:block; width:475.339px; height:231.893px; rotate:31.23deg; flex:none; }
+.nv-map .w > i img{ position:absolute; left:14.83px; top:-1.09px; width:461.6px; height:232.98px; display:block; }
+.nv-map .w1{ left:342.43px; top:101.73px; width:526.688px; height:444.752px; }
+.nv-map .w2{ left:342.43px; top:7.51px;   width:526.688px; height:444.752px; }
+.nv-map .m3{ position:absolute; left:377.68px; top:-53.47px; width:337.4px; height:286.08px; display:block; }
+.nv-map .m4{ position:absolute; left:560.25px; top:62.77px; width:52.68px; height:85.39px; display:block; }
+.nv-map .m5{ position:absolute; left:740.45px; top:219.85px; width:34.565px; height:20.068px; display:block; }
+.nv-map .m6{ position:absolute; left:746.18px; top:163.98px; width:23.094px; height:68.937px; background:#fff3c8;
+  -webkit-mask:url(new/aa1b1.png) 0 5.409px/23.094px 63.528px no-repeat;
+          mask:url(new/aa1b1.png) 0 5.409px/23.094px 63.528px no-repeat; }
+/* 길안내 칩 속 : 왼쪽 아이콘 + 두 줄 (pl 45 / pr 60 / gap 30) */
+.nv-go{ left:45px; top:0; bottom:0; right:60px; display:flex; align-items:center; gap:30px; }
+.nv-go .ico{ width:43.42px; height:59.124px; display:flex; align-items:center; justify-content:center; flex:none; }
+.nv-go .ico img{ width:67.44px; height:51.76px; rotate:-90deg; display:block; }
+.nv-go .tx, .nv-who .tx{ display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
+.nv-go .k, .nv-who .k{ font-family:var(--ff-ko,'SF Pro KR'), sans-serif; font-weight:500; font-size:20px;
+  line-height:1.2; letter-spacing:-0.02em; color:rgba(255,255,255,.6); text-transform:uppercase; white-space:nowrap; }
+.nv-go .v, .nv-who .v{ font-family:'Helvetica Now Bold', var(--ff-en,'Magnetik'), sans-serif; font-weight:700;
+  font-size:28px; line-height:1.2; letter-spacing:-0.01em; color:#fff; white-space:nowrap; }
+/* 갈안내 칩 속 : 의사 사진 + 두 줄 (pl 20 / pr 40 / gap 20 · 글 칸 147 자르기) */
+.nv-who{ left:20px; top:0; bottom:0; right:40px; display:flex; align-items:center; gap:20px; }
+.nv-who img{ width:73.92px; height:73.92px; border-radius:50%; display:block; flex:none; }
+.nv-who .tx{ width:147px; overflow:hidden; }
+.nv-who .v{ max-width:147px; overflow:hidden; text-overflow:ellipsis; }
+/* ---------- 길안내 : 가운데 도트 화살표 ---------- */
+.nv-arrow{ position:absolute; left:50%; translate:-50% -50%; width:186.366px; height:253.512px;
+  display:flex; align-items:center; justify-content:center; opacity:0;
+  transition:opacity .7s ease, top .9s var(--spring); }
+.nv-arrow i{ position:relative; display:block; width:253.512px; height:186.366px; rotate:-90deg; flex:none; }
+.nv-arrow img{ position:absolute; left:-17.92px; top:-17.91px; width:289.36px; height:222.18px; display:block; }
+body.ask .nv-arrow{ top:539.63px; opacity:1; }
+body.guide2 .nv-arrow{ top:559.76px; opacity:1; }
+/* ---------- 길안내 : 가장자리 곡선 게이지 (피그마 Ellipse 31254 / 31255) ---------- */
+.nv-gauge{ position:absolute; inset:0; }
+.nv-gauge > i{ position:absolute; display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity .7s ease; }
+.nv-gauge > i > b{ position:relative; display:block; width:926.727px; height:926.727px; flex:none; }
+.nv-gauge img{ position:absolute; display:block; }
+body.ask .nv-gauge .a1, body.ask .nv-gauge .a2,
+body.guide2 .nv-gauge .b1, body.guide2 .nv-gauge .b2{ opacity:1; }
+.nv-gauge .a1, .nv-gauge .b1{ width:1310.59px; height:1310.59px; top:-112.105px; }
+.nv-gauge .a1 > b, .nv-gauge .b1 > b{ rotate:-45deg; }
+.nv-gauge .a1{ left:-116.485px; } .nv-gauge .b1{ left:-118.485px; }
+.nv-gauge .a1 img{ left:673.54px; top:650.38px; width:207.31px; height:218.25px; }
+.nv-gauge .b1 img{ left:725.16px; top:650.65px; width:155.87px; height:184.60px; }
+.nv-gauge .a2, .nv-gauge .b2{ width:1111.444px; height:1111.444px; left:-16.222px; }
+.nv-gauge .a2 > b, .nv-gauge .b2 > b{ rotate:13deg; }
+.nv-gauge .a2{ top:-15.652px; } .nv-gauge .b2{ top:-15.852px; }
+.nv-gauge .a2 img{ left:893.18px; top:509.23px; width:29.93px; height:62.37px; }
+.nv-gauge .b2 img{ left:893.09px; top:454.84px; width:33.64px; height:117.32px; }
+/* ---------- 부상확인 : 어두운 판(배경 흐림) + 아래 빛 ---------- */
+.nv-panel{ position:absolute; left:56.2px; top:322.88px; width:952.02px; height:492.138px;
+  background:rgba(10,9,9,.8); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
+  opacity:0; transition:opacity .7s ease; }
+body.ask .nv-panel{ opacity:1; }
+.nv-glow{ position:absolute; inset:0; opacity:0; transition:opacity .9s ease; }
+body.ask .nv-glow{ opacity:1; }
+.nv-glow > i{ position:absolute; display:flex; align-items:center; justify-content:center; }
+.nv-glow > i > b{ position:relative; display:block; flex:none; }
+.nv-glow img{ position:absolute; display:block; }
+.nv-glow .q1{ left:56.2px; top:870.6px; width:1024.185px; height:247.378px; }
+.nv-glow .q1 > b{ width:1017.48px; height:213.09px; transform:rotate(1.94deg) skewX(-0.02deg); }
+.nv-glow .q1 img{ left:-32.56px; top:-32.6px; width:1082.6px; height:278.29px; }
+.nv-glow .q2{ left:558.05px; translate:-50% 0; top:891.56px; width:479.1px; height:254.609px; }
+.nv-glow .q2 > b{ width:465.036px; height:225.467px; transform:rotate(-3.65deg) skewX(0.16deg); }
+.nv-glow .q2 img{ left:-79.99px; top:-79.99px; width:625.01px; height:385.46px; }
+/* ---------- 아래 안내 글 · 시각 (상자 밑 959) ---------- */
 .nv-cta{ position:absolute; left:0; right:0; bottom:121px; margin:0; text-align:center;
-  font-family:var(--ff-ko,'SF Pro KR'), 'Pretendard Web', sans-serif; font-weight:600;
+  font-family:var(--ff-ko,'SF Pro KR'), 'Pretendard Web', sans-serif; font-weight:500;
   font-size:32px; line-height:1.2; letter-spacing:-0.02em; color:rgba(79,79,79,.4);
   opacity:0; translate:0 10px; transition:opacity .6s ease, translate .6s var(--bouncy); }
 .nv-cta.on{ opacity:1; translate:0 0; }
-/* 새 장면에서는 앞 장면의 배경 레이어를 모두 비운다 */
+body.ask .nv-cta.on{ color:#fff; opacity:.5; mix-blend-mode:overlay; }
+body.guide2 .nv-cta.on{ color:rgba(255,255,255,.8); }
+/* 새 장면에서는 앞 장면 배경 레이어를 비운다 */
 body.src .screen::before, body.src .screen::after, body.srcfull .screen::before, body.srcfull .screen::after,
 body.talk1 .screen::before, body.talk1 .screen::after, body.talk2 .screen::before, body.talk2 .screen::after,
-body.src .rimlight, body.srcfull .rimlight, body.talk1 .rimlight, body.talk2 .rimlight{ opacity:0; transition:none; }
-body.src .sring, body.srcfull .sring, body.talk1 .sring, body.talk2 .sring{ opacity:0; }
-
-
+body.ask .screen::before, body.ask .screen::after, body.guide2 .screen::before, body.guide2 .screen::after,
+body.src .rimlight, body.srcfull .rimlight, body.talk1 .rimlight, body.talk2 .rimlight,
+body.ask .rimlight, body.guide2 .rimlight,
+body.src .sring, body.srcfull .sring, body.talk1 .sring, body.talk2 .sring,
+body.ask .sring, body.guide2 .sring{ opacity:0; transition:none; }
 
 /* ---------- 배경 레이어 : 기본값 = message(본문) 상태 ---------- */
 /* blur 는 래퍼에 : 자식을 scale() 해도 흐림 반경이 같이 커지지 않게 */
@@ -805,6 +890,8 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
   <button type="button" data-go="idle">대기 상태</button>
   <button type="button" data-go="connecting">맥락 전달</button>
   <button type="button" data-go="connected">대화 시작</button>
+  <button type="button" data-go="ask">길안내 부상확인</button>
+  <button type="button" data-go="guide2">길안내 칩</button>
   <button type="button" data-go="follow">길안내 시작</button>
   <button type="button" data-go="end">길안내 끝</button>
 </nav>
@@ -877,11 +964,24 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
       <svg class="navpin" viewBox="0 0 41.897 48.0068" aria-hidden="true"><path fill="#E5E5E5" d="M20.9485 0C32.4961 0.000150891 41.8967 9.39648 41.8967 20.9385C41.975 37.8193 23.253 46.9338 22.467 47.5098C22.022 47.8499 21.4721 48.0068 20.9485 48.0068C20.4249 48.0068 19.875 47.8237 19.4299 47.5098C18.6444 46.934 -0.0779867 37.8195 0.000244478 20.9385C0.000244478 9.39638 9.40076 0 20.9485 0ZM20.467 9.44141C14.382 9.44141 9.44849 14.3749 9.44849 20.46C9.44871 26.5448 14.3821 31.4775 20.467 31.4775C26.5519 31.4774 31.4844 26.5448 31.4846 20.46C31.4846 14.375 26.552 9.44153 20.467 9.44141Z"/></svg>
     </div>
 
-    <!-- 맥락 출처 → 대화 (피그마 1636:653) : 한 컴포넌트가 늘어나고 바뀐다 -->
+    <!-- 맥락 출처 → 길안내 (피그마 1636:653 NEW) : 한 컴포넌트가 늘어나고 바뀐다 -->
     <div class="nv" aria-hidden="true">
-      <div class="nv-bg"><i></i></div>
+      <div class="nv-bg"><div class="nv-dots"></div><i></i><u></u></div>
+      <div class="nv-gauge">
+        <i class="a1"><b><img src="new/036b2.svg" alt=""></b></i>
+        <i class="a2"><b><img src="new/1f929.svg" alt=""></b></i>
+        <i class="b1"><b><img src="new/5380b.svg" alt=""></b></i>
+        <i class="b2"><b><img src="new/68830.svg" alt=""></b></i>
+      </div>
+      <div class="nv-arrow"><i><img src="new/0c805_s.svg" alt=""></i></div>
+      <div class="nv-panel"></div>
       <p class="nv-head nv-h1"></p>
       <p class="nv-head nv-h2"></p>
+      <p class="nv-head nv-h3"></p>
+      <div class="nv-glow">
+        <i class="q1"><b><img src="new/5b91c.svg" alt=""></b></i>
+        <i class="q2"><b><img src="new/25089.svg" alt=""></b></i>
+      </div>
       <div class="nv-pill">
         <div class="nv-ava"><img src="new/267ab.png" alt=""><i class="eye"></i></div>
         <div class="nv-spark"><img src="new/d46ea.png" alt=""></div>
@@ -894,12 +994,23 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
               <div class="rm">Room 513</div>
               <div class="fl">Wing A, 5th Floor</div>
             </div>
-            <div class="who"><img src="new/42bb7.png" alt=""><span>Dr. kim</span></div>
+            <div class="who"><img src="new/93f2c.png" alt=""><span>Dr. kim</span></div>
           </div>
           <div class="nv-map">
-            <img class="m1" src="new/60f16.svg" alt=""><img class="m2" src="new/6664a.svg" alt="">
-            <img class="m3" src="new/52923.svg" alt=""><img class="m4" src="new/14c73.svg" alt="">
-            <i class="m5"></i>
+            <i class="w w2"><i><img src="new/43136.svg" alt=""></i></i>
+            <i class="w w1"><i><img src="new/7a109.svg" alt=""></i></i>
+            <img class="m3" src="new/eacce.svg" alt="">
+            <img class="m4" src="new/b9be3.svg" alt="">
+            <img class="m5" src="new/36423.svg" alt="">
+            <i class="m6"></i>
+          </div>
+          <div class="nv-go">
+            <div class="ico"><img src="new/70bc8_s.svg" alt=""></div>
+            <div class="tx"><span class="k">go straight</span><span class="v">A Elevator</span></div>
+          </div>
+          <div class="nv-who">
+            <img src="new/64d01.png" alt="">
+            <div class="tx"><span class="k">pM 12:00</span><span class="v">Room 513, Wing A, 5th Floor</span></div>
           </div>
         </div>
       </div>
@@ -1233,9 +1344,15 @@ const navRun = () => {
 const NV = document.querySelector('.nv');
 const nvq = c => NV.querySelector(c);
 const nvItems = [...NV.querySelectorAll('.nv-body > *')];
-const nvHead = [nvq('.nv-h1'), nvq('.nv-h2')], nvCta = nvq('.nv-cta');
-nvHead[0].textContent = nvHead[0].dataset.t = 'Good afternoon, Leo.\nBack for your 2nd check up?';
-nvHead[1].textContent = nvHead[1].dataset.t = 'Let me guide you to\nthe exam room.';
+const nvHead = [nvq('.nv-h1'), nvq('.nv-h2'), nvq('.nv-h3')], nvCta = nvq('.nv-cta');
+const nvSay = (el, t) => {   // 흐린 겹 + 또렷한 겹
+  const b = document.createElement('b'), sh = document.createElement('b');
+  b.className = 'bl'; sh.className = 'sh'; b.textContent = sh.textContent = t;
+  el.replaceChildren(b, sh);
+};
+nvSay(nvHead[0], 'Good afternoon, Leo.\nBack for your 2nd check up?');
+nvSay(nvHead[1], 'Let me guide you  to \nthe exam room.');
+nvSay(nvHead[2], 'Have you had any discomfort \nsince your last visit?');
 // 출처 칩의 NAV 004 : 같은 도트 표로
 const nvDots = str => {
   const svg = document.createElementNS(NS, 'svg');
@@ -1244,11 +1361,12 @@ const nvDots = str => {
     for (const d of numDotsFor(ch).dots) pts.push([x + d.x, d.y]);
     x += NUMADV;
   }
-  const w = Math.max(...pts.map(p => p[0])) + NUMDR, h = 6 * NUMP + 2 * NUMDR;
+  // 글자 상자는 피그마와 같게 글자수 x 보내기 (마지막 글자 뒤 여백까지) : 뒤 묶음 간격이 맞는다
+  const w = str.length * NUMADV, h = 6 * NUMP + 2 * NUMDR;
   svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
   for (const [cx, cy] of pts) {
     const c = document.createElementNS(NS, 'circle');
-    c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', NUMDR); svg.append(c);
+    c.setAttribute('cx', cx + NUMDR); c.setAttribute('cy', cy); c.setAttribute('r', NUMDR); svg.append(c);
   }
   return svg;
 };
@@ -1269,22 +1387,24 @@ const nvOnly = (el, ms = 0) => {   // 하나만 들어오고 나머지는 왼쪽
 };
 const nvStep = k => {
   nvTimers.forEach(clearTimeout); nvTimers = [];
-  const head = k === 'talk1' ? nvHead[0] : k === 'talk2' ? nvHead[1] : null;
+  const head = k === 'talk1' ? nvHead[0] : k === 'talk2' ? nvHead[1] : k === 'ask' ? nvHead[2] : null;
   for (const h of nvHead) if (h !== head) h.classList.remove('on');
   if (head) nvLater(260, () => head.classList.add('on'));   // 배경 그래픽이 자리를 잡고 나서 톡
+  const cta = t => { nvCta.classList.remove('on'); nvLater(560, () => { nvCta.textContent = t; nvCta.classList.add('on'); }); };
   if (k === 'src')      { nvOnly(null); nvCta.classList.remove('on'); }
   if (k === 'srcfull')  { nvOnly(nvq('.nv-src'), 430); nvCta.classList.remove('on'); }
   if (k === 'talk1')    { nvOnly(nvq('.nv-rec'), 300); nvq('.nv-map').classList.remove('on');
-                          nvCta.textContent = 'Find another Drop'; nvLater(760, () => nvCta.classList.add('on')); }
+                          cta('Find another Drop'); }
   if (k === 'talk2')    { nvOnly(nvq('.nv-dest'), 360); nvLater(420, () => nvq('.nv-map').classList.add('on'));
-                          nvCta.classList.remove('on');
-                          nvLater(560, () => { nvCta.textContent = 'Guide Me'; nvCta.classList.add('on'); }); }
-  if (!['src', 'srcfull', 'talk1', 'talk2'].includes(k)) { nvOnly(null); nvCta.classList.remove('on'); }
+                          cta('Guide Me'); }
+  if (k === 'ask')      { nvOnly(nvq('.nv-go'), 420); nvq('.nv-map').classList.remove('on'); cta('AM 11: 36'); }
+  if (k === 'guide2')   { nvOnly(nvq('.nv-who'), 360); cta('AM 11: 38'); }
+  if (!['src', 'srcfull', 'talk1', 'talk2', 'ask', 'guide2'].includes(k)) { nvOnly(null); nvCta.classList.remove('on'); }
 };
 
-const STEPS = ['idle','fill','connecting','connected','src','srcfull','talk1','talk2','follow','bye'];
+const STEPS = ['idle','fill','connecting','connected','src','srcfull','talk1','talk2','ask','guide2','follow','bye'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 2900, 9000, 3000, 2800, 6000, 6400, 0, 4200];   /* 맥락 출처(로딩·출처)와 대화 두 장면이 들어왔다 */
+const HOLD  = [6000, 5200, 2900, 9000, 3000, 2800, 6000, 6400, 7200, 5600, 0, 4200];   /* 맥락 출처(로딩·출처)와 대화 두 장면이 들어왔다 */
 const body = document.body;
 let timer, strokeTimer, pbTimer;
 const sring = document.querySelector('.sring');
@@ -1417,7 +1537,7 @@ const go = n => {
   body.classList.remove('out', 'leave');
   body.classList.toggle('fromfill', STEPS[n] === 'connecting' && body.classList.contains('fill'));
   if (STEPS[n] === 'fill') { window.__fillAt = performance.now(); timer = setTimeout(leaveFill, 15000); requestAnimationFrame(bandsRun); }
-  body.className = body.className.replace(/\b(idle|fill|connecting|connected|src|srcfull|talk1|talk2|follow|bye)\b/, STEPS[n]);
+  body.className = body.className.replace(/\b(idle|fill|connecting|connected|src|srcfull|talk1|talk2|ask|guide2|follow|bye)\b/, STEPS[n]);
   if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
   nvStep(STEPS[n]);
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); }

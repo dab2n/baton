@@ -1,0 +1,17 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="625.036" height="385.467" viewBox="0 0 625.036 385.467" fill="none" xmlns="http://www.w3.org/2000/svg">
+<foreignObject x="0" y="-9.16337e-07" width="625.036" height="385.467"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(1px);clip-path:url(#bgblur_0_0_4_clip_path);height:100%;width:100%"></div></foreignObject><g id="Ellipse 31310" filter="url(#filter0_f_0_4)" data-figma-bg-blur-radius="2">
+<path d="M545.036 171.357C545.036 245.424 435.252 305.467 299.827 305.467C164.401 305.467 80 245.424 80 171.357C80 97.2899 107.631 134.831 167.635 116.73C361.495 12.9161 374.027 161.076 545.036 171.357Z" fill="url(#paint0_linear_0_4)" fill-opacity="0.6"/>
+</g>
+<defs>
+<filter id="filter0_f_0_4" x="0" y="-9.16337e-07" width="625.036" height="385.467" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="40" result="effect1_foregroundBlur_0_4"/>
+</filter>
+<clipPath id="bgblur_0_0_4_clip_path" transform="translate(0 9.16337e-07)"><path d="M545.036 171.357C545.036 245.424 435.252 305.467 299.827 305.467C164.401 305.467 80 245.424 80 171.357C80 97.2899 107.631 134.831 167.635 116.73C361.495 12.9161 374.027 161.076 545.036 171.357Z"/>
+</clipPath><linearGradient id="paint0_linear_0_4" x1="421.69" y1="203.904" x2="131.253" y2="325.228" gradientUnits="userSpaceOnUse">
+<stop offset="0.222234" stop-color="#FFEDAD"/>
+<stop offset="1" stop-color="#E1E0DC" stop-opacity="0"/>
+</linearGradient>
+</defs>
+</svg>

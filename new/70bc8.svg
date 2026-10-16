@@ -1,0 +1,22 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="67.4388" height="51.7667" viewBox="0 0 67.4388 51.7667" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame 2147232642" filter="url(#filter0_f_0_25)">
+<circle id="Ellipse 31236" cx="8.38045" cy="25.8818" r="4.20705" fill="white"/>
+<circle id="Ellipse 31237" cx="16.8268" cy="25.8818" r="4.20705" fill="white"/>
+<ellipse id="Ellipse 31238" cx="25.3557" cy="25.8834" rx="4.28958" ry="4.20864" fill="white"/>
+<circle id="Ellipse 31246" cx="33.7194" cy="25.8818" r="4.20705" fill="white"/>
+<circle id="Ellipse 31245" cx="42.1656" cy="25.8818" r="4.20705" fill="white"/>
+<circle id="Ellipse 31239" cx="42.1656" cy="8.38045" r="4.20705" fill="white"/>
+<circle id="Ellipse 31242" cx="50.6117" cy="17.1313" r="4.20705" fill="white"/>
+<circle id="Ellipse 31247" cx="59.0583" cy="25.8818" r="4.20705" fill="white"/>
+<circle id="Ellipse 31254" cx="50.6117" cy="25.8818" r="4.20705" fill="white"/>
+<circle id="Ellipse 31252" cx="50.6117" cy="34.6358" r="4.20705" fill="white"/>
+<circle id="Ellipse 31253" cx="42.1656" cy="43.3862" r="4.20705" fill="white"/>
+</g>
+<defs>
+<filter id="filter0_f_0_25" x="-4.94019e-08" y="1.16353e-07" width="67.4708" height="51.7668" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2.0867" result="effect1_foregroundBlur_0_25"/>
+</filter>
+</defs>
+</svg>
