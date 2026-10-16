@@ -116,7 +116,16 @@ body.bare .toggle:not(.camt) .sw::after{ transform:none; }
 .toggle.camt{ translate:0 calc(-50% + 46px); }
 body.nocam .toggle.camt .sw{ background:#d6d6d6; }
 body.nocam .toggle.camt .sw::after{ transform:none; }
-body.nocam .bezel{ display:none; }   /* 스크린 위에 그려 둔 카메라 자리(반원)도 같이 지운다 */
+body.nocam .bezel, body.nocam .lens, body.nocam .slight{ display:none; }   /* 스크린 위에 그려 둔 카메라 자리·렌즈·라이트도 같이 지운다 */
+/* 카메라 렌즈 : 노치 안에 (피그마 31x31, 투명도 66%) */
+.lens{ position:absolute; left:50%; top:47px; translate:-50% 0; width:31px; height:31px; border-radius:50%;
+  overflow:hidden; opacity:.66; z-index:5; pointer-events:none; }
+.lens img{ display:block; width:119.09%; height:120.42%; margin:-10.13% 0 0 -8.9%; }
+/* 센싱 라이트 : 렌즈 옆에서 아주 느리게 숨 쉰다 */
+.slight{ position:absolute; left:566px; top:58px; width:10px; height:10px; border-radius:50%; z-index:5;
+  background:radial-gradient(circle, #cfe9ff 0%, #4da3ff 46%, rgba(77,163,255,0) 72%);
+  mix-blend-mode:hard-light; pointer-events:none; animation:slBreath 3.4s ease-in-out infinite; }
+@keyframes slBreath{ 0%,100%{ opacity:.55; scale:.9; } 50%{ opacity:1; scale:1.12; } }
 body.kiosk .toggle, body.shot .toggle{ display:none; }   /* 전체화면·내보내기에선 숨김 */
 /* 장면 바로 가기 : 구간별로 골라 그 자리부터 재생 (디자인 확인용) */
 .jump{ position:fixed; left:16px; top:50%; translate:0 -50%; z-index:10; display:flex; flex-direction:column; gap:4px;
@@ -140,8 +149,8 @@ body.kiosk .ring{ display:none; }             /* 전체화면 : 목업은 항상
   position:absolute; inset:0; border-radius:50%;
   background:#000;
   overflow:hidden;
-  /* 피그마 프레임은 border:20px solid #000 : 표시영역은 20px 안쪽 원 */
-  clip-path:circle(520px at 540px 540px);
+  /* 피그마 프레임은 border:40px solid #000 : 표시영역은 40px 안쪽 원 (1636:653 에서 베젤이 두꺼워졌다) */
+  clip-path:circle(500px at 540px 540px);
 }
 /* 위아래 색 띠 (피그마 3124:17775 의 감청 / 밝은 회색) :
    직선 그라디언트는 검은 화면에서 경계가 가로줄로 보인다 → 스크린과 같은 중심(540,540)의 동심원으로 번지게 하고
@@ -171,6 +180,128 @@ body.idle .screen::before, body.idle .screen::after, body.idle .rimlight{ opacit
 @keyframes rimOrbit{ to{ rotate:360deg; } }
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
         z-index:4; pointer-events:none; }
+
+/* ================= 맥락 출처 → 대화 (피그마 1636:653 NEW) =================
+   네 장면이 '같은 하나의 컴포넌트'를 늘이고 바꾸며 이어진다 :
+   로딩(157) → 출처(840) → 대화1(840) → 대화2(929x353)
+   쫀득한 맛은 살짝 넘어갔다 돌아오는 스프링 커브로 (시리 모션 참고) */
+.nv{ position:absolute; inset:0; width:1080px; height:1080px; z-index:3; pointer-events:none;
+  opacity:0; visibility:hidden; transition:opacity .6s ease, visibility 0s linear .6s;
+  --spring:cubic-bezier(.34,1.32,.5,1);      /* 늘어나고 줄어드는 쫀득함 */
+  --bouncy:cubic-bezier(.22,1.45,.36,1); }   /* 위에서 아래로 톡 */
+body.src .nv, body.srcfull .nv, body.talk1 .nv, body.talk2 .nv{ opacity:1; visibility:visible; transition-delay:0s; }
+/* 바탕 : 흰 화면 위에 큰 타원(가운데 검정 → 가장자리 크림)을 하드라이트로 (피그마 Ellipse 31405) */
+.nv-bg{ position:absolute; inset:0; background:#fff; }
+.nv-bg i{ position:absolute; left:50%; translate:-50% 0; border-radius:50%; mix-blend-mode:hard-light;
+  /* 피그마 : 그라디언트 반지름은 도형보다 가로로 넓고 세로로 짧다 (translate…scale 실측) */
+  background:radial-gradient(839.3px 844px at 50% 50%, #000101 0%, #000101 95%, #E0DFA8 100%);
+  filter:blur(150px); width:1610.7px; height:1809.3px; top:-459.6px;
+  transition:width 1.1s var(--spring), height 1.1s var(--spring), top 1.1s var(--spring); }
+body.talk1 .nv-bg i, body.talk2 .nv-bg i{ width:1310px; height:1264px;
+  background:radial-gradient(682.6px 590px at 50% 50%, #000101 0%, #000101 95%, #E0DFA8 100%); }
+body.talk1 .nv-bg i{ top:-477px; }
+body.talk2 .nv-bg i{ top:-472px; }
+/* 문장 : 글자가 쓰이지 않고 위에서 아래로 톡 떨어진다 (배경 그래픽과 함께) */
+.nv-head{ position:absolute; left:0; right:0; margin:0; text-align:center; white-space:pre-line;
+  font-family:'Helvetica Now Bold', var(--ff-en,'Magnetik'), sans-serif; font-weight:700;
+  font-size:50.974px; line-height:1.4; letter-spacing:-0.02em;
+  background:linear-gradient(90deg,#fff 78.364%,#f8f8df 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  opacity:0; translate:0 -26px; filter:blur(8px);
+  transition:opacity .5s ease, translate .72s var(--bouncy), filter .5s ease; }
+.nv-head.on{ opacity:1; translate:0 0; filter:blur(0); }
+.nv-head{ isolation:isolate; }
+.nv-head::before{ content:attr(data-t); position:absolute; left:0; right:0; top:0; white-space:pre-line;
+  background:inherit; -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:blur(4.824px); text-shadow:0 0 34.772px #000; pointer-events:none; z-index:-1; }   /* 뒤에 번지는 한 겹 */
+.nv-h1{ bottom:730px; }    /* 대화1 : 글자 밑이 350 */
+.nv-h2{ bottom:700px; }    /* 대화2 : 380 */
+/* 공통 컴포넌트 : 가운데에서 길이가 변한다 */
+.nv-pill{ position:absolute; left:50%; top:604px; translate:-50% -50%;
+  width:157px; height:156px; border-radius:78px; overflow:hidden;
+  background:rgba(255,255,255,.05);
+  transition:width .95s var(--spring), height .95s var(--spring), border-radius .95s var(--spring),
+             top .95s var(--spring), background-color .6s ease; }
+.nv-pill::after{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:rgba(245,240,207,.3); mix-blend-mode:color; }
+body.srcfull .nv-pill{ width:840px; height:155.79px; border-radius:76.53px; }
+body.talk1 .nv-pill{ width:840px; height:155.79px; border-radius:76.53px; background:rgba(255,255,255,.1); }
+body.talk2 .nv-pill{ width:929px; height:353px; border-radius:120px; top:579.5px; background:rgba(255,255,255,.1);
+  box-shadow:inset 0 -26px 41.2px 1px #dbdaca; }
+body.talk2 .nv-pill::after{ background:rgba(245,237,179,.3); mix-blend-mode:multiply; }
+/* 아바타 : 로딩 때는 가운데, 늘어나면 왼쪽에 그대로 남는다 */
+.nv-ava{ position:absolute; left:14px; top:13px; width:129.371px; height:129.371px;
+  border-radius:50%; overflow:hidden; background:#0b0b0b;
+  transition:opacity .5s ease, scale .6s var(--spring); }
+.nv-ava img{ position:absolute; left:30.2px; top:24.1px; width:68.93px; height:189.55px; object-fit:fill; object-position:bottom;
+  opacity:0; transition:opacity .9s ease; }
+body.srcfull .nv-ava img, body.talk1 .nv-ava img, body.talk2 .nv-ava img{ opacity:1; }
+body.talk2 .nv-ava{ opacity:0; scale:.7; }
+/* 반짝이는 로딩 : 맥락 전달 그래픽과 같은 결 (screen 합성 · 돌면서 숨 쉰다) */
+.nv-spark{ position:absolute; left:50%; top:50%; translate:-50% -50%; width:150px; height:150px;
+  mix-blend-mode:screen; opacity:0; transition:opacity .8s ease; }
+.nv-spark img{ display:block; width:100%; height:100%; border-radius:50%;
+  animation:nvSpin 3.6s linear infinite, nvPulse 1.6s ease-in-out infinite; }
+body.src .nv-spark{ opacity:1; }
+@keyframes nvSpin{ to{ rotate:360deg; } }
+@keyframes nvPulse{ 0%,100%{ scale:.92; filter:brightness(.9); } 50%{ scale:1.06; filter:brightness(1.35); } }
+/* 아바타 이미지가 뜨기 전, 자리만 은은하게 */
+body.src .nv-ava{ opacity:1; }
+/* 컴포넌트 안 내용 : 오른쪽에서 왼쪽으로 밀려 들어온다 */
+.nv-body{ position:absolute; inset:0; }
+.nv-body > *{ position:absolute; opacity:0; translate:60px 0;
+  transition:opacity .45s ease, translate .7s var(--spring); }
+.nv-body > *.on{ opacity:1; translate:0 0; }
+.nv-body > *.out{ opacity:0; translate:-60px 0; }
+/* 출처 : NAV 004 ( 도트 ) 와 닫는 괄호 */
+.nv-src{ left:163px; right:52px; top:50%; translate:60px -50%; display:flex; align-items:center; justify-content:space-between; }
+.nv-src.on{ translate:0 -50%; } .nv-src.out{ translate:-60px -50%; }
+.nv-src .dg{ display:flex; align-items:flex-end; gap:11px; }
+.nv-src .dg span{ display:flex; align-items:flex-end; }
+.nv-src svg{ display:block; height:30.3px; width:auto; overflow:visible; }
+.nv-src circle{ fill:#fff; }
+.nv-src .paren{ font-family:'Helvetica Now Bold', var(--ff-en,'Magnetik'), sans-serif; font-size:43.7px;
+  color:#fff; line-height:1.2; letter-spacing:-0.01em; }
+/* 대화1 : 기록 카드 */
+.nv-rec{ left:167.37px; top:29px; display:flex; flex-direction:column; gap:16px; align-items:flex-start; }
+.nv-rec b{ font-family:'Helvetica Now Bold', var(--ff-en,'Magnetik'), sans-serif; font-weight:500;
+  font-size:34px; line-height:1.2; letter-spacing:-0.01em; color:#fff; }
+.nv-rec small{ font-family:var(--ff-ko,'SF Pro KR'), 'Pretendard Web', sans-serif; font-weight:600;
+  font-size:24px; line-height:1.2; letter-spacing:-0.02em; color:rgba(255,255,255,.6); }
+/* 대화2 : 목적지 카드 + 지도 */
+.nv-dest{ left:68px; top:50%; translate:60px -50%; display:flex; flex-direction:column; gap:54px; align-items:flex-start; }
+.nv-dest.on{ translate:0 -50%; } .nv-dest.out{ translate:-60px -50%; }
+.nv-dest .lab{ font-family:var(--ff-ko,'SF Pro KR'), sans-serif; font-weight:600; font-size:16px; line-height:1.2;
+  letter-spacing:-0.02em; color:rgba(255,255,255,.9); }
+.nv-dest .rm, .nv-dest .fl{ font-family:'Helvetica Now Bold', var(--ff-en,'Magnetik'), sans-serif; font-weight:700;
+  font-size:34px; line-height:1.2; letter-spacing:-0.01em; color:#fff; }
+.nv-dest .who{ display:flex; align-items:center; gap:11px; }
+.nv-dest .who img{ width:43px; height:43px; border-radius:50%; display:block; }
+.nv-dest .who span{ font-family:var(--ff-ko,'SF Pro KR'), sans-serif; font-weight:600; font-size:24px;
+  line-height:1.2; letter-spacing:-0.02em; color:rgba(255,255,255,.9); }
+.nv-map{ left:378.7px; top:-58.7px; width:583px; height:559px; opacity:0; translate:0 0; }
+.nv-map.on{ opacity:1; }
+.nv-map img{ position:absolute; display:block; }
+.nv-map .m1{ left:133px; top:67px; width:582.5px; height:491.9px; }
+.nv-map .m2{ left:33px; top:0; width:377.9px; height:314.7px; }
+.nv-map .m3{ left:241px; top:128px; width:57.9px; height:94.3px; animation:nvPin 2.8s ease-in-out infinite; }
+.nv-map .m4{ left:440px; top:302px; width:38.2px; height:22.2px; }
+.nv-map .m5{ position:absolute; left:446.5px; top:240px; width:25.54px; height:76.24px; background:#fff3c8;
+  -webkit-mask:url(new/9edd8.png) 0 5.98px/25.54px 70.26px no-repeat;
+          mask:url(new/9edd8.png) 0 5.98px/25.54px 70.26px no-repeat; }   /* 출발지(로봇) */
+@keyframes nvPin{ 0%,100%{ translate:0 0; } 50%{ translate:0 -9px; } }
+/* 아래 안내 글 */
+.nv-cta{ position:absolute; left:0; right:0; bottom:121px; margin:0; text-align:center;
+  font-family:var(--ff-ko,'SF Pro KR'), 'Pretendard Web', sans-serif; font-weight:600;
+  font-size:32px; line-height:1.2; letter-spacing:-0.02em; color:rgba(79,79,79,.4);
+  opacity:0; translate:0 10px; transition:opacity .6s ease, translate .6s var(--bouncy); }
+.nv-cta.on{ opacity:1; translate:0 0; }
+/* 새 장면에서는 앞 장면의 배경 레이어를 모두 비운다 */
+body.src .screen::before, body.src .screen::after, body.srcfull .screen::before, body.srcfull .screen::after,
+body.talk1 .screen::before, body.talk1 .screen::after, body.talk2 .screen::before, body.talk2 .screen::after,
+body.src .rimlight, body.srcfull .rimlight, body.talk1 .rimlight, body.talk2 .rimlight{ opacity:0; transition:none; }
+body.src .sring, body.srcfull .sring, body.talk1 .sring, body.talk2 .sring{ opacity:0; }
+
 
 
 /* ---------- 배경 레이어 : 기본값 = message(본문) 상태 ---------- */
@@ -739,12 +870,43 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
       <svg class="navpin" viewBox="0 0 41.897 48.0068" aria-hidden="true"><path fill="#E5E5E5" d="M20.9485 0C32.4961 0.000150891 41.8967 9.39648 41.8967 20.9385C41.975 37.8193 23.253 46.9338 22.467 47.5098C22.022 47.8499 21.4721 48.0068 20.9485 48.0068C20.4249 48.0068 19.875 47.8237 19.4299 47.5098C18.6444 46.934 -0.0779867 37.8195 0.000244478 20.9385C0.000244478 9.39638 9.40076 0 20.9485 0ZM20.467 9.44141C14.382 9.44141 9.44849 14.3749 9.44849 20.46C9.44871 26.5448 14.3821 31.4775 20.467 31.4775C26.5519 31.4774 31.4844 26.5448 31.4846 20.46C31.4846 14.375 26.552 9.44153 20.467 9.44141Z"/></svg>
     </div>
 
+    <!-- 맥락 출처 → 대화 (피그마 1636:653) : 한 컴포넌트가 늘어나고 바뀐다 -->
+    <div class="nv" aria-hidden="true">
+      <div class="nv-bg"><i></i></div>
+      <p class="nv-head nv-h1"></p>
+      <p class="nv-head nv-h2"></p>
+      <div class="nv-pill">
+        <div class="nv-ava"><img src="new/267ab.png" alt=""></div>
+        <div class="nv-spark"><img src="new/d46ea.png" alt=""></div>
+        <div class="nv-body">
+          <div class="nv-src"><span class="dg"></span><span class="paren">)</span></div>
+          <div class="nv-rec"><b>Rehabilitation Assessment</b><small>1 month ago · NYU Langone Health</small></div>
+          <div class="nv-dest">
+            <div>
+              <div class="lab">DESTINATION</div>
+              <div class="rm">Room 513</div>
+              <div class="fl">Wing A, 5th Floor</div>
+            </div>
+            <div class="who"><img src="new/42bb7.png" alt=""><span>Dr. kim</span></div>
+          </div>
+          <div class="nv-map">
+            <img class="m1" src="new/60f16.svg" alt=""><img class="m2" src="new/6664a.svg" alt="">
+            <img class="m3" src="new/52923.svg" alt=""><img class="m4" src="new/14c73.svg" alt="">
+            <i class="m5"></i>
+          </div>
+        </div>
+      </div>
+      <p class="nv-cta"></p>
+    </div>
+
     <!-- 카메라 노치 : .screen 안에 두어 같은 clip-path 로 잘리게 한다 (경계에 흰 선이 안 남음) -->
     <svg class="bezel" viewBox="0 0 1080 1080" aria-hidden="true">
-      <!-- 베젤을 그리지 않으므로 피그마 원본의 각진 노치(직선 측면 + 모따기) 대신 매끈한 반구 :
-           아래 꼭지 y 78 은 그대로 두고 위는 스크린 원 밖으로 넘겨 가장자리와 자연스럽게 이어지게 -->
-      <ellipse cx="540" cy="-10" rx="86" ry="88" fill="#000"/>
+      <!-- 피그마 1636:653 : 노치가 커졌다 (336 x 239, 아래 꼭지 y 119) -->
+      <ellipse cx="540" cy="-0.5" rx="168" ry="119.5" fill="#000"/>
     </svg>
+    <!-- 카메라 렌즈와 센싱 라이트 (피그마 image 328470041 · Ellipse 31409) -->
+    <div class="lens" aria-hidden="true"><img src="new/bdc46.png" alt=""></div>
+    <div class="slight" aria-hidden="true"></div>
   </div>
 </div>
 
@@ -956,6 +1118,9 @@ const NUMDOT = {
   '7': '11111,00001,00001,00010,00100,00100,00100',
   '8': '01110,10001,10001,01110,10001,10001,01110',
   '9': '01110,10001,10001,01111,00001,00010,11100',
+  'N': '10001,10001,11001,10101,10011,10001,10001',   /* 출처 칩의 NAV (DGM Composta 실측) */
+  'A': '00100,01010,10001,10001,11111,10001,10001',
+  'V': '10001,10001,10001,10001,10001,01010,00100',
 };
 const NUMP = 100, NUMDR = 47, NUMADV = 650;   // 칸 간격 · 도트 반지름 · 글자 보내기
 const NDOTS = {};
@@ -1055,9 +1220,64 @@ const navRun = () => {
 
 // 시퀀스 : 한 번 누르면 끝까지 자동 진행, 다시 누르면 idle 로 리셋
 // fill 은 엄지척(또는 탭)을 기다리므로 자동 진행하지 않는다
-const STEPS = ['idle','fill','connecting','connected','message','followup','guide','follow','bye'];
+/* ---------- 맥락 출처 → 대화 (피그마 1636:653) ----------
+   하나의 컴포넌트가 늘어나고(157 → 840 → 929) 안의 내용만 오른쪽에서 밀려 들어온다.
+   로딩은 맥락 전달 그래픽과 같은 반짝임이 아바타 위에서 돌다가, 이미지가 떠오르며 멎는다 */
+const NV = document.querySelector('.nv');
+const nvq = c => NV.querySelector(c);
+const nvItems = [...NV.querySelectorAll('.nv-body > *')];
+const nvHead = [nvq('.nv-h1'), nvq('.nv-h2')], nvCta = nvq('.nv-cta');
+nvHead[0].textContent = nvHead[0].dataset.t = 'Good afternoon, Leo.\nBack for your 2nd check up?';
+nvHead[1].textContent = nvHead[1].dataset.t = 'Let me guide you to\nthe exam room.';
+// 출처 칩의 NAV 004 : 같은 도트 표로
+const nvDots = str => {
+  const svg = document.createElementNS(NS, 'svg');
+  const pts = []; let x = 0;
+  for (const ch of str) {
+    for (const d of numDotsFor(ch).dots) pts.push([x + d.x, d.y]);
+    x += NUMADV;
+  }
+  const w = Math.max(...pts.map(p => p[0])) + NUMDR, h = 6 * NUMP + 2 * NUMDR;
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  for (const [cx, cy] of pts) {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', NUMDR); svg.append(c);
+  }
+  return svg;
+};
+nvq('.nv-src .dg').replaceChildren(
+  Object.assign(document.createElement('span'), {}), Object.assign(document.createElement('span'), {}));
+nvq('.nv-src .dg').children[0].append(nvDots('NAV'));
+nvq('.nv-src .dg').children[1].append(nvDots('004'));
+
+let nvTimers = [];
+const nvLater = (ms, f) => nvTimers.push(setTimeout(f, ms));
+const nvOnly = (el, ms = 0) => {   // 하나만 들어오고 나머지는 왼쪽으로 밀려 나간다
+  for (const it of nvItems) {
+    if (it === el) continue;
+    if (it.classList.contains('on')) { it.classList.remove('on'); it.classList.add('out'); }
+    else it.classList.remove('out');
+  }
+  if (el) nvLater(ms, () => { el.classList.remove('out'); el.classList.add('on'); });
+};
+const nvStep = k => {
+  nvTimers.forEach(clearTimeout); nvTimers = [];
+  const head = k === 'talk1' ? nvHead[0] : k === 'talk2' ? nvHead[1] : null;
+  for (const h of nvHead) if (h !== head) h.classList.remove('on');
+  if (head) nvLater(260, () => head.classList.add('on'));   // 배경 그래픽이 자리를 잡고 나서 톡
+  if (k === 'src')      { nvOnly(null); nvCta.classList.remove('on'); }
+  if (k === 'srcfull')  { nvOnly(nvq('.nv-src'), 430); nvCta.classList.remove('on'); }
+  if (k === 'talk1')    { nvOnly(nvq('.nv-rec'), 300); nvq('.nv-map').classList.remove('on');
+                          nvCta.textContent = 'Find another Drop'; nvLater(760, () => nvCta.classList.add('on')); }
+  if (k === 'talk2')    { nvOnly(nvq('.nv-dest'), 360); nvLater(420, () => nvq('.nv-map').classList.add('on'));
+                          nvCta.classList.remove('on');
+                          nvLater(560, () => { nvCta.textContent = 'Guide Me'; nvCta.classList.add('on'); }); }
+  if (!['src', 'srcfull', 'talk1', 'talk2'].includes(k)) { nvOnly(null); nvCta.classList.remove('on'); }
+};
+
+const STEPS = ['idle','fill','connecting','connected','src','srcfull','talk1','talk2','follow','bye'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 2900, 9000, 2900, 4300, 6200, 0, 4200];   // message 는 첫 문장이 다 쓰인 뒤(1.5s) 한 호흡만 : 둘째 문장이 곧바로 이어진다   // bye : 인사가 사라진 뒤(4.0s) 대기 상태로   // follow 은 도착(Arrived) 2.5s 뒤 bye 로   // 각 상태에 머무는 시간(ms)
+const HOLD  = [6000, 5200, 2900, 9000, 3000, 2800, 6000, 6400, 0, 4200];   /* 맥락 출처(로딩·출처)와 대화 두 장면이 들어왔다 */
 const body = document.body;
 let timer, strokeTimer, pbTimer;
 const sring = document.querySelector('.sring');
@@ -1190,16 +1410,17 @@ const go = n => {
   body.classList.remove('out', 'leave');
   body.classList.toggle('fromfill', STEPS[n] === 'connecting' && body.classList.contains('fill'));
   if (STEPS[n] === 'fill') { window.__fillAt = performance.now(); timer = setTimeout(leaveFill, 15000); requestAnimationFrame(bandsRun); }
-  body.className = body.className.replace(/\b(idle|fill|connecting|connected|message|followup|guide|follow|bye)\b/, STEPS[n]);
+  body.className = body.className.replace(/\b(idle|fill|connecting|connected|src|srcfull|talk1|talk2|follow|bye)\b/, STEPS[n]);
   if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
+  nvStep(STEPS[n]);
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); }
   else star.pause();
   // 스트로크 : 기기 번호가 사라진 뒤 connected 에서 처음부터 켜져 I'll take you 까지 끊지 않고 (영상 26s, 쓰는 구간 약 20s)
   // 스트로크는 connecting 부터 미리 돌려 둔다 (보이지 않는 동안 디코딩을 마쳐 등장 첫 프레임이 끊기지 않게)
   if (STEPS[n] === 'connecting') stroke.currentTime = RSTART;
-  if (['connecting', 'connected', 'message', 'followup', 'guide'].includes(STEPS[n])) {
+  if (['connecting', 'connected'].includes(STEPS[n])) {
     stroke.play().catch(() => {});
-    if (!['connected', 'message', 'followup', 'guide'].includes(STEPS[step()] ?? '')) {   // 들어오는 순간에만
+    if (!['connected'].includes(STEPS[step()] ?? '')) {   // 들어오는 순간에만
       sring.style.setProperty('--pb', 0);
       clearTimeout(pbTimer); pbTimer = setTimeout(() => sring.style.removeProperty('--pb'), 1700);
     }
@@ -1247,7 +1468,7 @@ const markJump = () => {
   const cur = STEPS[step()], navEnd = cur === 'follow' && NAV.classList.contains('arrived') || cur === 'bye';
   for (const b of jump.children) b.classList.toggle('on',
     b.dataset.go === 'end' ? navEnd :
-    b.dataset.go === 'connected' ? ['connected', 'message', 'followup', 'guide'].includes(cur) :
+    b.dataset.go === 'connected' ? ['connected', 'src', 'srcfull', 'talk1', 'talk2'].includes(cur) :
     b.dataset.go === 'follow' ? cur === 'follow' && !navEnd :
     b.dataset.go === 'idle' ? ['idle', 'fill'].includes(cur) : b.dataset.go === cur);
 };
