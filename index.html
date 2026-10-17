@@ -193,7 +193,7 @@ body.idle .screen::before, body.idle .screen::after, body.idle .rimlight{ opacit
 .nv{ position:absolute; inset:0; width:1080px; height:1080px; z-index:3; pointer-events:none;
   opacity:0; visibility:hidden; transition:opacity .6s ease, visibility 0s linear .6s;
   --spring:cubic-bezier(.34,1.32,.5,1); --bouncy:cubic-bezier(.22,1.45,.36,1); }
-body.src .nv, body.srcfull .nv, body.talk1 .nv, body.talk2 .nv, body.ask .nv, body.guide2 .nv{
+body.src .nv, body.srcfull .nv, body.talk1 .nv, body.talk2 .nv, body.guiding .nv{
   opacity:1; visibility:visible; transition-delay:0s; }
 /* ---------- 바탕 : 흰 화면 + 큰 타원 ---------- */
 .nv-bg{ position:absolute; inset:0; background:#fff; isolation:isolate; }
@@ -217,8 +217,8 @@ body.talk2 .nv-bg i{ top:-472px; }
 .nv-bg u{ position:absolute; left:50%; translate:-50% 0; width:1310px; height:1264px;
   border-radius:50%; background:#0A0909; opacity:0; top:-32.32px;
   transition:opacity .9s ease, top .95s var(--spring); }
-body.ask .nv-bg u{ opacity:1; top:-32.32px; }
-body.guide2 .nv-bg u{ opacity:1; top:-127.5px; }
+body.guiding .nv-bg u{ opacity:1; top:-127.5px; }
+body.ask .nv-bg u{ top:-32.32px; }
 /* ---------- 문장 : 위에서 아래로 약간 bouncy (글 쓰는 모션 없음) ---------- */
 .nv-head{ position:absolute; left:50%; transform:translateX(-50%); width:max-content; margin:0;
   text-align:center; white-space:pre; isolation:isolate;
@@ -254,7 +254,7 @@ body.talk2 .nv-pill{ width:840px; height:319.18px; border-radius:108.5px; top:59
   background:rgba(255,255,255,.06);
   box-shadow:inset 0 8px 12px -7px rgba(219,218,202,.42), inset 0 -34px 44px -32px rgba(219,218,202,.7); }
 /* 길안내 칩 : 314 x 114 · 가운데 (383,166.4) → 중심 (540,223.4) */
-body.ask .nv-pill, body.guide2 .nv-pill{ width:314px; height:114px; border-radius:76.53px; top:223.4px;
+body.guiding .nv-pill{ width:314px; height:114px; border-radius:76.53px; top:223.4px;
   background:rgba(255,255,255,.1); box-shadow:none; }
 /* ---------- 아바타 ---------- */
 .nv-ava{ position:absolute; left:14px; top:13px; width:129.371px; height:129.371px;
@@ -267,7 +267,7 @@ body.ask .nv-pill, body.guide2 .nv-pill{ width:314px; height:114px; border-radiu
 body.srcfull .nv-ava .eye, body.talk1 .nv-ava .eye,
 body.srcfull .nv-ava img, body.talk1 .nv-ava img{ opacity:1; }
 body.src .nv-ava img{ opacity:.8; }   /* 로딩 중에도 사진이 비친다 (피그마 1640:1228) */
-body.talk2 .nv-ava, body.ask .nv-ava, body.guide2 .nv-ava{ opacity:0; scale:.7; }
+body.talk2 .nv-ava, body.guiding .nv-ava{ opacity:0; scale:.7; }
 /* ---------- 반짝이는 로딩 (맥락 전달 그래픽과 같은 결) ---------- */
 .nv-spark{ position:absolute; left:14px; top:13px; width:129.371px; height:129.371px;
   mix-blend-mode:screen; opacity:0; transition:opacity .8s ease; }
@@ -277,7 +277,7 @@ body.src .nv-spark{ opacity:1; }
 @keyframes nvSpin{ to{ rotate:360deg; } }
 @keyframes nvPulse{ 0%,100%{ scale:.95; filter:brightness(.95); } 50%{ scale:1.05; filter:brightness(1.3); } }
 /* ---------- 내용 : 오른쪽에서 밀려 들어온다 ---------- */
-.nv-body{ position:absolute; inset:0; }
+.nv-body{ position:absolute; inset:0; perspective:420px; }   /* 칩 속 룰렛의 원기둥 */
 .nv-body > *{ position:absolute; opacity:0; translate:60px 0;
   transition:opacity .45s ease, translate .7s var(--spring); }
 .nv-body > *.on{ opacity:1; translate:0 0; }
@@ -322,6 +322,12 @@ body.src .nv-spark{ opacity:1; }
 .nv-map .m6{ position:absolute; left:746.18px; top:163.98px; width:23.094px; height:68.937px; background:#fff3c8;
   -webkit-mask:url(new/aa1b1.png) 0 5.409px/23.094px 63.528px no-repeat;
           mask:url(new/aa1b1.png) 0 5.409px/23.094px 63.528px no-repeat; }
+/* 길안내 칩 속 : 원기둥에 맵핑된 듯 위로 말려 넘어간다 (룰렛) */
+.nv-go, .nv-who{ transform-origin:50% 50%; backface-visibility:hidden;
+  transform:rotateX(-92deg) translateY(26px); translate:0 !important;
+  transition:opacity .34s ease, transform .62s cubic-bezier(.3,1.25,.45,1); }
+.nv-go.on, .nv-who.on{ transform:rotateX(0deg) translateY(0); }
+.nv-go.out, .nv-who.out{ transform:rotateX(92deg) translateY(-26px); }
 /* 길안내 칩 속 : 왼쪽 아이콘 + 두 줄 (pl 45 / pr 60 / gap 30) */
 .nv-go{ left:45px; top:0; bottom:0; right:60px; display:flex; align-items:center; gap:30px; }
 .nv-go .ico{ width:43.42px; height:59.124px; display:flex; align-items:center; justify-content:center; flex:none; }
@@ -340,60 +346,74 @@ body.src .nv-spark{ opacity:1; }
 .nv-arrow{ position:absolute; left:50%; translate:-50% -50%; width:186.366px; height:253.512px;
   display:flex; align-items:center; justify-content:center; opacity:0;
   transition:opacity .7s ease, top .9s var(--spring); }
-.nv-arrow i{ position:relative; display:block; width:253.512px; height:186.366px; rotate:-90deg; flex:none; }
+.nv-arrow i{ position:relative; display:block; width:253.512px; height:186.366px; rotate:-90deg; flex:none;
+  animation:nvPoke 2.8s cubic-bezier(.45,0,.35,1) infinite; }
 .nv-arrow img{ position:absolute; left:-17.92px; top:-17.91px; width:289.36px; height:222.18px; display:block; }
-body.ask .nv-arrow{ top:539.63px; opacity:1; }
-body.guide2 .nv-arrow{ top:559.76px; opacity:1; }
-/* ---------- 길안내 : 가장자리 곡선 게이지 (피그마 Ellipse 31254 / 31255) ---------- */
-.nv-gauge{ position:absolute; inset:0; }
-.nv-gauge > i{ position:absolute; display:flex; align-items:center; justify-content:center;
+body.guiding .nv-arrow{ top:559.76px; opacity:1; }
+body.ask .nv-arrow{ top:539.63px; }
+@keyframes nvPoke{ 0%,62%,100%{ translate:0 0; } 30%{ translate:0 -13px; } }
+/* ---------- 길안내 : 오른쪽 가장자리 게이지 = 남은 거리 (피그마 Ellipse 31254 / 31255) ----------
+   실측 : 중심 (540,540) · 반지름 449.5 · 두께 23 · 12시부터 시계방향 70° ~ 116.75°
+   채움(흰 20% + #F5F0CF 30%)이 남은 거리 · 지나온 길은 흰 10% 트랙으로 남는다 */
+.nv-gauge{ position:absolute; inset:0; width:1080px; height:1080px;
   opacity:0; transition:opacity .7s ease; }
-.nv-gauge > i > b{ position:relative; display:block; width:926.727px; height:926.727px; flex:none; }
-.nv-gauge img{ position:absolute; display:block; }
-body.ask .nv-gauge .a1, body.ask .nv-gauge .a2,
-body.guide2 .nv-gauge .b1, body.guide2 .nv-gauge .b2{ opacity:1; }
-.nv-gauge .a1, .nv-gauge .b1{ width:1310.59px; height:1310.59px; top:-112.105px; }
-.nv-gauge .a1 > b, .nv-gauge .b1 > b{ rotate:-45deg; }
-.nv-gauge .a1{ left:-116.485px; } .nv-gauge .b1{ left:-118.485px; }
-.nv-gauge .a1 img{ left:673.54px; top:650.38px; width:207.31px; height:218.25px; }
-.nv-gauge .b1 img{ left:725.16px; top:650.65px; width:155.87px; height:184.60px; }
-.nv-gauge .a2, .nv-gauge .b2{ width:1111.444px; height:1111.444px; left:-16.222px; }
-.nv-gauge .a2 > b, .nv-gauge .b2 > b{ rotate:13deg; }
-.nv-gauge .a2{ top:-15.652px; } .nv-gauge .b2{ top:-15.852px; }
-.nv-gauge .a2 img{ left:893.18px; top:509.23px; width:29.93px; height:62.37px; }
-.nv-gauge .b2 img{ left:893.09px; top:454.84px; width:33.64px; height:117.32px; }
-/* ---------- 부상확인 : 어두운 판(배경 흐림) + 아래 빛 ---------- */
+body.guiding .nv-gauge{ opacity:1; }
+.nv-gauge circle{ fill:none; stroke-width:23; stroke-linecap:round;
+  transition:stroke-dasharray 5.2s cubic-bezier(.35,0,.25,1), stroke-dashoffset 5.2s cubic-bezier(.35,0,.25,1); }
+.nv-gauge .gtk{ stroke:rgba(255,255,255,.1); }
+.nv-gauge .gf1{ stroke:rgba(255,255,255,.2); }
+.nv-gauge .gf2{ stroke:rgba(245,240,207,.3); }
+/* ---------- 부상확인 : 어두운 판(배경 흐림) + 아래 VUI 그래픽 ---------- */
 .nv-panel{ position:absolute; left:56.2px; top:322.88px; width:952.02px; height:492.138px;
   background:rgba(10,9,9,.8); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
   opacity:0; transition:opacity .7s ease; }
 body.ask .nv-panel{ opacity:1; }
+/* 아래 빛 : 멈춰 있지 않고 AI 가 듣고 말하듯 천천히 일렁인다 */
 .nv-glow{ position:absolute; inset:0; opacity:0; transition:opacity .9s ease; }
 body.ask .nv-glow{ opacity:1; }
-.nv-glow > i{ position:absolute; display:flex; align-items:center; justify-content:center; }
+.nv-glow > i{ position:absolute; display:flex; align-items:center; justify-content:center;
+  will-change:transform, opacity; }
 .nv-glow > i > b{ position:relative; display:block; flex:none; }
 .nv-glow img{ position:absolute; display:block; }
-.nv-glow .q1{ left:56.2px; top:870.6px; width:1024.185px; height:247.378px; }
+.nv-glow .q1{ left:56.2px; top:870.6px; width:1024.185px; height:247.378px;
+  animation:vui1 9.2s ease-in-out infinite; }
 .nv-glow .q1 > b{ width:1017.48px; height:213.09px; transform:rotate(1.94deg) skewX(-0.02deg); }
 .nv-glow .q1 img{ left:-32.56px; top:-32.6px; width:1082.6px; height:278.29px; }
-.nv-glow .q2{ left:558.05px; translate:-50% 0; top:891.56px; width:479.1px; height:254.609px; }
+.nv-glow .q2{ left:558.05px; translate:-50% 0; top:891.56px; width:479.1px; height:254.609px;
+  animation:vui2 6.6s ease-in-out infinite; }
 .nv-glow .q2 > b{ width:465.036px; height:225.467px; transform:rotate(-3.65deg) skewX(0.16deg); }
 .nv-glow .q2 img{ left:-79.99px; top:-79.99px; width:625.01px; height:385.46px; }
+/* 같은 숨으로 바닥에서 올라오는 이너 섀도우 */
+.nv-ish{ position:absolute; inset:40px; border-radius:50%; pointer-events:none;
+  box-shadow:inset 0 -66px 96px -58px rgba(245,240,207,.3), inset 0 0 20px rgba(0,0,0,.25);
+  opacity:0; transition:opacity .9s ease; }
+body.ask .nv-ish{ opacity:1; animation:vui3 6.6s ease-in-out infinite; }
+/* 밝기는 원본(1.0)을 기준으로 위아래로만 숨쉰다 : 멈춘 장면은 디자인 그대로 */
+@keyframes vui1{ 0%,100%{ transform:translate(0,0) scale(1); filter:brightness(1); }
+  34%{ transform:translate(-22px,-9px) scale(1.07); filter:brightness(1.12); }
+  67%{ transform:translate(16px,5px) scale(.96); filter:brightness(.93); } }
+@keyframes vui2{ 0%,100%{ transform:translate(0,0) scale(1); filter:brightness(1); }
+  30%{ transform:translate(14px,-13px) scale(1.11); filter:brightness(1.15); }
+  64%{ transform:translate(-18px,7px) scale(.93); filter:brightness(.9); } }
+@keyframes vui3{ 0%,100%{ box-shadow:inset 0 -66px 96px -58px rgba(245,240,207,.3), inset 0 0 20px rgba(0,0,0,.25); }
+  38%{ box-shadow:inset 0 -88px 120px -56px rgba(245,240,207,.42), inset 0 0 20px rgba(0,0,0,.25); }
+  72%{ box-shadow:inset 0 -56px 86px -60px rgba(245,240,207,.22), inset 0 0 20px rgba(0,0,0,.25); } }
 /* ---------- 아래 안내 글 · 시각 (상자 밑 959) ---------- */
 .nv-cta{ position:absolute; left:0; right:0; bottom:121px; margin:0; text-align:center;
   font-family:var(--ff-ko,'SF Pro KR'), 'Pretendard Web', sans-serif; font-weight:500;
   font-size:32px; line-height:1.2; letter-spacing:-0.02em; color:rgba(79,79,79,.4);
   opacity:0; translate:0 10px; transition:opacity .6s ease, translate .6s var(--bouncy); }
 .nv-cta.on{ opacity:1; translate:0 0; }
-body.ask .nv-cta.on{ color:#fff; opacity:.5; mix-blend-mode:overlay; }
-body.guide2 .nv-cta.on{ color:rgba(255,255,255,.8); }
+body.guiding .nv-cta{ color:rgba(255,255,255,.8); }
+body.guiding .nv-cta.eta{ color:#F5F0CF; }
 /* 새 장면에서는 앞 장면 배경 레이어를 비운다 */
 body.src .screen::before, body.src .screen::after, body.srcfull .screen::before, body.srcfull .screen::after,
 body.talk1 .screen::before, body.talk1 .screen::after, body.talk2 .screen::before, body.talk2 .screen::after,
-body.ask .screen::before, body.ask .screen::after, body.guide2 .screen::before, body.guide2 .screen::after,
+body.guiding .screen::before, body.guiding .screen::after,
 body.src .rimlight, body.srcfull .rimlight, body.talk1 .rimlight, body.talk2 .rimlight,
-body.ask .rimlight, body.guide2 .rimlight,
+body.guiding .rimlight,
 body.src .sring, body.srcfull .sring, body.talk1 .sring, body.talk2 .sring,
-body.ask .sring, body.guide2 .sring{ opacity:0; transition:none; }
+body.guiding .sring{ opacity:0; transition:none; }
 
 /* ---------- 배경 레이어 : 기본값 = message(본문) 상태 ---------- */
 /* blur 는 래퍼에 : 자식을 scale() 해도 흐림 반경이 같이 커지지 않게 */
@@ -890,10 +910,9 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
   <button type="button" data-go="idle">대기 상태</button>
   <button type="button" data-go="connecting">맥락 전달</button>
   <button type="button" data-go="connected">대화 시작</button>
-  <button type="button" data-go="ask">길안내 부상확인</button>
-  <button type="button" data-go="guide2">길안내 칩</button>
-  <button type="button" data-go="follow">길안내 시작</button>
-  <button type="button" data-go="end">길안내 끝</button>
+  <button type="button" data-go="guide2">길안내</button>
+  <button type="button" data-go="ask">부상 확인</button>
+  <button type="button" data-go="bye">도착 인사</button>
 </nav>
 <button class="toggle" type="button" aria-pressed="false">
   <span class="sw"></span><span class="lb">제품 목업</span>
@@ -967,14 +986,16 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
     <!-- 맥락 출처 → 길안내 (피그마 1636:653 NEW) : 한 컴포넌트가 늘어나고 바뀐다 -->
     <div class="nv" aria-hidden="true">
       <div class="nv-bg"><div class="nv-dots"></div><i></i><u></u></div>
-      <div class="nv-gauge">
-        <i class="a1"><b><img src="new/036b2.svg" alt=""></b></i>
-        <i class="a2"><b><img src="new/1f929.svg" alt=""></b></i>
-        <i class="b1"><b><img src="new/5380b.svg" alt=""></b></i>
-        <i class="b2"><b><img src="new/68830.svg" alt=""></b></i>
-      </div>
+      <svg class="nv-gauge" viewBox="0 0 1080 1080" aria-hidden="true">
+        <g transform="rotate(-90 540 540)">
+          <circle class="gtk" cx="540" cy="540" r="449.5"></circle>
+          <circle class="gf1" cx="540" cy="540" r="449.5"></circle>
+          <circle class="gf2" cx="540" cy="540" r="449.5"></circle>
+        </g>
+      </svg>
       <div class="nv-arrow"><i><img src="new/0c805_s.svg" alt=""></i></div>
       <div class="nv-panel"></div>
+      <div class="nv-ish"></div>
       <p class="nv-head nv-h1"></p>
       <p class="nv-head nv-h2"></p>
       <p class="nv-head nv-h3"></p>
@@ -1385,6 +1406,49 @@ const nvOnly = (el, ms = 0) => {   // 하나만 들어오고 나머지는 왼쪽
   }
   if (el) nvLater(ms, () => { el.classList.remove('out'); el.classList.add('on'); });
 };
+// 남은 거리 게이지 : 실측값(반지름 449.5 · 두께 23 · 70° ~ 116.75°) 위에서 채움이 끝에서 거꾸로 자란다
+const GR = 449.5, GC = 2 * Math.PI * GR, GPD = GC / 360, GA0 = 70, GA1 = 116.75, GGAP = 2.25;
+const GCAP = (23 / 2) / GPD;   // 둥근 끝이 밖으로 더 나오는 만큼(약 1.47°)
+const gTk = nvq('.nv-gauge .gtk'), gFl = [...NV.querySelectorAll('.nv-gauge .gf1, .nv-gauge .gf2')];
+const arcTo = (el, a, b) => {
+  const len = Math.max(0, (b - GCAP) - (a + GCAP)) * GPD;
+  el.style.strokeDasharray = `${len.toFixed(2)} ${GC.toFixed(2)}`;
+  el.style.strokeDashoffset = (-(a + GCAP) * GPD).toFixed(2);
+};
+const nvGauge = (f, now) => {   // f : 남은 거리(각도). now = 전환 없이 그 자리에서
+  const all = [gTk, ...gFl];
+  if (now) { for (const el of all) el.style.transition = 'none'; }
+  arcTo(gTk, GA0, Math.max(GA0, GA1 - f - GGAP));
+  for (const el of gFl) arcTo(el, GA1 - f, GA1);
+  if (now) { gTk.getBoundingClientRect(); for (const el of all) el.style.transition = ''; }
+};
+nvGauge(0);
+
+// 아래 시각 : 현 시각(흰 80%) 과 도착예상시간(#F5F0CF) 을 8초마다 번갈아
+const two = n => String(n).padStart(2, '0');
+const clockTxt = d => { let h = d.getHours(); const ap = h < 12 ? 'AM' : 'PM'; h = h % 12 || 12; return `${ap} ${h}: ${two(d.getMinutes())}`; };
+let navClock = [];
+const navClockStop = () => { for (const t of navClock) { clearTimeout(t); clearInterval(t); } navClock = []; };
+const ctaSet = eta => {
+  const d = new Date();
+  const t = clockTxt(eta ? new Date(d.getTime() + 4 * 60000) : d);
+  nvCta.classList.remove('on');
+  navClock.push(setTimeout(() => {
+    nvCta.textContent = t; nvCta.classList.toggle('eta', eta); nvCta.classList.add('on');
+  }, nvCta.textContent ? 420 : 0));
+};
+const navClockStart = () => {   // 시작은 도착예상시간, 길안내가 시작되면 현 시각으로
+  navClockStop();
+  ctaSet(true);
+  navClock.push(setTimeout(() => {
+    ctaSet(false);
+    let eta = false;
+    navClock.push(setInterval(() => { eta = !eta; ctaSet(eta); }, 8000));
+  }, 3500));
+};
+
+const GUIDE = ['guide2', 'ask', 'guide3'];   // 길안내 한 묶음 (부상확인은 길안내 도중의 대화)
+let nvPrev = '';
 const nvStep = k => {
   nvTimers.forEach(clearTimeout); nvTimers = [];
   const head = k === 'talk1' ? nvHead[0] : k === 'talk2' ? nvHead[1] : k === 'ask' ? nvHead[2] : null;
@@ -1397,14 +1461,23 @@ const nvStep = k => {
                           cta('Find another Drop'); }
   if (k === 'talk2')    { nvOnly(nvq('.nv-dest'), 360); nvLater(420, () => nvq('.nv-map').classList.add('on'));
                           cta('Guide Me'); }
-  if (k === 'ask')      { nvOnly(nvq('.nv-go'), 420); nvq('.nv-map').classList.remove('on'); cta('AM 11: 36'); }
-  if (k === 'guide2')   { nvOnly(nvq('.nv-who'), 360); cta('AM 11: 38'); }
-  if (!['src', 'srcfull', 'talk1', 'talk2', 'ask', 'guide2'].includes(k)) { nvOnly(null); nvCta.classList.remove('on'); }
+  if (GUIDE.includes(k)) {   // 칩 속은 룰렛처럼 굴러 바뀌고, 게이지는 남은 거리를 줄인다
+    nvOnly(k === 'ask' ? nvq('.nv-go') : nvq('.nv-who'), 300);
+    nvq('.nv-map').classList.remove('on');
+    const fresh = !GUIDE.includes(nvPrev);
+    nvGauge(k === 'guide2' ? 14.75 : k === 'ask' ? 8.5 : 3.5, fresh);   // 남은 거리 : 갈수록 줄어든다
+    if (fresh) navClockStart();
+  } else {
+    navClockStop(); nvCta.classList.remove('eta');
+    if (!['src', 'srcfull', 'talk1', 'talk2'].includes(k)) { nvOnly(null); nvCta.classList.remove('on'); }
+  }
+  if (!GUIDE.includes(k) && GUIDE.includes(nvPrev)) nvGauge(0);
+  nvPrev = k;
 };
 
-const STEPS = ['idle','fill','connecting','connected','src','srcfull','talk1','talk2','ask','guide2','follow','bye'];
+const STEPS = ['idle','fill','connecting','connected','src','srcfull','talk1','talk2','guide2','ask','guide3','bye'];
 // 터치가 안 되는 스크린이라 전 구간 자동 진행하고 마지막에서 idle 로 돌아온다
-const HOLD  = [6000, 5200, 2900, 9000, 3000, 2800, 6000, 6400, 7200, 5600, 0, 4200];   /* 맥락 출처(로딩·출처)와 대화 두 장면이 들어왔다 */
+const HOLD  = [6000, 5200, 2900, 9000, 3000, 2800, 6000, 6400, 9000, 8200, 9000, 4200];   /* 맥락 출처(로딩·출처)와 대화 두 장면이 들어왔다 */
 const body = document.body;
 let timer, strokeTimer, pbTimer;
 const sring = document.querySelector('.sring');
@@ -1537,8 +1610,8 @@ const go = n => {
   body.classList.remove('out', 'leave');
   body.classList.toggle('fromfill', STEPS[n] === 'connecting' && body.classList.contains('fill'));
   if (STEPS[n] === 'fill') { window.__fillAt = performance.now(); timer = setTimeout(leaveFill, 15000); requestAnimationFrame(bandsRun); }
-  body.className = body.className.replace(/\b(idle|fill|connecting|connected|src|srcfull|talk1|talk2|ask|guide2|follow|bye)\b/, STEPS[n]);
-  if (STEPS[n] === 'follow') navRun(); else { clearTimeout(navRAF); clearInterval(roll); }
+  body.className = body.className.replace(/\b(idle|fill|connecting|connected|src|srcfull|talk1|talk2|guide2|ask|guide3|bye)\b/, STEPS[n]);
+  body.classList.toggle('guiding', ['guide2', 'ask', 'guide3'].includes(STEPS[n]));
   nvStep(STEPS[n]);
   if (STEPS[n] === 'connecting') { star.currentTime = 0; star.play().catch(() => {}); }
   else star.pause();
@@ -1588,15 +1661,13 @@ jump.addEventListener('pointerdown', e => e.stopPropagation());
 jump.addEventListener('click', e => {
   const k = e.target.dataset?.go;
   if (!k) return;
-  if (k === 'end') window.__navEnd = true;
-  go(STEPS.indexOf(k === 'end' ? 'follow' : k));
+  go(STEPS.indexOf(k));
 });
 const markJump = () => {
-  const cur = STEPS[step()], navEnd = cur === 'follow' && NAV.classList.contains('arrived') || cur === 'bye';
+  const cur = STEPS[step()];
   for (const b of jump.children) b.classList.toggle('on',
-    b.dataset.go === 'end' ? navEnd :
     b.dataset.go === 'connected' ? ['connected', 'src', 'srcfull', 'talk1', 'talk2'].includes(cur) :
-    b.dataset.go === 'follow' ? cur === 'follow' && !navEnd :
+    b.dataset.go === 'guide2' ? ['guide2', 'guide3'].includes(cur) :
     b.dataset.go === 'idle' ? ['idle', 'fill'].includes(cur) : b.dataset.go === cur);
 };
 setInterval(markJump, 250);
