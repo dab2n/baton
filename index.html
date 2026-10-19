@@ -282,12 +282,12 @@ body.ask .nv-bg u{ top:-32.32px; }
 .nv-h3 .bl{ opacity:.3; text-shadow:none; margin-left:.5px; }
 /* ---------- 공통 컴포넌트 (늘어나는 알약) ---------- */
 .nv-pill{ position:absolute; left:50%; top:-200px; translate:-50% -50%;   /* 기본은 프레임 위 : 맥락전달이 끝나면 아래로 똑 떨어진다 */
-  width:220.282px; height:220.14px; border-radius:50%; overflow:hidden;
+  width:157px; height:156px; border-radius:78px; overflow:hidden;
   background:rgba(255,255,255,.085); --rim:.21;
   transition:width .95s var(--spring), height .95s var(--spring), border-radius .95s var(--spring),
              top .95s var(--bouncy), background-color .6s ease, box-shadow .6s ease; }
-/* 맥락출처 로딩중 (피그마 1640:1228) : 220 원이 프레임 밖에서 떨어져 (540, 639.3) 에 멈춘다 */
-body.src .nv-pill{ top:639.33px; }
+/* 맥락출처 로딩중·맥락출처 (피그마 1640:1228 · 1635:322) : 157 원이 프레임 밖에서 떨어져 한가운데 멈춘다 */
+body.src .nv-pill{ top:540px; }
 /* ---------- 유리(Glass) ----------
    피그마 Glass 는 (1) 가장자리 1px 하이라이트 와 (2) 바탕을 렌즈처럼 끌어당기는 굴절 로 보인다.
    굴절은 위 안쪽을 밝게, 아래 안쪽을 어둡게 만들되 바탕을 흐리지는 않는다
@@ -323,10 +323,9 @@ body.guiding .nv-pill{ width:314px; height:114px; border-radius:76.53px; top:223
   background:rgba(255,255,255,.1); box-shadow:none; --rim:0; --rimt:.5; }
 /* ---------- 아바타 ---------- */
 /* 안쪽 좌표는 % : 알약이 220 → 157 로 줄어도 로봇 이미지가 같은 비율로 따라 줄어든다 */
-.nv-ava{ position:absolute; left:14px; top:13px; width:182.037px; height:182.037px;
+.nv-ava{ position:absolute; left:14px; top:13px; width:129.371px; height:129.371px;
   border-radius:50%; overflow:hidden; background:#D9D9CB;
   transition:opacity .5s ease, width .95s var(--spring), height .95s var(--spring), scale .6s var(--spring); }
-body.srcfull .nv-ava, body.talk1 .nv-ava{ width:129.371px; height:129.371px; }
 .nv-ava .eye{ position:absolute; left:42.9%; top:24.86%; width:12.43%; height:2.66%;
   border-radius:50%; background:#141414; opacity:0; transition:opacity .9s ease; }
 .nv-ava img{ position:absolute; left:23.36%; top:18.65%; width:53.28%; height:146.51%; object-fit:fill;
@@ -345,10 +344,8 @@ body.src .nv-ava img{ animation:avaVeil 2.9s cubic-bezier(.3,.6,.4,1) both; }
   100%{ opacity:1; filter:none; } }
 body.talk2 .nv-ava, body.guiding .nv-ava{ opacity:0; scale:.7; }
 /* ---------- 반짝이는 로딩 (맥락 전달 그래픽과 같은 결) ---------- */
-.nv-spark{ position:absolute; left:14px; top:13px; width:182.037px; height:182.037px;
-  mix-blend-mode:screen; opacity:0;
-  transition:opacity .8s ease, width .95s var(--spring), height .95s var(--spring); }
-body.srcfull .nv-spark, body.talk1 .nv-spark{ width:129.371px; height:129.371px; }
+.nv-spark{ position:absolute; left:14px; top:13px; width:129.371px; height:129.371px;
+  mix-blend-mode:screen; opacity:0; transition:opacity .8s ease; }
 .nv-spark img{ display:block; width:113.4%; height:112.8%; margin:-6.5% 0 0 -6.4%; border-radius:50%;
   animation:nvSpin 4.2s linear infinite, nvPulse 1.9s ease-in-out infinite; }
 body.src .nv-spark{ opacity:1; }
@@ -444,10 +441,12 @@ body.src .nv-spark{ opacity:1; }
 .nv-who img{ width:73.92px; height:73.92px; border-radius:50%; display:block; flex:none; }
 .nv-who .tx{ width:147px; overflow:hidden; }
 /* Room 513 뒤의 'Wing A, 5th Floor' 가 잘려 있다 → 천천히 왼쪽으로 흘려 뒷 내용을 보여준다 */
-.nv-who .v{ max-width:147px; overflow:hidden; text-overflow:clip; }
+.nv-who .v{ max-width:147px; overflow:hidden; text-overflow:clip;
+  -webkit-mask:linear-gradient(90deg,#000 0 84%, transparent 100%);
+          mask:linear-gradient(90deg,#000 0 84%, transparent 100%); }   /* 잘리는 쪽이 흐려지며 끊긴다 */
 .nv-who .v span{ display:inline-block; white-space:nowrap;
-  animation:whoRoll 11s cubic-bezier(.5,0,.5,1) 2.2s infinite; }
-@keyframes whoRoll{ 0%,16%{ translate:0 0; } 46%,62%{ translate:calc(0px - var(--mw,0px)) 0; } 92%,100%{ translate:0 0; } }
+  animation:whoRoll 6.5s cubic-bezier(.45,0,.45,1) 1.1s infinite; }
+@keyframes whoRoll{ 0%,12%{ translate:0 0; } 42%,66%{ translate:calc(0px - var(--mw,0px)) 0; } 96%,100%{ translate:0 0; } }
 /* ---------- 길안내 : 가운데 도트 화살표 ---------- */
 .nv-arrow{ position:absolute; left:50%; translate:-50% -50%; width:186.366px; height:253.512px;
   display:flex; align-items:center; justify-content:center; opacity:0;
