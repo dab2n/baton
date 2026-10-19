@@ -266,25 +266,41 @@ body.ask .nv-bg u{ top:-32.32px; }
 /* ---------- 공통 컴포넌트 (늘어나는 알약) ---------- */
 .nv-pill{ position:absolute; left:50%; top:604px; translate:-50% -50%;
   width:157px; height:156px; border-radius:78px; overflow:hidden;
-  background:rgba(255,255,255,.06);
+  background:rgba(255,255,255,.085); --rim:.21;
   transition:width .95s var(--spring), height .95s var(--spring), border-radius .95s var(--spring),
              top .95s var(--spring), background-color .6s ease, box-shadow .6s ease; }
-.nv-pill::after{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; }
+/* ---------- 유리(Glass) ----------
+   피그마 Glass 는 (1) 가장자리 1px 하이라이트 와 (2) 바탕을 렌즈처럼 끌어당기는 굴절 로 보인다.
+   굴절은 위 안쪽을 밝게, 아래 안쪽을 어둡게 만들되 바탕을 흐리지는 않는다
+   (카드 뒤의 점 격자가 또렷하게 비친다 — 실측) → backdrop blur 가 아니라 세로 띠로 옮겼다.
+   내용(글자·지도)보다 아래에 깔려야 하므로 ::before */
+@property --rim{ syntax:'<number>'; inherits:true; initial-value:0; }
+@property --rimt{ syntax:'<number>'; inherits:true; initial-value:0; }
+@property --g1{ syntax:'<number>'; inherits:true; initial-value:0; }
+@property --g2{ syntax:'<number>'; inherits:true; initial-value:0; }
+@property --g1e{ syntax:'<percentage>'; inherits:true; initial-value:42%; }
+@property --g2s{ syntax:'<percentage>'; inherits:true; initial-value:80%; }
+.nv-pill::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,var(--rim)), inset 0 1px 0 rgba(255,255,255,var(--rimt));
+  background:linear-gradient(180deg, rgba(255,255,255,var(--g1)) 0%, rgba(255,255,255,0) var(--g1e),
+                                     rgba(0,0,0,0) var(--g2s), rgba(0,0,0,var(--g2)) 100%);
+  transition:--rim .6s ease, --rimt .6s ease, --g1 .6s ease, --g2 .6s ease,
+             --g1e .6s ease, --g2s .6s ease; }
 body.srcfull .nv-pill{ width:840px; height:155.79px; border-radius:76.53px; top:603.9px;
-  background:rgba(255,255,255,.1); }
+  background:rgba(255,255,255,.04); --rim:.24; }
 /* 대화1·대화2 fill : 피그마 두 겹(#F5F0CF 30% 위, #FFFFFF 10% 아래)을 한 색으로 합친 값.
    alpha = 1-(.7x.9) = .37, 색 = (F5F0CF x .3 + FFFFFF x .07) / .37 */
 /* 피그마 fill 은 #F5F0CF 30% + #FFFFFF 10% 지만, 그 위의 Glass 가 바탕을 굴절·흡수해
    렌더에서는 훨씬 옅게 나온다. 색은 피그마 그대로 두고 세기만 렌더에 맞춰 쓸었다 */
-body.talk1 .nv-pill{ background:rgba(247,243,216,.045); }
-body.talk2 .nv-pill{ background:rgba(247,243,216,.04); }
+body.talk1 .nv-pill{ background:rgba(247,243,216,.02); --rim:.35; --g1:.125; --g2:.13; --g1e:44%; --g2s:79%; }
+body.talk2 .nv-pill{ background:rgba(247,243,216,.015); --rim:.28; --g1:.05; --g1e:29%; }
 body.talk1 .nv-pill{ width:840px; height:155.79px; border-radius:76.53px; top:603.9px; }
 body.talk2 .nv-pill{ width:840px; height:319.18px; border-radius:108.5px; top:598.59px;
   /* 대화2 는 Glass 위에 Inner shadow 한 겹 더 : X 0 · Y -23.51 · Blur 37.25 · Spread 0.9 · #DBDACA */
   box-shadow:inset 0 -23.51px 37.25px .9px #DBDACA; }
 /* 길안내 칩 : 314 x 114 · 가운데 (383,166.4) → 중심 (540,223.4) */
 body.guiding .nv-pill{ width:314px; height:114px; border-radius:76.53px; top:223.4px;
-  background:rgba(255,255,255,.1); box-shadow:none; }
+  background:rgba(255,255,255,.1); box-shadow:none; --rim:0; --rimt:.5; }
 /* ---------- 아바타 ---------- */
 .nv-ava{ position:absolute; left:14px; top:13px; width:129.371px; height:129.371px;
   border-radius:50%; overflow:hidden; background:#D9D9CB;
