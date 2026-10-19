@@ -278,11 +278,13 @@ body.ask .nv-bg u{ top:-32.32px; }
   -webkit-background-clip:text; background-clip:text; }
 .nv-h3 .bl{ opacity:.3; text-shadow:none; margin-left:.5px; }
 /* ---------- 공통 컴포넌트 (늘어나는 알약) ---------- */
-.nv-pill{ position:absolute; left:50%; top:540px; translate:-50% -50%;   /* 로딩·맥락출처는 프레임 한가운데 */
-  width:157px; height:156px; border-radius:78px; overflow:hidden;
+.nv-pill{ position:absolute; left:50%; top:-200px; translate:-50% -50%;   /* 기본은 프레임 위 : 맥락전달이 끝나면 아래로 똑 떨어진다 */
+  width:220.282px; height:220.14px; border-radius:50%; overflow:hidden;
   background:rgba(255,255,255,.085); --rim:.21;
   transition:width .95s var(--spring), height .95s var(--spring), border-radius .95s var(--spring),
-             top .95s var(--spring), background-color .6s ease, box-shadow .6s ease; }
+             top .95s var(--bouncy), background-color .6s ease, box-shadow .6s ease; }
+/* 맥락출처 로딩중 (피그마 1640:1228) : 220 원이 프레임 밖에서 떨어져 (540, 639.3) 에 멈춘다 */
+body.src .nv-pill{ top:639.33px; }
 /* ---------- 유리(Glass) ----------
    피그마 Glass 는 (1) 가장자리 1px 하이라이트 와 (2) 바탕을 렌즈처럼 끌어당기는 굴절 로 보인다.
    굴절은 위 안쪽을 밝게, 아래 안쪽을 어둡게 만들되 바탕을 흐리지는 않는다
@@ -300,7 +302,8 @@ body.ask .nv-bg u{ top:-32.32px; }
                                      rgba(0,0,0,0) var(--g2s), rgba(0,0,0,var(--g2)) 100%);
   transition:--rim .6s ease, --rimt .6s ease, --g1 .6s ease, --g2 .6s ease,
              --g1e .6s ease, --g2s .6s ease; }
-body.srcfull .nv-pill{ width:840px; height:155.79px; border-radius:76.53px; top:540px;
+/* 맥락출처 (피그마 1635:322) : 157 원이 프레임 한가운데로 올라온다 (NAV 004 는 삭제됐다) */
+body.srcfull .nv-pill{ width:157px; height:156px; border-radius:78px; top:540px;
   background:rgba(255,255,255,.04); --rim:.24; }
 /* 대화1·대화2 fill : 피그마 두 겹(#F5F0CF 30% 위, #FFFFFF 10% 아래)을 한 색으로 합친 값.
    alpha = 1-(.7x.9) = .37, 색 = (F5F0CF x .3 + FFFFFF x .07) / .37 */
@@ -316,20 +319,33 @@ body.talk2 .nv-pill{ width:840px; height:319.18px; border-radius:108.5px; top:59
 body.guiding .nv-pill{ width:314px; height:114px; border-radius:76.53px; top:223.4px;
   background:rgba(255,255,255,.1); box-shadow:none; --rim:0; --rimt:.5; }
 /* ---------- 아바타 ---------- */
-.nv-ava{ position:absolute; left:14px; top:13px; width:129.371px; height:129.371px;
+/* 안쪽 좌표는 % : 알약이 220 → 157 로 줄어도 로봇 이미지가 같은 비율로 따라 줄어든다 */
+.nv-ava{ position:absolute; left:14px; top:13px; width:182.037px; height:182.037px;
   border-radius:50%; overflow:hidden; background:#D9D9CB;
-  transition:opacity .5s ease, scale .6s var(--spring); }
-.nv-ava .eye{ position:absolute; left:55.5px; top:32.17px; width:16.083px; height:3.446px;
+  transition:opacity .5s ease, width .95s var(--spring), height .95s var(--spring), scale .6s var(--spring); }
+body.srcfull .nv-ava, body.talk1 .nv-ava{ width:129.371px; height:129.371px; }
+.nv-ava .eye{ position:absolute; left:42.9%; top:24.86%; width:12.43%; height:2.66%;
   border-radius:50%; background:#141414; opacity:0; transition:opacity .9s ease; }
-.nv-ava img{ position:absolute; left:30.22px; top:24.13px; width:68.926px; height:189.546px; object-fit:fill;
+.nv-ava img{ position:absolute; left:23.36%; top:18.65%; width:53.28%; height:146.51%; object-fit:fill;
   opacity:0; transition:opacity .9s ease; }
 body.srcfull .nv-ava .eye, body.talk1 .nv-ava .eye,
 body.srcfull .nv-ava img, body.talk1 .nv-ava img{ opacity:1; }
-body.src .nv-ava img{ opacity:.8; }   /* 로딩 중에도 사진이 비친다 (피그마 1640:1228) */
+/* 베일이 벗겨지듯 : 반짝임이 도는 동안 뒤의 로봇 이미지가 일렁이며 드러난다 */
+body.src .nv-ava img{ animation:avaVeil 2.9s cubic-bezier(.3,.6,.4,1) both; }
+@keyframes avaVeil{
+  0%{ opacity:0; filter:blur(7px) brightness(1.6); }
+  18%{ opacity:.26; filter:blur(5px) brightness(1.5); }
+  32%{ opacity:.12; }
+  48%{ opacity:.55; filter:blur(3px) brightness(1.25); }
+  62%{ opacity:.38; }
+  80%{ opacity:.86; filter:blur(1px) brightness(1.05); }
+  100%{ opacity:1; filter:none; } }
 body.talk2 .nv-ava, body.guiding .nv-ava{ opacity:0; scale:.7; }
 /* ---------- 반짝이는 로딩 (맥락 전달 그래픽과 같은 결) ---------- */
-.nv-spark{ position:absolute; left:14px; top:13px; width:129.371px; height:129.371px;
-  mix-blend-mode:screen; opacity:0; transition:opacity .8s ease; }
+.nv-spark{ position:absolute; left:14px; top:13px; width:182.037px; height:182.037px;
+  mix-blend-mode:screen; opacity:0;
+  transition:opacity .8s ease, width .95s var(--spring), height .95s var(--spring); }
+body.srcfull .nv-spark, body.talk1 .nv-spark{ width:129.371px; height:129.371px; }
 .nv-spark img{ display:block; width:113.4%; height:112.8%; margin:-6.5% 0 0 -6.4%; border-radius:50%;
   animation:nvSpin 4.2s linear infinite, nvPulse 1.9s ease-in-out infinite; }
 body.src .nv-spark{ opacity:1; }
@@ -341,17 +357,15 @@ body.src .nv-spark{ opacity:1; }
   transition:opacity .45s ease, translate .7s var(--spring); }
 .nv-body > *.on{ opacity:1; translate:0 0; }
 .nv-body > *.out{ opacity:0; translate:-60px 0; }
-/* 출처 : NAV 004 ) — 피그마 (163,52) 625 x 52 */
-.nv-src{ left:163px; top:52px; width:625px; height:52px; display:flex; align-items:center; justify-content:space-between; }
-.nv-src .dg{ display:flex; align-items:center; gap:11px; }
-.nv-src svg{ display:block; height:30.3px; width:auto; overflow:visible; }
-.nv-src circle{ fill:#fff; }
-.nv-src .paren{ font-family:'Helvetica Now Bold', var(--ff-en,'Magnetik'), sans-serif; font-weight:700;
-  font-size:43.3px; line-height:1.2; letter-spacing:-0.01em; color:#fff; }
 /* 대화1 : 기록 — 피그마 (167.37,29) 390 x 86 */
 .nv-rec{ left:167.37px; top:29px; display:flex; flex-direction:column; align-items:flex-start; }
 .nv-rec b{ font-family:'Helvetica Now Med', var(--ff-en,'Magnetik'), sans-serif; font-weight:500;
   font-size:34px; line-height:1.2; letter-spacing:-0.01em; color:#fff; text-transform:capitalize; }
+/* 칩 속도 순서대로 : 제목 → 날짜 */
+.nv-rec b, .nv-rec small{ opacity:0; translate:20px 0;
+  transition:opacity .4s ease, translate .55s var(--spring); }
+.nv-rec.on b{ opacity:1; translate:0 0; transition-delay:.1s; }
+.nv-rec.on small{ opacity:1; translate:0 0; transition-delay:.22s; }
 .nv-rec small{ margin-top:16.2px; font-family:var(--ff-ko,'SF Pro KR'), 'Pretendard Web', sans-serif;
   font-weight:500; font-size:24px; line-height:1.2; letter-spacing:-0.02em; color:rgba(255,255,255,.6); }
 /* 대화2 : 목적지 — 피그마 (61.49, 가운데) gap 48.827 */
@@ -366,6 +380,14 @@ body.src .nv-spark{ opacity:1; }
   font-weight:700; font-size:34px; line-height:1.2; letter-spacing:-0.01em; color:#fff; }
 .nv-dest .who{ display:flex; align-items:center; gap:9.946px; }
 .nv-dest .who img{ width:38.881px; height:38.881px; border-radius:50%; display:block; }
+/* 도착지 칩 : 라벨 → 방 → 층 → 담당의 순서로 */
+.nv-dest .lab, .nv-dest .rm, .nv-dest .fl, .nv-dest .who{ opacity:0; translate:0 14px;
+  transition:opacity .42s ease, translate .6s var(--spring); }
+.nv-dest.on .lab, .nv-dest.on .rm, .nv-dest.on .fl, .nv-dest.on .who{ opacity:1; translate:0 0; }
+.nv-dest.on .lab{ transition-delay:.06s; }
+.nv-dest.on .rm{ transition-delay:.16s; }
+.nv-dest.on .fl{ transition-delay:.26s; }
+.nv-dest.on .who{ transition-delay:.38s; }
 .nv-dest .who span{ font-family:var(--ff-ko,'SF Pro KR'), sans-serif; font-weight:500; font-size:20px;
   line-height:1.2; letter-spacing:-0.02em; color:rgba(255,255,255,.9); text-transform:capitalize; }
 /* 대화2 : 지도 (좌표는 카드 840 x 319.18 기준) */
@@ -380,8 +402,14 @@ body.src .nv-spark{ opacity:1; }
 .nv-map.on .w1{ transition-delay:.12s; }
 .nv-map.on .m3{ transition-delay:.24s; }
 .nv-map.on .m5, .nv-map.on .m6{ transition-delay:.34s; }
-.nv-map.on .m4{ transition-delay:.46s; animation:navPin 2.8s ease-in-out 1.4s infinite; }
-@keyframes navPin{ 0%,100%{ translate:0 0; } 50%{ translate:0 -7px; } }
+.nv-map.on .m4{ transition-delay:.46s; }
+/* 도착점 강조 : 핀 아래 원형 그래픽이 차례로 번져 나간다 */
+.nv-map .m7{ position:absolute; left:586.6px; top:148.2px; width:74px; height:30px; translate:-50% -50%;
+  border-radius:50%; box-shadow:0 0 0 2px rgba(255,255,255,.5); opacity:0; }
+.nv-map.on .m7{ animation:navPing 2.8s cubic-bezier(.2,.65,.3,1) .75s infinite; }
+.nv-map.on .m7.b{ animation-delay:1.18s; }
+.nv-map.on .m7.c{ animation-delay:1.61s; }
+@keyframes navPing{ 0%{ opacity:0; scale:.2; } 14%{ opacity:.85; } 100%{ opacity:0; scale:1.95; } }
 .nv-map .w{ position:absolute; display:flex; align-items:center; justify-content:center; }
 .nv-map .w > i{ position:relative; display:block; width:475.339px; height:231.893px; rotate:31.23deg; flex:none; }
 .nv-map .w > i img{ position:absolute; left:14.83px; top:-1.09px; width:461.6px; height:232.98px; display:block; }
@@ -412,14 +440,24 @@ body.src .nv-spark{ opacity:1; }
 .nv-who{ left:20px; top:0; bottom:0; right:40px; display:flex; align-items:center; gap:20px; }
 .nv-who img{ width:73.92px; height:73.92px; border-radius:50%; display:block; flex:none; }
 .nv-who .tx{ width:147px; overflow:hidden; }
-.nv-who .v{ max-width:147px; overflow:hidden; text-overflow:ellipsis; }
+/* Room 513 뒤의 'Wing A, 5th Floor' 가 잘려 있다 → 천천히 왼쪽으로 흘려 뒷 내용을 보여준다 */
+.nv-who .v{ max-width:147px; overflow:hidden; text-overflow:clip; }
+.nv-who .v span{ display:inline-block; white-space:nowrap;
+  animation:whoRoll 11s cubic-bezier(.5,0,.5,1) 2.2s infinite; }
+@keyframes whoRoll{ 0%,16%{ translate:0 0; } 46%,62%{ translate:calc(0px - var(--mw,0px)) 0; } 92%,100%{ translate:0 0; } }
 /* ---------- 길안내 : 가운데 도트 화살표 ---------- */
 .nv-arrow{ position:absolute; left:50%; translate:-50% -50%; width:186.366px; height:253.512px;
   display:flex; align-items:center; justify-content:center; opacity:0;
   transition:opacity .7s ease, top .9s var(--spring); }
 .nv-arrow i{ position:relative; display:block; width:253.512px; height:186.366px; rotate:-90deg; flex:none;
   animation:nvPoke 2.8s cubic-bezier(.45,0,.35,1) infinite; }
-.nv-arrow img{ position:absolute; left:-17.92px; top:-17.91px; width:289.36px; height:222.18px; display:block; }
+/* 도트 화살표 : 0c805_s.svg 의 원 11 개를 따로 그려 불규칙한 순서로 튀어나오게 한다 */
+.nv-arrow .ar{ position:absolute; left:-17.92px; top:-17.91px; width:289.337px; height:222.191px;
+  display:block; overflow:visible; }
+.nv-arrow .ar ellipse{ fill:#fff; opacity:0; transform-box:fill-box; transform-origin:center; }
+body.guiding .nv-arrow .ar ellipse{ animation:arPop .46s cubic-bezier(.2,1.55,.4,1) both;
+  animation-delay:var(--d, 0ms); }
+@keyframes arPop{ from{ opacity:0; transform:scale(.25); } to{ opacity:1; transform:scale(1); } }
 body.guiding .nv-arrow{ top:559.76px; opacity:1; }
 body.ask .nv-arrow{ top:539.63px; }
 @keyframes nvPoke{ 0%,62%,100%{ translate:0 0; } 30%{ translate:0 -13px; } }
@@ -480,6 +518,7 @@ body.guiding .nv-cta{ color:rgba(255,255,255,.8); transition:opacity .6s ease, t
 body.guiding .nv-cta.eta{ color:#F5F0CF; }
 /* 시각은 글자칸(i)으로 쪼개 둔다 : 바뀐 칸만 굴러 바뀌고 나머지는 제자리.
    tabular-nums : 숫자 폭이 같아 한 칸이 바뀌어도 줄 전체가 다시 가운데 정렬되지 않는다 */
+.nv-cta, .nv-cta *{ letter-spacing:-0.02em; }   /* .device * 의 0.03em 이 글자칸(i·b)을 덮어쓰고 있었다 */
 .nv-cta{ font-variant-numeric:tabular-nums; }
 .nv-cta i{ position:relative; display:inline-block; white-space:pre; vertical-align:top; font-style:normal; }   /* <i> 는 기본이 이탤릭 */
 .nv-cta i b{ display:inline-block; font-weight:inherit; font-style:normal; }
@@ -972,7 +1011,7 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
           <circle class="gf2" cx="540" cy="540" r="449.5"></circle>
         </g>
       </svg>
-      <div class="nv-arrow"><i><img src="new/0c805_s.svg" alt=""></i></div>
+      <div class="nv-arrow"><i><svg class="ar" viewBox="0 0 289.337 222.191" aria-hidden="true"></svg></i></div>
       <div class="nv-panel"></div>
       <div class="nv-ish"></div>
       <p class="nv-head nv-h1"></p>
@@ -986,7 +1025,6 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
         <div class="nv-ava"><img src="new/267ab.png" alt=""><i class="eye"></i></div>
         <div class="nv-spark"><img src="new/d46ea.png" alt=""></div>
         <div class="nv-body">
-          <div class="nv-src"><span class="dg"></span><span class="paren">)</span></div>
           <div class="nv-rec"><b>Rehabilitation Assessment</b><small>1 month ago · NYU Langone Health</small></div>
           <div class="nv-dest">
             <div>
@@ -1003,6 +1041,7 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
             <img class="m4" src="new/b9be3.svg" alt="">
             <img class="m5" src="new/36423.svg" alt="">
             <i class="m6"></i>
+            <i class="m7"></i><i class="m7 b"></i><i class="m7 c"></i>
           </div>
           <div class="nv-go">
             <div class="ico"><img src="new/70bc8_s.svg" alt=""></div>
@@ -1330,27 +1369,27 @@ const nvSay = (el, t) => {   // 흐린 겹 + 또렷한 겹
 nvSay(nvHead[0], 'Good afternoon, Leo.\nBack for your 2nd check up?');
 nvSay(nvHead[1], 'Let me guide you  to \nthe exam room.');
 nvSay(nvHead[2], 'Have you had any discomfort \nsince your last visit?');
-// 출처 칩의 NAV 004 : 같은 도트 표로
-const nvDots = str => {
-  const svg = document.createElementNS(NS, 'svg');
-  const pts = []; let x = 0;
-  for (const ch of str) {
-    for (const d of numDotsFor(ch).dots) pts.push([x + d.x, d.y]);
-    x += NUMADV;
-  }
-  // 글자 상자는 피그마와 같게 글자수 x 보내기 (마지막 글자 뒤 여백까지) : 뒤 묶음 간격이 맞는다
-  const w = str.length * NUMADV, h = 6 * NUMP + 2 * NUMDR;
-  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-  for (const [cx, cy] of pts) {
-    const c = document.createElementNS(NS, 'circle');
-    c.setAttribute('cx', cx + NUMDR); c.setAttribute('cy', cy); c.setAttribute('r', NUMDR); svg.append(c);
-  }
-  return svg;
-};
-nvq('.nv-src .dg').replaceChildren(
-  Object.assign(document.createElement('span'), {}), Object.assign(document.createElement('span'), {}));
-nvq('.nv-src .dg').children[0].append(nvDots('NAV'));
-nvq('.nv-src .dg').children[1].append(nvDots('004'));
+// 도트 화살표 : 0c805_s.svg 의 원 11 개. 불규칙한 순서·간격으로 튀어나오게 지연을 흩는다
+{
+  const AR = [[35.9703,111.089],[72.085,111.089],[108.554,111.096],[145.023,111.089],[181.138,111.089],
+              [181.138,35.9703],[217.252,73.5296],[253.367,111.089],[217.252,111.089],[217.252,148.662],[181.138,186.221]];
+  const svg = NV.querySelector('.nv-arrow .ar');
+  const cs = AR.map(([cx, cy], i) => {
+    const e = document.createElementNS(NS, 'ellipse');
+    e.setAttribute('cx', cx); e.setAttribute('cy', cy);
+    e.setAttribute('rx', i === 2 ? 18.4116 : 18.0574); e.setAttribute('ry', i === 2 ? 18.4116 : 18.0574);
+    return e;
+  });
+  cs.map(c => [Math.random(), c]).sort((a, b) => a[0] - b[0])
+    .forEach(([, c], i) => c.style.setProperty('--d', (120 + i * 46 + Math.random() * 60 | 0) + 'ms'));
+  svg.replaceChildren(...cs);
+}
+// 길안내 칩의 'Room 513, Wing A, 5th Floor' : 잘린 길이만큼만 흘린다
+{
+  const v = NV.querySelector('.nv-who .v'), sp = document.createElement('span');
+  sp.textContent = v.textContent; v.replaceChildren(sp);
+  requestAnimationFrame(() => v.style.setProperty('--mw', Math.max(0, sp.scrollWidth - v.clientWidth) + 'px'));
+}
 
 let nvTimers = [];
 const nvLater = (ms, f) => nvTimers.push(setTimeout(f, ms));
@@ -1435,7 +1474,7 @@ const nvStep = k => {
                     () => { head.classList.remove('out'); head.classList.add('on'); });
   const cta = t => { nvCta.classList.remove('on'); nvLater(560, () => { nvCta.textContent = t; nvCta.classList.add('on'); }); };
   if (k === 'src')      { nvOnly(null); nvCta.classList.remove('on'); }
-  if (k === 'srcfull')  { nvOnly(nvq('.nv-src'), 430); nvCta.classList.remove('on'); }
+  if (k === 'srcfull')  { nvOnly(null); nvCta.classList.remove('on'); }   // NAV 004 는 삭제됐다
   if (k === 'talk1')    { nvOnly(nvq('.nv-rec'), 300); nvq('.nv-map').classList.remove('on');
                           cta('Find another Drop'); }
   if (k === 'talk2')    { nvOnly(nvq('.nv-dest'), 360); nvLater(420, () => nvq('.nv-map').classList.add('on'));
@@ -1448,6 +1487,14 @@ const nvStep = k => {
     // 길안내 내내 한 번에 자란다 (장면마다 뚝뚝 바꾸면 변하는 게 눈에 안 띈다)
     if (fresh) {
       const ms = GUIDE.reduce((a, g) => a + HOLD[STEPS.indexOf(g)], 0);
+      const dots = nvq('.nv-dots');   // 검은 바탕에 도트가 중심에서 가장자리로 퍼진다
+      dots.style.transition = 'none';
+      dots.style.setProperty('--dw', '26px'); dots.style.setProperty('--dh', '21px');
+      dots.getBoundingClientRect();
+      requestAnimationFrame(() => {
+        dots.style.transition = '';
+        dots.style.removeProperty('--dw'); dots.style.removeProperty('--dh');
+      });
       nvGauge(0, true);
       NV.style.setProperty('--gt', 'linear');
       requestAnimationFrame(() => { NV.style.setProperty('--gd', ms + 'ms'); nvGauge(GFULL); });
