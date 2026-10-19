@@ -197,10 +197,30 @@ body.src .nv, body.srcfull .nv, body.talk1 .nv, body.talk2 .nv, body.guiding .nv
   opacity:1; visibility:visible; transition-delay:0s; }
 /* ---------- 바탕 : 흰 화면 + 큰 타원 ---------- */
 .nv-bg{ position:absolute; inset:0; background:#fff; isolation:isolate; }
-/* 피그마 Rectangle 1954137249 : 흰 점 격자 (4%) */
-.nv-dots{ position:absolute; inset:0; opacity:.04; pointer-events:none;
-  background-image:radial-gradient(circle at center, #fff 0 2.6px, rgba(255,255,255,0) 3.3px);
-  background-size:19.6px 19.6px; background-position:10.6px 6.9px; }
+/* 피그마 Mask group : 점 격자(Rectangle 1954137249)를 방사형 알파(Rectangle 1954137251)로 가린다.
+   격자는 19.6 간격, 줄마다 반 칸(9.8) 엇갈린다 → 두 겹을 39.2 주기로 어긋나게 깐다.
+   점은 #2D2D2D : 검은 바탕에선 옅은 빛, 밝은 바탕에선 옅은 그늘 (피그마 실측과 같다).
+   구름 자리는 장면마다 달라 커스텀 속성으로 두고 @property 로 보간한다 (안 그러면 뚝 끊긴다) */
+@property --dx{ syntax:'<length>'; inherits:true; initial-value:538.569px; }
+@property --dy{ syntax:'<length>'; inherits:true; initial-value:295.228px; }
+@property --dw{ syntax:'<length>'; inherits:true; initial-value:396.052px; }
+@property --dh{ syntax:'<length>'; inherits:true; initial-value:336.535px; }
+@property --ds{ syntax:'<percentage>'; inherits:true; initial-value:59.6791%; }
+.nv-dots{ position:absolute; inset:0; opacity:0; pointer-events:none;
+  --dx:538.569px; --dy:295.228px; --dw:396.052px; --dh:336.535px; --ds:59.6791%;
+  background-image:radial-gradient(circle at center, #313131 0 2.7px, rgba(49,49,49,0) 3.4px),
+                   radial-gradient(circle at center, #313131 0 2.7px, rgba(49,49,49,0) 3.4px);
+  background-size:19.6px 39.2px;
+  background-position:5px 34.3px, 14.8px 14.7px;
+  -webkit-mask-image:radial-gradient(var(--dw) var(--dh) at var(--dx) var(--dy), rgba(0,0,0,.85) 0, rgba(0,0,0,0) var(--ds));
+          mask-image:radial-gradient(var(--dw) var(--dh) at var(--dx) var(--dy), rgba(0,0,0,.85) 0, rgba(0,0,0,0) var(--ds));
+  transition:opacity .8s ease, --dx .9s ease, --dy .9s ease, --dw .9s ease, --dh .9s ease, --ds .9s ease; }
+/* 대화1·2 : 머리 위 (538.6, 295.2) */
+body.talk1 .nv-dots, body.talk2 .nv-dots{ opacity:1; }
+/* 길안내 : 화면 한가운데로 내려와 넓게 퍼진다 (레이어 투명도 80%) */
+body.guiding .nv-dots{ opacity:.4;
+  --dx:551.519px; --dy:551.906px; --dw:528.778px; --dh:420.644px; --ds:51.9775%; }
+body.ask .nv-dots{ --dy:523.559px; --dw:528.63px; --dh:390.45px; }
 .nv-bg i{ position:absolute; left:50%; translate:-50% 0; border-radius:50%; mix-blend-mode:hard-light;
   /* 피그마 Ellipse 31405 (9d79d.svg) : 방사형 + 검정 20% 두 겹을 150 흐림 */
   background:radial-gradient(839.3px 844px at 50% 50%, #000101 0 95%, #E0DFA8 100%);
@@ -896,7 +916,7 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
 
     <!-- 맥락 출처 → 길안내 (피그마 1636:653 NEW) : 한 컴포넌트가 늘어나고 바뀐다 -->
     <div class="nv" aria-hidden="true">
-      <div class="nv-bg"><div class="nv-dots"></div><i></i><u></u></div>
+      <div class="nv-bg"><i></i><u></u><div class="nv-dots"></div></div>
       <svg class="nv-gauge" viewBox="0 0 1080 1080" aria-hidden="true">
         <g transform="rotate(-90 540 540)">
           <circle class="gtk" cx="540" cy="540" r="449.5"></circle>
