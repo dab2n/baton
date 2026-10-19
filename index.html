@@ -228,7 +228,8 @@ body.ask .nv-dots{ --dy:523.559px; --dw:528.63px; --dh:390.45px; }
 .nv-bg i{ position:absolute; left:50%; translate:-50% 0; border-radius:50%; mix-blend-mode:hard-light;
   /* 피그마 Ellipse 31405 (9d79d.svg) : fill 두 겹 — 위 #000000 20%, 아래 Radial(#000101 84% → #E0DFA8 100%).
      중심·반지름은 SVG 의 gradientTransform 그대로 (rotate(90) 이라 두 번째 값이 가로).
-     레이어 블러만 150 이 아니라 128 : 크롬 blur() 는 박스 블러 세 번이라 피그마 가우시안과 반경이 다르다 (실측) */
+     레이어 블러 : 피그마 UI 값 300 은 SVG 로 stdDeviation 150 으로 나간다(피그마가 절반으로 내보낸다).
+     크롬 blur() 는 박스 블러 세 번이라 같은 150 이어도 더 퍼진다 → 128 이 실측으로 일치 (256 으로 하면 대비가 다 날아간다) */
   background:linear-gradient(rgba(0,0,0,.2), rgba(0,0,0,.2)),
              radial-gradient(839.264px 793.717px at 50% 54.747%, #000101 0 83.5718%, #E0DFA8 100%);
   filter:blur(128px); width:1610.74px; height:1809.3px; top:-459.6px;
@@ -405,7 +406,7 @@ body.ask .nv-arrow{ top:539.63px; }
 @keyframes nvPoke{ 0%,62%,100%{ translate:0 0; } 30%{ translate:0 -13px; } }
 /* ---------- 길안내 : 오른쪽 가장자리 게이지 = 남은 거리 (피그마 Ellipse 31254 / 31255) ----------
    실측 : 중심 (540,540) · 반지름 449.5 · 두께 23 · 12시부터 시계방향 70° ~ 116.75°
-   채움(흰 20% + #F5F0CF 30%)이 남은 거리 · 지나온 길은 흰 10% 트랙으로 남는다 */
+   아래쪽 채움(흰 20% + #F5F0CF 30%)이 지나온 거리 · 위쪽 흰 10% 트랙이 남은 거리 */
 .nv-gauge{ position:absolute; inset:0; width:1080px; height:1080px;
   opacity:0; transition:opacity .7s ease; }
 body.guiding .nv-gauge{ opacity:1; }
@@ -461,8 +462,8 @@ body.guiding .nv-cta.eta{ color:#F5F0CF; }
 /* 시각은 글자칸(i)으로 쪼개 둔다 : 바뀐 칸만 굴러 바뀌고 나머지는 제자리.
    tabular-nums : 숫자 폭이 같아 한 칸이 바뀌어도 줄 전체가 다시 가운데 정렬되지 않는다 */
 .nv-cta{ font-variant-numeric:tabular-nums; }
-.nv-cta i{ position:relative; display:inline-block; white-space:pre; vertical-align:top; }
-.nv-cta i b{ display:inline-block; font-weight:inherit; }
+.nv-cta i{ position:relative; display:inline-block; white-space:pre; vertical-align:top; font-style:normal; }   /* <i> 는 기본이 이탤릭 */
+.nv-cta i b{ display:inline-block; font-weight:inherit; font-style:normal; }
 .nv-cta i b.go{ position:absolute; left:0; top:0; animation:ctaRollOut .46s cubic-bezier(.4,0,.6,1) both; }
 .nv-cta i b.in{ animation:ctaRollIn .5s var(--bouncy) both; }
 @keyframes ctaRollOut{ to{ opacity:0; translate:0 -.48em; filter:blur(2px); } }
@@ -1345,14 +1346,14 @@ const nvOnly = (el, ms = 0) => {   // 하나만 들어오고 나머지는 왼쪽
 // 남은 거리 게이지 : 실측값(반지름 449.5 · 두께 23 · 70° ~ 116.75°) 위에서 채움이 끝에서 거꾸로 자란다
 const GR = 449.5, GC = 2 * Math.PI * GR, GPD = GC / 360, GA0 = 70, GA1 = 116.75, GGAP = 2.25;
 const GCAP = (23 / 2) / GPD;   // 둥근 끝이 밖으로 더 나오는 만큼(약 1.47°)
-const GFULL = GA1 - GA0 - GGAP;   // 남은 거리 최대 = 트랙 전체
+const GFULL = GA1 - GA0 - GGAP;   // 다 왔을 때(지나온 거리 = 트랙 전체)
 const gTk = nvq('.nv-gauge .gtk'), gFl = [...NV.querySelectorAll('.nv-gauge .gf1, .nv-gauge .gf2')];
 const arcTo = (el, a, b) => {
   const len = Math.max(0, (b - GCAP) - (a + GCAP)) * GPD;
   el.style.strokeDasharray = `${len.toFixed(2)} ${GC.toFixed(2)}`;
   el.style.strokeDashoffset = (-(a + GCAP) * GPD).toFixed(2);
 };
-const nvGauge = (f, now) => {   // f : 남은 거리(각도). now = 전환 없이 그 자리에서
+const nvGauge = (f, now) => {   // f : 지나온 거리(각도) — 아래에서 위로 자란다. now = 전환 없이 그 자리에서
   const all = [gTk, ...gFl];
   if (now) { for (const el of all) el.style.transition = 'none'; }
   arcTo(gTk, GA0, Math.max(GA0, GA1 - f - GGAP));
@@ -1417,13 +1418,13 @@ const nvStep = k => {
     nvOnly(k === 'ask' ? nvq('.nv-go') : nvq('.nv-who'), 300);
     nvq('.nv-map').classList.remove('on');
     const fresh = !GUIDE.includes(nvPrev);
-    // 남은 거리는 길안내 내내 한 번에 줄어든다 (장면마다 뚝뚝 바뀌면 줄어드는 게 안 보인다).
-    // 트랙 전체(70°~116.75° · 1시 반 ~ 4시 반)를 채운 채 시작해 도착에서 0 이 된다
+    // 아래쪽 밝은 호 = 지금까지 온 거리, 위쪽 옅은 트랙 = 남은 거리.
+    // 길안내 내내 한 번에 자란다 (장면마다 뚝뚝 바꾸면 변하는 게 눈에 안 띈다)
     if (fresh) {
       const ms = GUIDE.reduce((a, g) => a + HOLD[STEPS.indexOf(g)], 0);
-      nvGauge(GFULL, true);
+      nvGauge(0, true);
       NV.style.setProperty('--gt', 'linear');
-      requestAnimationFrame(() => { NV.style.setProperty('--gd', ms + 'ms'); nvGauge(0); });
+      requestAnimationFrame(() => { NV.style.setProperty('--gd', ms + 'ms'); nvGauge(GFULL); });
       navClockStart();
     }
   } else {
