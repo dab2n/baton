@@ -21,9 +21,9 @@
 
 :root{ --fit: 1238; }                    /* 제품 목업 켰을 때만 하우징 자리를 비운다 */
 /* 목업 끈 웹 화면 : 피그마 프레임(1080, 20px 검은 베젤 포함) 을 그대로 보여준다 */
-body.bare{ --fit: 1080; }
+body.bare{ --fit: 1000; }   /* 베젤이 없으므로 표시영역(지름 1000)이 기준 */
 /* 실기기 : 베젤은 진짜 유리가 대신하므로 실제 표시영역 1022.68 을 꽉 채운다 */
-body.kiosk{ --fit: 1046; }   /* 전체화면 : 보이는 원(지름 1040)이 화면 높이 안에 다 들어오게 + 양쪽 3px 여유. 1023 이면 위아래가 잘렸다 */
+body.kiosk{ --fit: 1000; }   /* 전체화면 : 표시영역(지름 1000)이 화면 높이를 꽉 채운다 */
 /* ?s=N 이미지 내보내기 : 피그마 프레임 1080 을 1:1 로 */
 body.shot{ --fit: 1080; }
 
@@ -81,10 +81,13 @@ html.fb-en{ --ff-en:var(--ff-ko,'SF Pro KR'); }   /* 영문만 없으면 한글�
 /* 한국어 문구 : 헬스장 ui 와 같은 자간(-2%)·굵기(Medium) — 기본 +3% 자간은 한글에서 너무 벌어진다 */
 .l-greet, .l-greet *{ letter-spacing:-0.02em; }
 
-/* 배경을 검은 원으로 : 스크린 clip-path(500) 과 베젤 안쪽 모서리가 같은 반지름이라
-   배율이 소수점일 때 둘의 안티에일리어싱 사이로 페이지 흰색이 실처럼 비쳤다 */
+/* 실기기는 원형 스크린이라 베젤(검은 테)을 그리지 않는다. 표시영역 밖은 아무것도 없다.
+   스크린 clip-path 와 같은 반지름의 검은 원을 뒤에 깔아 둔다 :
+   배율이 소수점일 때 clip 경계의 안티에일리어싱 사이로 페이지 흰색이 실처럼 비치는 것을 막는다 */
 .device{ position:relative; width:1080px; height:1080px; flex:none; transform:scale(var(--s,1));
-  background:#000; border-radius:50%; }
+  background:radial-gradient(500px at 540px 540px, #000 0 99.8%, rgba(0,0,0,0) 100%); }
+/* ?s=N 내보내기만 피그마 프레임처럼 바깥을 검게 (대조용) */
+body.shot .device{ background:#000; border-radius:50%; }
 
 /* ---------- 제품 하우징 (피그마 그룹 = 임의 표현) ---------- */
 .ring{
@@ -141,7 +144,7 @@ body.kiosk .toggle, body.shot .toggle{ display:none; }   /* 전체화면·내보
   background:transparent; color:#000; cursor:pointer; }
 .jump button:hover{ background:#f2f2f2; }
 .jump button.on{ background:#000; color:#fff; }
-body.rec .jump, body.shot .jump{ display:none; }   /* 'device' 는 기기 상자(.device)의 클래스라 body 에 붙이면 안 된다 (1080 상자로 축소됨) */
+body.kiosk .jump, body.rec .jump, body.shot .jump{ display:none; }   /* 전체화면에선 양옆에 아무것도 띄우지 않는다 */   /* 'device' 는 기기 상자(.device)의 클래스라 body 에 붙이면 안 된다 (1080 상자로 축소됨) */
 body.rec .toggle{ display:none; }   /* 전체화면에서도 보이고, 실기기(#screen)·내보내기에서만 숨김 */
 .jump, .jump button{ cursor:pointer; }
 body.kiosk{ cursor:none; background:#0B0F18; }   /* 터치/마우스 없는 스크린 */
@@ -155,7 +158,7 @@ body.kiosk .ring{ display:none; }             /* 전체화면 : 목업은 항상
   position:absolute; inset:0; border-radius:50%;
   background:#000;
   overflow:hidden;
-  /* 피그마 프레임은 border:40px solid #000 : 표시영역은 40px 안쪽 원 (1636:653 에서 베젤이 두꺼워졌다) */
+  /* 피그마 프레임은 border:40px : 표시영역은 40px 안쪽 원(반지름 500) */
   clip-path:circle(500px at 540px 540px);
 }
 /* 위아래 색 띠 (피그마 3124:17775 의 감청 / 밝은 회색) :
@@ -187,8 +190,6 @@ body.idle .screen::before, body.idle .screen::after, body.idle .rimlight{ opacit
 .bezel{ position:absolute; inset:0; width:1080px; height:1080px;
         z-index:4; pointer-events:none; }
 /* 베젤 : 피그마 border:40px solid #000 (스크린 표시영역은 반지름 500) */
-.bez{ position:absolute; inset:0; border-radius:50%; border:40px solid #000; box-sizing:border-box;
-  z-index:2; pointer-events:none; }
 
 /* ================= 맥락 출처 → 길안내 (피그마 1636:653 NEW · 여섯 프레임) =================
    한 컴포넌트가 늘어나고(157 → 840 → 840x319 → 314) 안의 내용만 밀려 들어온다.
@@ -225,11 +226,13 @@ body.guiding .nv-dots{ opacity:.4;
   --dx:551.519px; --dy:551.906px; --dw:528.778px; --dh:420.644px; --ds:51.9775%; }
 body.ask .nv-dots{ --dy:523.559px; --dw:528.63px; --dh:390.45px; }
 .nv-bg i{ position:absolute; left:50%; translate:-50% 0; border-radius:50%; mix-blend-mode:hard-light;
-  /* 피그마 Ellipse 31405 (9d79d.svg) : 방사형 + 검정 20% 두 겹을 150 흐림 */
+  /* 피그마 Ellipse 31405 (9d79d.svg) : SVG 원본값(세로 793.7 · 중심 54.7% · 정지점 83.57% + 검정 20%)은
+     피그마 렌더와 안 맞는다. 프레임 익스포트에 맞춰 쓸어 찾은 값 */
   background:radial-gradient(839.3px 844px at 50% 50%, #000101 0 95%, #E0DFA8 100%);
   filter:blur(150px); width:1610.74px; height:1809.3px; top:-459.6px;
   transition:width 1.1s var(--spring), height 1.1s var(--spring), top 1.1s var(--spring),
              background-color .8s ease, filter .8s ease; }
+/* 대화 두 장면 (be949.svg) */
 /* 대화 두 장면 (be949.svg) */
 body.talk1 .nv-bg i, body.talk2 .nv-bg i{ width:1310px; height:1264px;
   background:radial-gradient(682.565px 590px at 50% 50%, #000101 0 95%, #E0DFA8 100%); }
@@ -404,7 +407,8 @@ body.ask .nv-arrow{ top:539.63px; }
   opacity:0; transition:opacity .7s ease; }
 body.guiding .nv-gauge{ opacity:1; }
 .nv-gauge circle{ fill:none; stroke-width:23; stroke-linecap:round;
-  transition:stroke-dasharray 5.2s cubic-bezier(.35,0,.25,1), stroke-dashoffset 5.2s cubic-bezier(.35,0,.25,1); }
+  transition:stroke-dasharray var(--gd,5.2s) var(--gt,cubic-bezier(.35,0,.25,1)),
+             stroke-dashoffset var(--gd,5.2s) var(--gt,cubic-bezier(.35,0,.25,1)); }
 .nv-gauge .gtk{ stroke:rgba(255,255,255,.1); }
 .nv-gauge .gf1{ stroke:rgba(255,255,255,.2); }
 .nv-gauge .gf2{ stroke:rgba(245,240,207,.3); }
@@ -892,7 +896,6 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
 <div class="device">
   <div class="ring"></div>
 
-  <div class="bez" aria-hidden="true"></div>
   <div class="screen">
     <canvas class="bandc" width="540" height="540" aria-hidden="true"></canvas>
     <div class="rimlight" aria-hidden="true"></div>
@@ -1339,6 +1342,7 @@ const nvOnly = (el, ms = 0) => {   // 하나만 들어오고 나머지는 왼쪽
 // 남은 거리 게이지 : 실측값(반지름 449.5 · 두께 23 · 70° ~ 116.75°) 위에서 채움이 끝에서 거꾸로 자란다
 const GR = 449.5, GC = 2 * Math.PI * GR, GPD = GC / 360, GA0 = 70, GA1 = 116.75, GGAP = 2.25;
 const GCAP = (23 / 2) / GPD;   // 둥근 끝이 밖으로 더 나오는 만큼(약 1.47°)
+const GFULL = GA1 - GA0 - GGAP;   // 남은 거리 최대 = 트랙 전체
 const gTk = nvq('.nv-gauge .gtk'), gFl = [...NV.querySelectorAll('.nv-gauge .gf1, .nv-gauge .gf2')];
 const arcTo = (el, a, b) => {
   const len = Math.max(0, (b - GCAP) - (a + GCAP)) * GPD;
@@ -1410,13 +1414,20 @@ const nvStep = k => {
     nvOnly(k === 'ask' ? nvq('.nv-go') : nvq('.nv-who'), 300);
     nvq('.nv-map').classList.remove('on');
     const fresh = !GUIDE.includes(nvPrev);
-    nvGauge(k === 'guide2' ? 14.75 : k === 'ask' ? 8.5 : 3.5, fresh);   // 남은 거리 : 갈수록 줄어든다
-    if (fresh) navClockStart();
+    // 남은 거리는 길안내 내내 한 번에 줄어든다 (장면마다 뚝뚝 바뀌면 줄어드는 게 안 보인다).
+    // 트랙 전체(70°~116.75° · 1시 반 ~ 4시 반)를 채운 채 시작해 도착에서 0 이 된다
+    if (fresh) {
+      const ms = GUIDE.reduce((a, g) => a + HOLD[STEPS.indexOf(g)], 0);
+      nvGauge(GFULL, true);
+      NV.style.setProperty('--gt', 'linear');
+      requestAnimationFrame(() => { NV.style.setProperty('--gd', ms + 'ms'); nvGauge(0); });
+      navClockStart();
+    }
   } else {
     navClockStop(); nvCta.classList.remove('eta');
     if (!['src', 'srcfull', 'talk1', 'talk2'].includes(k)) { nvOnly(null); nvCta.classList.remove('on'); }
   }
-  if (!GUIDE.includes(k) && GUIDE.includes(nvPrev)) nvGauge(0);
+  if (!GUIDE.includes(k) && GUIDE.includes(nvPrev)) { NV.style.removeProperty('--gd'); NV.style.removeProperty('--gt'); nvGauge(0); }
   nvPrev = k;
 };
 
