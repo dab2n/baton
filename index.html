@@ -274,6 +274,9 @@ body.ask .nv-bg u{ top:-32.32px; }
 .nv-head .sh{ position:relative; }
 .nv-h1, .nv-h2{ bottom:730px; }            /* 대화1·2 : 글자 상자 208 ~ 350 */
 .nv-h3{ bottom:464px; line-height:1.5; }   /* 부상확인 : 464 ~ 616 · 행간 1.5 */
+/* 묻는 말이라 대화 장면보다 한참 느리게 : 판 → 아래 빛 → 문장이 서로 겹치며 이어진다 */
+.nv-h3{ translate:0 -18px;
+  transition:opacity 1.2s ease, translate 1.6s cubic-bezier(.22,.85,.28,1), --mp 2.1s cubic-bezier(.32,0,.24,1); }
 .nv-h3 b{ background:linear-gradient(164.78deg,#fff 70.819%,#f8f8df 80.134%);
   -webkit-background-clip:text; background-clip:text; }
 .nv-h3 .bl{ opacity:.3; text-shadow:none; margin-left:.5px; }
@@ -476,11 +479,11 @@ body.guiding .nv-gauge{ opacity:1; }
 /* ---------- 부상확인 : 어두운 판(배경 흐림) + 아래 VUI 그래픽 ---------- */
 .nv-panel{ position:absolute; left:56.2px; top:322.88px; width:952.02px; height:492.138px;
   background:rgba(10,9,9,.8); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
-  opacity:0; transition:opacity .7s ease; }
+  opacity:0; transition:opacity 1.6s cubic-bezier(.3,0,.3,1); }   /* 툭 던지는 질문이라 천천히 */
 body.ask .nv-panel{ opacity:1; }
 /* 아래 빛 : 멈춰 있지 않고 AI 가 듣고 말하듯 천천히 일렁인다 */
-.nv-glow{ position:absolute; inset:0; opacity:0; transition:opacity .9s ease; }
-body.ask .nv-glow{ opacity:1; transition-delay:.5s; }   /* 어두운 판이 깔린 뒤에 */
+.nv-glow{ position:absolute; inset:0; opacity:0; transition:opacity 1.5s cubic-bezier(.3,0,.3,1); }
+body.ask .nv-glow{ opacity:1; transition-delay:.85s; }   /* 어두운 판이 거의 다 깔린 뒤에 */
 .nv-glow > i{ position:absolute; display:flex; align-items:center; justify-content:center;
   will-change:transform, opacity; }
 .nv-glow > i > b{ position:relative; display:block; flex:none; }
@@ -1470,7 +1473,7 @@ const nvStep = k => {
   }
   // 대화1 은 배경이 자리를 잡고 내려오고, 대화2 는 앞 문장이 지워지기 시작한 뒤 따라 들어온다.
   // 부상확인은 판(0s) → 아래 그래픽(0.5s) → 문장 순서
-  if (head) nvLater(k === 'ask' ? 1150 : k === 'talk2' ? 430 : 300,
+  if (head) nvLater(k === 'ask' ? 1500 : k === 'talk2' ? 430 : 300,
                     () => { head.classList.remove('out'); head.classList.add('on'); });
   const cta = t => { nvCta.classList.remove('on'); nvLater(560, () => { nvCta.textContent = t; nvCta.classList.add('on'); }); };
   if (k === 'src')      { nvOnly(null); nvCta.classList.remove('on'); }
