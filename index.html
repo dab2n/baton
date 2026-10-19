@@ -81,7 +81,10 @@ html.fb-en{ --ff-en:var(--ff-ko,'SF Pro KR'); }   /* 영문만 없으면 한글�
 /* 한국어 문구 : 헬스장 ui 와 같은 자간(-2%)·굵기(Medium) — 기본 +3% 자간은 한글에서 너무 벌어진다 */
 .l-greet, .l-greet *{ letter-spacing:-0.02em; }
 
-.device{ position:relative; width:1080px; height:1080px; flex:none; transform:scale(var(--s,1)); }
+/* 배경을 검은 원으로 : 스크린 clip-path(500) 과 베젤 안쪽 모서리가 같은 반지름이라
+   배율이 소수점일 때 둘의 안티에일리어싱 사이로 페이지 흰색이 실처럼 비쳤다 */
+.device{ position:relative; width:1080px; height:1080px; flex:none; transform:scale(var(--s,1));
+  background:#000; border-radius:50%; }
 
 /* ---------- 제품 하우징 (피그마 그룹 = 임의 표현) ---------- */
 .ring{
@@ -271,7 +274,10 @@ body.srcfull .nv-pill{ width:840px; height:155.79px; border-radius:76.53px; top:
   background:rgba(255,255,255,.1); }
 /* 대화1·대화2 fill : 피그마 두 겹(#F5F0CF 30% 위, #FFFFFF 10% 아래)을 한 색으로 합친 값.
    alpha = 1-(.7x.9) = .37, 색 = (F5F0CF x .3 + FFFFFF x .07) / .37 */
-body.talk1 .nv-pill, body.talk2 .nv-pill{ background:rgba(247,243,216,.37); }
+/* 피그마 fill 은 #F5F0CF 30% + #FFFFFF 10% 지만, 그 위의 Glass 가 바탕을 굴절·흡수해
+   렌더에서는 훨씬 옅게 나온다. 색은 피그마 그대로 두고 세기만 렌더에 맞춰 쓸었다 */
+body.talk1 .nv-pill{ background:rgba(247,243,216,.045); }
+body.talk2 .nv-pill{ background:rgba(247,243,216,.04); }
 body.talk1 .nv-pill{ width:840px; height:155.79px; border-radius:76.53px; top:603.9px; }
 body.talk2 .nv-pill{ width:840px; height:319.18px; border-radius:108.5px; top:598.59px;
   /* 대화2 는 Glass 위에 Inner shadow 한 겹 더 : X 0 · Y -23.51 · Blur 37.25 · Spread 0.9 · #DBDACA */
