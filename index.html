@@ -518,6 +518,7 @@ body.ask .nv-ish{ opacity:1; animation:vui3 6.6s ease-in-out infinite; }
 .nv-cta.on{ opacity:1; translate:0 0; }
 body.guiding .nv-cta{ color:rgba(255,255,255,.8); transition:opacity .6s ease, translate .6s var(--bouncy), color .55s ease; }
 body.guiding .nv-cta.eta{ color:#F5F0CF; }
+body.ask .nv-cta{ opacity:0; translate:0 10px; }   /* 말을 걸면 아래 시각도 판에 가려진다 */
 /* 시각은 글자칸(i)으로 쪼개 둔다 : 바뀐 칸만 굴러 바뀌고 나머지는 제자리.
    tabular-nums : 숫자 폭이 같아 한 칸이 바뀌어도 줄 전체가 다시 가운데 정렬되지 않는다 */
 .nv-cta, .nv-cta *{ letter-spacing:-0.02em; }   /* .device * 의 0.03em 이 글자칸(i·b)을 덮어쓰고 있었다 */
@@ -566,8 +567,13 @@ body.idle       .field{ transform:translate(1px,145.5px) scale(.22); }
 /* 1.14 = 1022x1053 타원이 지름 1080 원을 완전히 덮는 배율(블러 39px 여유 포함) */
 /* 기본 화면은 검정 : 구슬은 idle 크기 그대로 조용히 사라진다 */
 /* 얼굴이 가까워지면(fill) 구슬이 사라지지 않고 화면을 채우며 커진다. 대신 옅게 해서 화면은 어둡게 유지 */
-body.fill       .field{ transform:translate(1px,145.5px) scale(.16); opacity:0; }   /* 원은 조금 작아지고 흐려지며 어두워진다 : 뒤로 물러나는 느낌. 돌아올 땐 반대로 뒤에서 앞으로 */
-body.fill       .blur39{ filter:blur(30px); transition-delay:0s; }
+body.fill       .field{ transform:translate(1px,145.5px) scale(.16); opacity:0;
+  /* 그 자리에서 천천히 : ease 로 1.2s 면 앞쪽이 급해 뚝 끊긴 것처럼 보였다.
+     opacity 는 뒤로 갈수록 빨라지는 곡선 — 감마 때문에 눈에는 고르게 옅어진다 */
+  transition-duration:2.4s, 2.2s, 1.2s, 1.2s, 1.2s, 1.2s;
+  transition-timing-function:cubic-bezier(.45,0,.15,1), cubic-bezier(.55,.06,.72,.5), ease, ease, ease, ease; }
+body.fill       .field::before{ transition-duration:2s; }   /* 발광 링도 구슬과 같은 속도로 */
+body.fill       .blur39{ filter:blur(30px); transition:filter 2.2s ease 0s; }
 /* 구슬이 커질 때도 위아래 띠는 보여야 한다. 다만 구슬과 겹쳐 색이 뜨지 않게 살짝만 낮춘다 */
 body.fill .screen::before, body.fill .screen::after{ opacity:0; transition:none; }   /* 얼굴 근접 : 띠는 캔버스(.bandc)가 12시부터 한 바퀴 그리며 */
 .bandc{ position:absolute; inset:0; width:1080px; height:1080px; pointer-events:none; opacity:0; }
@@ -847,10 +853,10 @@ body:not(.fill) .l-greet{ transition:none; }
 /* 엄지척(맥락 전달) : 떠 있던 한국어 문장이 그 자리에서 어두워지고, 그 위로 별 모션이 입혀지며 함께 사그라든다 */
 body.connecting.fromfill .l-greet{ opacity:1; animation:koUnder 2.3s ease both; }
 @keyframes koUnder{
-  0%   { opacity:1;   filter:brightness(1); }
-  22%  { opacity:.9;  filter:brightness(.42); }
-  70%  { opacity:.45; filter:brightness(.32); }
-  100% { opacity:0;   filter:brightness(.3); }
+  0%   { opacity:.9;  filter:brightness(.85) blur(0px); }
+  22%  { opacity:.5;  filter:brightness(.34) blur(1.6px); }
+  70%  { opacity:.22; filter:brightness(.26) blur(3.2px); }
+  100% { opacity:0;   filter:brightness(.24) blur(4.6px); }
 }
 
 /* ---------- connecting : AE 별 모션 ----------
@@ -1425,7 +1431,7 @@ nvGauge(0);
 // 아래 시각 : 실제 현 시각(흰 80%) 과 도착예상시간(#F5F0CF) 을 8초마다 번갈아.
 // 바뀐 글자칸만 굴러 바뀐다 (통째로 갈아끼우면 시계가 전부 움직여 눈에 걸린다)
 const two = n => String(n).padStart(2, '0');
-const clockTxt = d => { let h = d.getHours(); const ap = h < 12 ? 'AM' : 'PM'; h = h % 12 || 12; return `${ap} ${h}: ${two(d.getMinutes())}`; };
+const clockTxt = d => { let h = d.getHours(); const ap = h < 12 ? 'AM' : 'PM'; h = h % 12 || 12; return `${ap} ${two(h)}: ${two(d.getMinutes())}`; };
 const navShow = txt => {
   if ([...nvCta.childNodes].some(n => n.nodeType !== 1)) nvCta.textContent = '';   // 앞 문구(Guide Me) 를 걷어낸다
   while (nvCta.children.length < txt.length) nvCta.append(document.createElement('i'));
