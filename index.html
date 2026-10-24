@@ -567,14 +567,8 @@ body.idle       .field{ transform:translate(1px,145.5px) scale(.22); }
 /* 1.14 = 1022x1053 타원이 지름 1080 원을 완전히 덮는 배율(블러 39px 여유 포함) */
 /* 기본 화면은 검정 : 구슬은 idle 크기 그대로 조용히 사라진다 */
 /* 얼굴이 가까워지면(fill) 구슬이 사라지지 않고 화면을 채우며 커진다. 대신 옅게 해서 화면은 어둡게 유지 */
-body.fill       .field{ transform:translate(1px,145.5px) scale(.16); opacity:0;
-  /* 그 자리에서 천천히 : ease 로 1.2s 면 앞쪽이 급해 뚝 끊긴 것처럼 보였다.
-     opacity 는 뒤로 갈수록 빨라지는 곡선 — 감마 때문에 눈에는 고르게 옅어진다 */
-  transition-duration:2.4s, 2.2s, 2.2s, 2.2s, 2.2s, 2.2s;
-  transition-timing-function:cubic-bezier(.45,0,.15,1), cubic-bezier(.55,.06,.72,.5),
-    cubic-bezier(.25,.6,.25,1), cubic-bezier(.25,.6,.25,1), cubic-bezier(.25,.6,.25,1), cubic-bezier(.25,.6,.25,1); }
-body.fill       .field::before{ transition-duration:2s; }   /* 발광 링도 구슬과 같은 속도로 */
-body.fill       .blur39{ filter:blur(30px); transition:filter 2.2s ease 0s; }
+body.fill       .field{ transform:translate(1px,145.5px) scale(.16); opacity:0; }   /* 원은 조금 작아지고 흐려지며 어두워진다 : 뒤로 물러나는 느낌. 돌아올 땐 반대로 뒤에서 앞으로 */
+body.fill       .blur39{ filter:blur(30px); transition-delay:0s; }
 /* 구슬이 커질 때도 위아래 띠는 보여야 한다. 다만 구슬과 겹쳐 색이 뜨지 않게 살짝만 낮춘다 */
 body.fill .screen::before, body.fill .screen::after{ opacity:0; transition:none; }   /* 얼굴 근접 : 띠는 캔버스(.bandc)가 12시부터 한 바퀴 그리며 */
 .bandc{ position:absolute; inset:0; width:1080px; height:1080px; pointer-events:none; opacity:0; }
@@ -1646,8 +1640,9 @@ const go = n => {
   if (freeze) {
     field.style.translate = cs.translate; field.style.rotate = cs.rotate;
     field.style.borderRadius = cs.borderRadius; field.style.scale = cs.scale;   // scale 을 빼면 그 한 프레임에 구슬이 튄다
-    // 다음 프레임에 풀어 준다 : 배회하던 자리에서 기준값(화면 중앙·정원)까지 전환이 태워진다
-    requestAnimationFrame(() => requestAnimationFrame(() => {
+    // 엄지척(connecting)·얼굴 근접(fill) 은 배회가 멈춘 마지막 자세 그대로 작아지며 사라진다.
+    // 다른 장면은 다음 프레임에 풀어 기준값(중앙·정원)까지 전환이 이어지게
+    if (!['connecting', 'fill'].includes(STEPS[n])) requestAnimationFrame(() => requestAnimationFrame(() => {
       field.style.translate = field.style.rotate = field.style.borderRadius = field.style.scale = '';
     }));
   }
