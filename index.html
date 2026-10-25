@@ -264,6 +264,9 @@ body.ask .nv-bg u{ top:-32.32px; }
 .nv-h1{ --mp:50%; }   /* 첫 문장은 쓸고 들어오지 않고 위에서 아래로 내려온다 */
 .nv-head.on{ opacity:1; translate:0 0; --mp:50%; }
 .nv-head.out{ opacity:1; translate:0 0; --mp:0%; }   /* 왼→오로 지워진다 */
+/* 지워진 문장을 기본 상태로 되돌릴 때는 마스크를 애니메이션하지 않는다 :
+   --mp 가 0%→100% 로 쓸려 돌아가면서 그 문장이 장면 한가운데서 다시 떴다 사라졌다 */
+.nv-head:not(.on):not(.out){ transition:opacity .22s ease, translate .72s var(--bouncy); }
 /* 흐린 겹 + 또렷한 겹 : 피그마도 같은 글자를 두 장 겹쳐 둔다
    (한 요소에 ::before 로 겹치면 크롬이 background-clip:text 를 놓친다) */
 .nv-head b{ display:block; font:inherit; letter-spacing:inherit; white-space:pre;
@@ -404,14 +407,6 @@ body.src .nv-spark{ opacity:1; }
 .nv-map.on .m5, .nv-map.on .m6{ transition-delay:.34s; }
 .nv-map.on .m4{ transition-delay:.46s; }
 /* 도착점 강조 : 핀 아래 원형 그래픽이 차례로 번져 나간다 */
-/* 핀 그래픽(b9be3.svg) 안의 바닥 동심원 중심 = (560.25+26.341, 62.77+68.231). 링은 그 자리에서만 번진다 */
-.nv-map .m7{ position:absolute; left:586.59px; top:131px; width:52.37px; height:31.38px; translate:-50% -50%;
-  border-radius:50%; box-shadow:0 0 0 1.2px rgba(255,255,255,.38); opacity:0; }
-.nv-map.on .m7{ animation:navPing 2.8s cubic-bezier(.2,.65,.3,1) .75s infinite; }
-.nv-map.on .m7.b{ animation-delay:1.18s; }
-.nv-map.on .m7.c{ animation-delay:1.61s; }
-/* 안쪽 원(rx 7.54)에서 바깥 원(rx 26.19)까지만 : 전에는 그래픽을 한참 넘어 1.95 까지 퍼졌다 */
-@keyframes navPing{ 0%{ opacity:0; scale:.288; } 18%{ opacity:.45; } 100%{ opacity:0; scale:1.06; } }
 .nv-map .w{ position:absolute; display:flex; align-items:center; justify-content:center; }
 .nv-map .w > i{ position:relative; display:block; width:475.339px; height:231.893px; rotate:31.23deg; flex:none; }
 .nv-map .w > i img{ position:absolute; left:14.83px; top:-1.09px; width:461.6px; height:232.98px; display:block; }
@@ -490,25 +485,25 @@ body.ask .nv-glow{ opacity:1; transition-delay:.85s; }   /* 어두운 판이 거
 .nv-glow > i > b{ position:relative; display:block; flex:none; }
 .nv-glow img{ position:absolute; display:block; }
 .nv-glow .q1{ left:56.2px; top:870.6px; width:1024.185px; height:247.378px;
-  animation:vui1 9.2s ease-in-out infinite; }
+  animation:vui1 5.2s ease-in-out infinite; }
 .nv-glow .q1 > b{ width:1017.48px; height:213.09px; transform:rotate(1.94deg) skewX(-0.02deg); }
 .nv-glow .q1 img{ left:-32.56px; top:-32.6px; width:1082.6px; height:278.29px; }
 .nv-glow .q2{ left:558.05px; translate:-50% 0; top:891.56px; width:479.1px; height:254.609px;
-  animation:vui2 6.6s ease-in-out infinite; }
+  animation:vui2 4.1s ease-in-out infinite; }
 .nv-glow .q2 > b{ width:465.036px; height:225.467px; transform:rotate(-3.65deg) skewX(0.16deg); }
 .nv-glow .q2 img{ left:-79.99px; top:-79.99px; width:625.01px; height:385.46px; }
 /* 같은 숨으로 바닥에서 올라오는 이너 섀도우 */
 .nv-ish{ position:absolute; inset:40px; border-radius:50%; pointer-events:none;
   box-shadow:inset 0 -66px 96px -58px rgba(245,240,207,.3), inset 0 0 20px rgba(0,0,0,.25);
   opacity:0; transition:opacity .9s ease; }
-body.ask .nv-ish{ opacity:1; animation:vui3 6.6s ease-in-out infinite; }
+body.ask .nv-ish{ opacity:1; animation:vui3 4.1s ease-in-out infinite; }
 /* 밝기는 원본(1.0)을 기준으로 위아래로만 숨쉰다 : 멈춘 장면은 디자인 그대로 */
-@keyframes vui1{ 0%,100%{ transform:translate(0,0) scale(1); filter:brightness(1); }
-  34%{ transform:translate(-22px,-9px) scale(1.07); filter:brightness(1.12); }
-  67%{ transform:translate(16px,5px) scale(.96); filter:brightness(.93); } }
-@keyframes vui2{ 0%,100%{ transform:translate(0,0) scale(1); filter:brightness(1); }
-  30%{ transform:translate(14px,-13px) scale(1.11); filter:brightness(1.15); }
-  64%{ transform:translate(-18px,7px) scale(.93); filter:brightness(.9); } }
+@keyframes vui1{ 0%,100%{ transform:translate(0,0) scale(1); filter:brightness(.94); opacity:.9; }
+  34%{ transform:translate(-31px,-14px) scale(1.12); filter:brightness(1.3); opacity:1; }
+  67%{ transform:translate(23px,8px) scale(.93); filter:brightness(.82); opacity:.82; } }
+@keyframes vui2{ 0%,100%{ transform:translate(0,0) scale(1); filter:brightness(.95); opacity:.88; }
+  30%{ transform:translate(19px,-18px) scale(1.17); filter:brightness(1.34); opacity:1; }
+  64%{ transform:translate(-24px,10px) scale(.89); filter:brightness(.8); opacity:.8; } }
 @keyframes vui3{ 0%,100%{ box-shadow:inset 0 -66px 96px -58px rgba(245,240,207,.3), inset 0 0 20px rgba(0,0,0,.25); }
   38%{ box-shadow:inset 0 -88px 120px -56px rgba(245,240,207,.42), inset 0 0 20px rgba(0,0,0,.25); }
   72%{ box-shadow:inset 0 -56px 86px -60px rgba(245,240,207,.22), inset 0 0 20px rgba(0,0,0,.25); } }
@@ -1050,7 +1045,6 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
             <img class="m4" src="new/b9be3.svg" alt="">
             <img class="m5" src="new/36423.svg" alt="">
             <i class="m6"></i>
-            <i class="m7"></i><i class="m7 b"></i><i class="m7 c"></i>
           </div>
           <div class="nv-go">
             <div class="ico"><img src="new/70bc8_s.svg" alt=""></div>
@@ -1058,7 +1052,7 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
           </div>
           <div class="nv-who">
             <img src="new/64d01.png" alt="">
-            <div class="tx"><span class="k">pM 12:00</span><span class="v">Room 513, Wing A, 5th Floor</span></div>
+            <div class="tx"><span class="k">pM 12:00</span><span class="v">Room 513.. Wing A, 5th Floor</span></div>
           </div>
         </div>
       </div>
@@ -1376,7 +1370,7 @@ const nvSay = (el, t) => {   // 흐린 겹 + 또렷한 겹
   el.replaceChildren(b, sh);
 };
 nvSay(nvHead[0], 'Good afternoon, Leo.\nBack for your 2nd check up?');
-nvSay(nvHead[1], 'Let me guide you  to \nthe exam room.');
+nvSay(nvHead[1], 'Let me guide you to\nthe exam room.');
 nvSay(nvHead[2], 'Have you had any discomfort \nsince your last visit?');
 // 도트 화살표 : 0c805_s.svg 의 원 11 개. 불규칙한 순서·간격으로 튀어나오게 지연을 흩는다
 {
@@ -1459,11 +1453,9 @@ const navClockStart = () => {   // 시작은 도착예상시간, 길안내가 �
   nvCta.classList.remove('on');
   navClock.push(setTimeout(() => {   // 앞 문구가 걷힌 뒤 시각이 떠오르고, 이후로는 글자칸만 바뀐다
     navRender(); nvCta.classList.add('on');
-    navClock.push(setInterval(navRender, 1000));   // 실제 시각 : 분이 바뀌는 그 순간 그 칸만
-    navClock.push(setTimeout(() => {
-      navEta = false; navRender();
-      navClock.push(setInterval(() => { navEta = !navEta; navRender(); }, 8000));
-    }, 3500));
+    // 질문(부상확인) 이 뜨기 전에 숫자가 딱 한 번 바뀐다 : 도착예상시간 → 현재 시각.
+    // 실시간 갱신은 하지 않는다 (영상에서 분이 제멋대로 넘어가면 안 된다)
+    navClock.push(setTimeout(() => { navEta = false; navRender(); }, 5200));
   }, 420));
 };
 
