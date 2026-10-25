@@ -266,7 +266,10 @@ body.ask .nv-bg u{ top:-32.32px; }
 .nv-head.out{ opacity:1; translate:0 0; --mp:0%; }   /* 왼→오로 지워진다 */
 /* 지워진 문장을 기본 상태로 되돌릴 때는 마스크를 애니메이션하지 않는다 :
    --mp 가 0%→100% 로 쓸려 돌아가면서 그 문장이 장면 한가운데서 다시 떴다 사라졌다 */
-.nv-head:not(.on):not(.out){ transition:opacity .22s ease, translate .72s var(--bouncy); }
+.nv-head:not(.on):not(.out):not(.dim){ transition:opacity .22s ease, translate .72s var(--bouncy); }
+/* 길안내(알약 캡션)로 이어질 때 : 지우지 않고 그 자리에서 어두워지며 사라진다 */
+.nv-head.dim{ opacity:0; translate:0 0; --mp:50%; filter:brightness(.22);
+  transition:opacity .75s cubic-bezier(.4,0,.6,1), filter .75s cubic-bezier(.4,0,.6,1); }
 /* 흐린 겹 + 또렷한 겹 : 피그마도 같은 글자를 두 장 겹쳐 둔다
    (한 요소에 ::before 로 겹치면 크롬이 background-clip:text 를 놓친다) */
 .nv-head b{ display:block; font:inherit; letter-spacing:inherit; white-space:pre;
@@ -454,8 +457,10 @@ body.src .nv-spark{ opacity:1; }
 .nv-arrow .ar{ position:absolute; left:-17.92px; top:-17.91px; width:289.337px; height:222.191px;
   display:block; overflow:visible; }
 .nv-arrow .ar ellipse{ fill:#fff; opacity:0; transform-box:fill-box; transform-origin:center; }
+/* 알약이 캡션으로 옮겨 앉은 뒤에 튀어나온다 (--d 는 JS 가 뿌린 불규칙한 간격) */
+body.guiding .nv-arrow{ transition-delay:1s; }
 body.guiding .nv-arrow .ar ellipse{ animation:arPop .46s cubic-bezier(.2,1.55,.4,1) both;
-  animation-delay:var(--d, 0ms); }
+  animation-delay:calc(var(--d, 0ms) + 1s); }
 @keyframes arPop{ from{ opacity:0; transform:scale(.25); } to{ opacity:1; transform:scale(1); } }
 body.guiding .nv-arrow{ top:559.76px; opacity:1; }
 body.ask .nv-arrow{ top:539.63px; }
@@ -485,28 +490,28 @@ body.ask .nv-glow{ opacity:1; transition-delay:.85s; }   /* 어두운 판이 거
 .nv-glow > i > b{ position:relative; display:block; flex:none; }
 .nv-glow img{ position:absolute; display:block; }
 .nv-glow .q1{ left:56.2px; top:870.6px; width:1024.185px; height:247.378px;
-  animation:vui1 5.2s ease-in-out infinite; }
+  animation:vui1 3.4s ease-in-out infinite; }
 .nv-glow .q1 > b{ width:1017.48px; height:213.09px; transform:rotate(1.94deg) skewX(-0.02deg); }
 .nv-glow .q1 img{ left:-32.56px; top:-32.6px; width:1082.6px; height:278.29px; }
 .nv-glow .q2{ left:558.05px; translate:-50% 0; top:891.56px; width:479.1px; height:254.609px;
-  animation:vui2 4.1s ease-in-out infinite; }
+  animation:vui2 2.7s ease-in-out infinite; }
 .nv-glow .q2 > b{ width:465.036px; height:225.467px; transform:rotate(-3.65deg) skewX(0.16deg); }
 .nv-glow .q2 img{ left:-79.99px; top:-79.99px; width:625.01px; height:385.46px; }
 /* 같은 숨으로 바닥에서 올라오는 이너 섀도우 */
 .nv-ish{ position:absolute; inset:40px; border-radius:50%; pointer-events:none;
   box-shadow:inset 0 -66px 96px -58px rgba(245,240,207,.3), inset 0 0 20px rgba(0,0,0,.25);
   opacity:0; transition:opacity .9s ease; }
-body.ask .nv-ish{ opacity:1; animation:vui3 4.1s ease-in-out infinite; }
+body.ask .nv-ish{ opacity:1; animation:vui3 3.4s ease-in-out infinite; }
 /* 밝기는 원본(1.0)을 기준으로 위아래로만 숨쉰다 : 멈춘 장면은 디자인 그대로 */
-@keyframes vui1{ 0%,100%{ transform:translate(0,0) scale(1); filter:brightness(.94); opacity:.9; }
-  34%{ transform:translate(-31px,-14px) scale(1.12); filter:brightness(1.3); opacity:1; }
-  67%{ transform:translate(23px,8px) scale(.93); filter:brightness(.82); opacity:.82; } }
-@keyframes vui2{ 0%,100%{ transform:translate(0,0) scale(1); filter:brightness(.95); opacity:.88; }
-  30%{ transform:translate(19px,-18px) scale(1.17); filter:brightness(1.34); opacity:1; }
-  64%{ transform:translate(-24px,10px) scale(.89); filter:brightness(.8); opacity:.8; } }
-@keyframes vui3{ 0%,100%{ box-shadow:inset 0 -66px 96px -58px rgba(245,240,207,.3), inset 0 0 20px rgba(0,0,0,.25); }
-  38%{ box-shadow:inset 0 -88px 120px -56px rgba(245,240,207,.42), inset 0 0 20px rgba(0,0,0,.25); }
-  72%{ box-shadow:inset 0 -56px 86px -60px rgba(245,240,207,.22), inset 0 0 20px rgba(0,0,0,.25); } }
+@keyframes vui1{ 0%,100%{ transform:translate(0,6px) scale(.97); filter:brightness(.78); opacity:.78; }
+  34%{ transform:translate(-34px,-26px) scale(1.17); filter:brightness(1.55); opacity:1; }
+  67%{ transform:translate(26px,14px) scale(.9); filter:brightness(.66); opacity:.7; } }
+@keyframes vui2{ 0%,100%{ transform:translate(0,8px) scale(.96); filter:brightness(.8); opacity:.74; }
+  30%{ transform:translate(22px,-30px) scale(1.24); filter:brightness(1.62); opacity:1; }
+  64%{ transform:translate(-28px,16px) scale(.86); filter:brightness(.62); opacity:.66; } }
+@keyframes vui3{ 0%,100%{ box-shadow:inset 0 -54px 88px -60px rgba(245,240,207,.2), inset 0 0 20px rgba(0,0,0,.25); }
+  38%{ box-shadow:inset 0 -116px 140px -50px rgba(245,240,207,.62), inset 0 0 20px rgba(0,0,0,.25); }
+  72%{ box-shadow:inset 0 -44px 76px -64px rgba(245,240,207,.14), inset 0 0 20px rgba(0,0,0,.25); } }
 /* ---------- 아래 안내 글 · 시각 (상자 밑 959) ---------- */
 .nv-cta{ position:absolute; left:0; right:0; bottom:121px; margin:0; text-align:center;
   font-family:var(--ff-ko,'SF Pro KR'), 'Pretendard Web', sans-serif; font-weight:500;
@@ -1464,15 +1469,17 @@ let nvPrev = '';
 const nvStep = k => {
   nvTimers.forEach(clearTimeout); nvTimers = [];
   const head = k === 'talk1' ? nvHead[0] : k === 'talk2' ? nvHead[1] : k === 'ask' ? nvHead[2] : null;
+  // 길안내로 넘어갈 때만 어두워지며(dim) 사라지고, 나머지는 왼→오로 지워진다(out)
+  const leave = GUIDE.includes(k) ? 'dim' : 'out';
   for (const h of nvHead) {
     if (h === head) continue;
-    if (h.classList.contains('on')) { h.classList.remove('on'); h.classList.add('out'); }   // 왼→오로 지워진다
-    else h.classList.remove('out');
+    if (h.classList.contains('on')) { h.classList.remove('on'); h.classList.add(leave); }
+    else h.classList.remove('out', 'dim');
   }
   // 대화1 은 배경이 자리를 잡고 내려오고, 대화2 는 앞 문장이 지워지기 시작한 뒤 따라 들어온다.
   // 부상확인은 판(0s) → 아래 그래픽(0.5s) → 문장 순서
   if (head) nvLater(k === 'ask' ? 1500 : k === 'talk2' ? 430 : 300,
-                    () => { head.classList.remove('out'); head.classList.add('on'); });
+                    () => { head.classList.remove('out', 'dim'); head.classList.add('on'); });
   const cta = t => { nvCta.classList.remove('on'); nvLater(560, () => { nvCta.textContent = t; nvCta.classList.add('on'); }); };
   if (k === 'src')      { nvOnly(null); nvCta.classList.remove('on'); }
   if (k === 'srcfull')  { nvOnly(null); nvCta.classList.remove('on'); }   // NAV 004 는 삭제됐다
@@ -1493,17 +1500,18 @@ const nvStep = k => {
     if (fresh) {
       const ms = GUIDE.reduce((a, g) => a + HOLD[STEPS.indexOf(g)], 0);
       const dots = nvq('.nv-dots');   // 검은 바탕에 도트가 중심에서 가장자리로 퍼진다
-      dots.style.transition = 'none';
+      dots.style.transition = 'none'; dots.style.opacity = '0';
       dots.style.setProperty('--dw', '26px'); dots.style.setProperty('--dh', '21px');
       dots.getBoundingClientRect();
-      requestAnimationFrame(() => {
-        dots.style.transition = '';
-        dots.style.removeProperty('--dw'); dots.style.removeProperty('--dh');
-      });
       nvGauge(0, true);
-      NV.style.setProperty('--gt', 'linear');
-      requestAnimationFrame(() => { NV.style.setProperty('--gd', ms + 'ms'); nvGauge(GFULL); });
-      navClockStart();
+      // 순서 : 알약이 캡션으로 옮겨 앉고(0~1s) → 화살표 도트가 튀어나오고(1s~) → 나머지(1.6s~)
+      nvLater(1600, () => {
+        dots.style.transition = ''; dots.style.removeProperty('opacity');
+        dots.style.removeProperty('--dw'); dots.style.removeProperty('--dh');
+        NV.style.setProperty('--gt', 'linear');
+        requestAnimationFrame(() => { NV.style.setProperty('--gd', (ms - 1600) + 'ms'); nvGauge(GFULL); });
+        navClockStart();
+      });
     }
   } else {
     navClockStop(); nvCta.classList.remove('eta');
