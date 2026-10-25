@@ -404,12 +404,14 @@ body.src .nv-spark{ opacity:1; }
 .nv-map.on .m5, .nv-map.on .m6{ transition-delay:.34s; }
 .nv-map.on .m4{ transition-delay:.46s; }
 /* 도착점 강조 : 핀 아래 원형 그래픽이 차례로 번져 나간다 */
-.nv-map .m7{ position:absolute; left:586.6px; top:148.2px; width:74px; height:30px; translate:-50% -50%;
-  border-radius:50%; box-shadow:0 0 0 2px rgba(255,255,255,.5); opacity:0; }
+/* 핀 그래픽(b9be3.svg) 안의 바닥 동심원 중심 = (560.25+26.341, 62.77+68.231). 링은 그 자리에서만 번진다 */
+.nv-map .m7{ position:absolute; left:586.59px; top:131px; width:52.37px; height:31.38px; translate:-50% -50%;
+  border-radius:50%; box-shadow:0 0 0 1.2px rgba(255,255,255,.38); opacity:0; }
 .nv-map.on .m7{ animation:navPing 2.8s cubic-bezier(.2,.65,.3,1) .75s infinite; }
 .nv-map.on .m7.b{ animation-delay:1.18s; }
 .nv-map.on .m7.c{ animation-delay:1.61s; }
-@keyframes navPing{ 0%{ opacity:0; scale:.2; } 14%{ opacity:.85; } 100%{ opacity:0; scale:1.95; } }
+/* 안쪽 원(rx 7.54)에서 바깥 원(rx 26.19)까지만 : 전에는 그래픽을 한참 넘어 1.95 까지 퍼졌다 */
+@keyframes navPing{ 0%{ opacity:0; scale:.288; } 18%{ opacity:.45; } 100%{ opacity:0; scale:1.06; } }
 .nv-map .w{ position:absolute; display:flex; align-items:center; justify-content:center; }
 .nv-map .w > i{ position:relative; display:block; width:475.339px; height:231.893px; rotate:31.23deg; flex:none; }
 .nv-map .w > i img{ position:absolute; left:14.83px; top:-1.09px; width:461.6px; height:232.98px; display:block; }
@@ -1487,7 +1489,11 @@ const nvStep = k => {
   if (k === 'talk2')    { nvOnly(nvq('.nv-dest'), 360); nvLater(420, () => nvq('.nv-map').classList.add('on'));
                           cta('Guide Me'); }
   if (GUIDE.includes(k)) {   // 칩 속은 룰렛처럼 굴러 바뀌고, 게이지는 남은 거리를 줄인다
-    nvOnly(k === 'ask' ? nvq('.nv-go') : nvq('.nv-who'), 300);
+    // 칩은 질문이 다 올라온 뒤(3.2s) 바뀐다. 들어오는 칩은 앞 칩이 완전히 넘어간 뒤(0.62s)에 —
+    // 300ms 면 둘이 겹쳐 돌아 글자가 섞여 보였다
+    const chip = k === 'ask' ? nvq('.nv-go') : nvq('.nv-who');
+    if (k === 'ask') nvLater(3200, () => nvOnly(chip, 640));
+    else nvOnly(chip, 640);
     nvq('.nv-map').classList.remove('on');
     const fresh = !GUIDE.includes(nvPrev);
     // 아래쪽 밝은 호 = 지금까지 온 거리, 위쪽 옅은 트랙 = 남은 거리.
