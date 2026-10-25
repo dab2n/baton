@@ -287,7 +287,8 @@ body.ask .nv-bg u{ top:-32.32px; }
   -webkit-background-clip:text; background-clip:text; }
 .nv-h3 .bl{ opacity:.3; text-shadow:none; margin-left:.5px; }
 /* ---------- 공통 컴포넌트 (늘어나는 알약) ---------- */
-.nv-pill{ position:absolute; left:50%; top:-200px; translate:-50% -50%;   /* 기본은 프레임 위 : 맥락전달이 끝나면 아래로 똑 떨어진다 */
+.nv-pill{ position:absolute; left:50%; top:-200px; translate:-50% -50%;
+  perspective:560px; perspective-origin:50% 50%;   /* 칩 속이 원기둥처럼 돌게 */   /* 기본은 프레임 위 : 맥락전달이 끝나면 아래로 똑 떨어진다 */
   width:157px; height:156px; border-radius:78px; overflow:hidden;
   background:rgba(255,255,255,.085); --rim:.21;
   transition:width .95s var(--spring), height .95s var(--spring), border-radius .95s var(--spring),
@@ -421,12 +422,15 @@ body.src .nv-spark{ opacity:1; }
 .nv-map .m6{ position:absolute; left:746.18px; top:163.98px; width:23.094px; height:68.937px; background:#fff3c8;
   -webkit-mask:url(new/aa1b1.png) 0 5.409px/23.094px 63.528px no-repeat;
           mask:url(new/aa1b1.png) 0 5.409px/23.094px 63.528px no-repeat; }
-/* 길안내 칩 속 : 원기둥에 맵핑된 듯 위로 말려 넘어간다 (룰렛) */
-.nv-go, .nv-who{ transform-origin:50% 50%; backface-visibility:hidden;
-  transform:rotateX(-92deg) translateY(26px); translate:0 !important;
-  transition:opacity .34s ease, transform .62s cubic-bezier(.3,1.25,.45,1); }
-.nv-go.on, .nv-who.on{ transform:rotateX(0deg) translateY(0); }
-.nv-go.out, .nv-who.out{ transform:rotateX(92deg) translateY(-26px); }
+/* 길안내 칩 속 : 둥근 원기둥 겉면에 붙어 아래에서 위로 돌아 올라온다.
+   원근(perspective)이 없으면 그냥 납작하게 눌렸다 펴지는 것처럼 보인다.
+   회전축을 면 뒤 64px(=원기둥 반지름)에 두면, 제자리(0deg)에서는 디자인 그대로이고
+   돌아갈 때만 드럼 겉면을 따라 아래에서 위로 넘어간다 */
+.nv-go, .nv-who{ transform-origin:50% 50% -64px; backface-visibility:hidden;
+  transform:rotateX(-86deg); translate:0 !important;
+  transition:opacity .34s ease, transform .66s cubic-bezier(.32,.9,.35,1); }
+.nv-go.on, .nv-who.on{ transform:rotateX(0deg); }
+.nv-go.out, .nv-who.out{ transform:rotateX(86deg); }
 /* 길안내 칩 속 : 왼쪽 아이콘 + 두 줄 (pl 45 / pr 60 / gap 30) */
 .nv-go{ left:45px; top:0; bottom:0; right:60px; display:flex; align-items:center; gap:30px; }
 .nv-go .ico{ width:43.42px; height:59.124px; display:flex; align-items:center; justify-content:center; flex:none; }
@@ -450,7 +454,9 @@ body.src .nv-spark{ opacity:1; }
 /* ---------- 길안내 : 가운데 도트 화살표 ---------- */
 .nv-arrow{ position:absolute; left:50%; translate:-50% -50%; width:186.366px; height:253.512px;
   display:flex; align-items:center; justify-content:center; opacity:0;
-  transition:opacity .7s ease, top .9s var(--spring); }
+  transition:opacity .7s ease, top .9s var(--spring), rotate 1.25s cubic-bezier(.4,0,.2,1); }
+/* 직진만 오래 보여주면 심심하다 : 길안내 중간에 꺾는 길을 한 번 가리킨다 */
+body.guiding .nv-arrow.turn{ rotate:42deg; }
 .nv-arrow i{ position:relative; display:block; width:253.512px; height:186.366px; rotate:-90deg; flex:none;
   animation:nvPoke 2.8s cubic-bezier(.45,0,.35,1) infinite; }
 /* 도트 화살표 : 0c805_s.svg 의 원 11 개를 따로 그려 불규칙한 순서로 튀어나오게 한다 */
@@ -458,7 +464,7 @@ body.src .nv-spark{ opacity:1; }
   display:block; overflow:visible; }
 .nv-arrow .ar ellipse{ fill:#fff; opacity:0; transform-box:fill-box; transform-origin:center; }
 /* 알약이 캡션으로 옮겨 앉은 뒤에 튀어나온다 (--d 는 JS 가 뿌린 불규칙한 간격) */
-body.guiding .nv-arrow{ transition-delay:1s; }
+body.guiding .nv-arrow{ transition-delay:1s, 0s, 0s; }   /* 1s 는 등장(opacity)에만 : 회전까지 늦추면 안 된다 */
 body.guiding .nv-arrow .ar ellipse{ animation:arPop .46s cubic-bezier(.2,1.55,.4,1) both;
   animation-delay:calc(var(--d, 0ms) + 1s); }
 @keyframes arPop{ from{ opacity:0; transform:scale(.25); } to{ opacity:1; transform:scale(1); } }
@@ -486,6 +492,7 @@ body.ask .nv-panel{ opacity:1; }
 .nv-glow{ position:absolute; inset:0; opacity:0; transition:opacity 1.5s cubic-bezier(.3,0,.3,1); }
 body.ask .nv-glow{ opacity:1; transition-delay:.85s; }   /* 어두운 판이 거의 다 깔린 뒤에 */
 .nv-glow > i{ position:absolute; display:flex; align-items:center; justify-content:center;
+  transform-origin:50% 100%;   /* 아래 한가운데를 축으로 : 빛이 바닥에서 피어오른다 */
   will-change:transform, opacity; }
 .nv-glow > i > b{ position:relative; display:block; flex:none; }
 .nv-glow img{ position:absolute; display:block; }
@@ -503,12 +510,13 @@ body.ask .nv-glow{ opacity:1; transition-delay:.85s; }   /* 어두운 판이 거
   opacity:0; transition:opacity .9s ease; }
 body.ask .nv-ish{ opacity:1; animation:vui3 3.4s ease-in-out infinite; }
 /* 밝기는 원본(1.0)을 기준으로 위아래로만 숨쉰다 : 멈춘 장면은 디자인 그대로 */
-@keyframes vui1{ 0%,100%{ transform:translate(0,6px) scale(.97); filter:brightness(.78); opacity:.78; }
-  34%{ transform:translate(-34px,-26px) scale(1.17); filter:brightness(1.55); opacity:1; }
-  67%{ transform:translate(26px,14px) scale(.9); filter:brightness(.66); opacity:.7; } }
-@keyframes vui2{ 0%,100%{ transform:translate(0,8px) scale(.96); filter:brightness(.8); opacity:.74; }
-  30%{ transform:translate(22px,-30px) scale(1.24); filter:brightness(1.62); opacity:1; }
-  64%{ transform:translate(-28px,16px) scale(.86); filter:brightness(.62); opacity:.66; } }
+/* 좌우로 미끄러지지 않는다 : 아래 한가운데에서 위로 피었다 가라앉는다 (x 는 ±8px 만) */
+@keyframes vui1{ 0%,100%{ transform:translate(0,10px) scaleX(.98) scaleY(.94); filter:brightness(.76); opacity:.76; }
+  34%{ transform:translate(-8px,-16px) scaleX(1.05) scaleY(1.22); filter:brightness(1.58); opacity:1; }
+  67%{ transform:translate(6px,16px) scaleX(.95) scaleY(.86); filter:brightness(.64); opacity:.68; } }
+@keyframes vui2{ 0%,100%{ transform:translate(0,12px) scaleX(.97) scaleY(.92); filter:brightness(.78); opacity:.72; }
+  30%{ transform:translate(7px,-20px) scaleX(1.07) scaleY(1.3); filter:brightness(1.66); opacity:1; }
+  64%{ transform:translate(-6px,18px) scaleX(.93) scaleY(.83); filter:brightness(.6); opacity:.64; } }
 @keyframes vui3{ 0%,100%{ box-shadow:inset 0 -54px 88px -60px rgba(245,240,207,.2), inset 0 0 20px rgba(0,0,0,.25); }
   38%{ box-shadow:inset 0 -116px 140px -50px rgba(245,240,207,.62), inset 0 0 20px rgba(0,0,0,.25); }
   72%{ box-shadow:inset 0 -44px 76px -64px rgba(245,240,207,.14), inset 0 0 20px rgba(0,0,0,.25); } }
@@ -1445,15 +1453,18 @@ const navShow = txt => {
     cell.append(b);
   });
 };
-let navClock = [], navEta = false, navEtaAt = 0;
+let navClock = [], navEta = false, navEtaMin = 0;
 const navClockStop = () => { for (const t of navClock) { clearTimeout(t); clearInterval(t); } navClock = []; };
 const navRender = () => {
   nvCta.classList.toggle('eta', navEta);
-  navShow(clockTxt(navEta ? new Date(navEtaAt) : new Date()));
+  const d = new Date();
+  if (navEta) d.setMinutes(navEtaMin);   // 시·오전오후는 그대로, 분만 다르다
+  navShow(clockTxt(d));
 };
 const navClockStart = () => {   // 시작은 도착예상시간, 길안내가 시작되면 현 시각으로
   navClockStop();
-  navEtaAt = Date.now() + 4 * 60000;   // 도착 시각은 들어온 순간에 정해지고 그대로 (분이 지날수록 가까워진다)
+  const m = new Date().getMinutes();   // 도착예상시간은 '분'만 다르게 : 시까지 같이 굴러가면 숫자가 통째로 바뀐다
+  navEtaMin = m + 4 < 60 ? m + 4 : m - 4;
   navEta = true;
   nvCta.classList.remove('on');
   navClock.push(setTimeout(() => {   // 앞 문구가 걷힌 뒤 시각이 떠오르고, 이후로는 글자칸만 바뀐다
@@ -1488,11 +1499,11 @@ const nvStep = k => {
   if (k === 'talk2')    { nvOnly(nvq('.nv-dest'), 360); nvLater(420, () => nvq('.nv-map').classList.add('on'));
                           cta('Guide Me'); }
   if (GUIDE.includes(k)) {   // 칩 속은 룰렛처럼 굴러 바뀌고, 게이지는 남은 거리를 줄인다
-    // 칩은 질문이 다 올라온 뒤(3.2s) 바뀐다. 들어오는 칩은 앞 칩이 완전히 넘어간 뒤(0.62s)에 —
-    // 300ms 면 둘이 겹쳐 돌아 글자가 섞여 보였다
+    // 칩은 아래 빛(0.85s)·중앙 문장(1.5s)과 같은 박자에 바뀐다.
+    // 들어오는 칩은 앞 칩이 원기둥을 다 넘어간 뒤(0.66s)에 올라온다 (겹치면 글자가 섞인다)
     const chip = k === 'ask' ? nvq('.nv-go') : nvq('.nv-who');
-    if (k === 'ask') nvLater(3200, () => nvOnly(chip, 640));
-    else nvOnly(chip, 640);
+    if (k === 'ask') nvLater(1500, () => nvOnly(chip, 680));
+    else nvOnly(chip, 680);
     nvq('.nv-map').classList.remove('on');
     const fresh = !GUIDE.includes(nvPrev);
     // 아래쪽 밝은 호 = 지금까지 온 거리, 위쪽 옅은 트랙 = 남은 거리.
@@ -1505,6 +1516,8 @@ const nvStep = k => {
       dots.getBoundingClientRect();
       nvGauge(0, true);
       // 순서 : 알약이 캡션으로 옮겨 앉고(0~1s) → 화살표 도트가 튀어나오고(1s~) → 나머지(1.6s~)
+      nvq('.nv-arrow').classList.remove('turn');
+      nvLater(5200, () => nvq('.nv-arrow').classList.add('turn'));   // 직진 → 대각선
       nvLater(1600, () => {
         dots.style.transition = ''; dots.style.removeProperty('opacity');
         dots.style.removeProperty('--dw'); dots.style.removeProperty('--dh');
