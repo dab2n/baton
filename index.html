@@ -246,7 +246,11 @@ body.talk2 .nv-bg i{ top:-472px; }
 .nv-bg u{ position:absolute; left:50%; translate:-50% 0; width:1310px; height:1264px;
   border-radius:50%; background:#0A0909; opacity:0; top:-32.32px;
   transition:opacity .9s ease, top .95s var(--spring); }
-body.guiding .nv-bg u{ opacity:1; top:-127.5px; }
+/* 먼저 부드럽게 덮고(1.25s), 다 덮인 뒤에 올라간다(0.55s 뒤) */
+body.guiding .nv-bg u{ opacity:1; top:-127.5px;
+  transition:opacity 1.25s cubic-bezier(.33,0,.25,1), top .95s var(--spring) .55s; }
+body.guiding .nv-bg i{ transition-duration:1.35s, 1.35s, 1.35s;
+  transition-timing-function:cubic-bezier(.4,0,.2,1), cubic-bezier(.4,0,.2,1), cubic-bezier(.4,0,.2,1); }
 body.ask .nv-bg u{ top:-32.32px; }
 /* ---------- 문장 : 위에서 아래로 약간 bouncy (글 쓰는 모션 없음) ---------- */
 /* 문장 교체 : 앞 문장이 왼→오로 지워지고, 다음 문장이 같은 방향으로 드러난다.
@@ -472,9 +476,9 @@ body.guiding .nv-arrow.turn{ rotate:42deg; }
   display:block; overflow:visible; }
 .nv-arrow .ar ellipse{ fill:#fff; opacity:0; transform-box:fill-box; transform-origin:center; }
 /* 알약이 캡션으로 옮겨 앉은 뒤에 튀어나온다 (--d 는 JS 가 뿌린 불규칙한 간격) */
-body.guiding .nv-arrow{ transition-delay:1.25s, 0s, 0s; }   /* 1s 는 등장(opacity)에만 : 회전까지 늦추면 안 된다 */
+body.guiding .nv-arrow{ transition-delay:1.5s, 0s, 0s; }   /* 1s 는 등장(opacity)에만 : 회전까지 늦추면 안 된다 */
 body.guiding .nv-arrow .ar ellipse{ animation:arPop .46s cubic-bezier(.2,1.55,.4,1) both;
-  animation-delay:calc(var(--d, 0ms) + 1.25s); }
+  animation-delay:calc(var(--d, 0ms) + 1.5s); }
 @keyframes arPop{ from{ opacity:0; transform:scale(.25); } to{ opacity:1; transform:scale(1); } }
 body.guiding .nv-arrow{ top:559.76px; opacity:1; }
 body.ask .nv-arrow{ top:539.63px; }
@@ -483,8 +487,9 @@ body.ask .nv-arrow{ top:539.63px; }
    실측 : 중심 (540,540) · 반지름 449.5 · 두께 23 · 12시부터 시계방향 70° ~ 116.75°
    아래쪽 채움(흰 20% + #F5F0CF 30%)이 지나온 거리 · 위쪽 흰 10% 트랙이 남은 거리 */
 .nv-gauge{ position:absolute; inset:0; width:1080px; height:1080px;
-  opacity:0; transition:opacity .7s ease; }
-body.guiding .nv-gauge{ opacity:1; }
+  opacity:0; translate:30px 0;   /* 오른쪽 바 : 바깥에서 밀려 들어온다 */
+  transition:opacity .8s ease, translate 1s cubic-bezier(.25,.85,.3,1); }
+body.guiding .nv-gauge{ opacity:1; translate:0 0; transition-delay:1.2s; }
 .nv-gauge circle{ fill:none; stroke-width:23; stroke-linecap:round;
   transition:stroke-dasharray var(--gd,5.2s) var(--gt,cubic-bezier(.35,0,.25,1)),
              stroke-dashoffset var(--gd,5.2s) var(--gt,cubic-bezier(.35,0,.25,1)); }
@@ -544,6 +549,7 @@ body.ask .nv-ish{ opacity:1; animation:vui3 3.9s ease-in-out infinite; }
   font-size:32px; line-height:1.2; letter-spacing:-0.02em; color:rgba(79,79,79,.4);
   opacity:0; translate:0 10px; transition:opacity .6s ease, translate .6s var(--bouncy); }
 .nv-cta.on{ opacity:1; translate:0 0; }
+body.guiding .nv-cta:not(.on){ translate:0 26px; }   /* 길안내에선 아래에서 슬라이드인 */
 body.guiding .nv-cta{ color:rgba(255,255,255,.8); transition:opacity .6s ease, translate .6s var(--bouncy), color .55s ease; }
 body.guiding .nv-cta.eta{ color:#F5F0CF; }
 body.ask .nv-cta{ opacity:0; translate:0 10px; }   /* 말을 걸면 아래 시각도 판에 가려진다 */
@@ -1527,6 +1533,7 @@ const nvStep = k => {
     // 아래쪽 밝은 호 = 지금까지 온 거리, 위쪽 옅은 트랙 = 남은 거리.
     // 길안내 내내 한 번에 자란다 (장면마다 뚝뚝 바꾸면 변하는 게 눈에 안 띈다)
     if (fresh) {
+      nvCta.classList.remove('on');   // 'Guide Me' 는 먼저 내려가고, 시각이 그 자리로 슬라이드인
       const ms = GUIDE.reduce((a, g) => a + HOLD[STEPS.indexOf(g)], 0);
       const dots = nvq('.nv-dots');   // 검은 바탕에 도트가 중심에서 가장자리로 퍼진다
       dots.style.transition = 'none'; dots.style.opacity = '0';
