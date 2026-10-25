@@ -327,7 +327,9 @@ body.talk2 .nv-pill{ width:840px; height:319.18px; border-radius:108.5px; top:59
   /* 대화2 는 Glass 위에 Inner shadow 한 겹 더 : X 0 · Y -23.51 · Blur 37.25 · Spread 0.9 · #DBDACA */
   box-shadow:inset 0 -23.51px 37.25px .9px #DBDACA; }
 /* 길안내 칩 : 314 x 114 · 가운데 (383,166.4) → 중심 (540,223.4) */
-body.guiding .nv-pill{ transition-delay:.3s;   /* 내용이 먼저 걷히고 0.18s 뒤 알약이 따라 올라간다 */
+/* 내용이 먼저 걷히고 0.3s 뒤 알약이 따라 올라간다. 빈 알약이 오래 떠 있으면 오류처럼 보이므로
+   이동도 0.7s 로 줄이고, 캡션은 알약이 도착하기 전부터 올라오기 시작한다 */
+body.guiding .nv-pill{ transition-delay:.3s; transition-duration:.7s, .7s, .7s, .74s, .6s, .6s;
   width:314px; height:114px; border-radius:76.53px; top:223.4px;
   background:rgba(255,255,255,.1); box-shadow:none; --rim:0; --rimt:.5; }
 /* ---------- 아바타 ---------- */
@@ -470,9 +472,9 @@ body.guiding .nv-arrow.turn{ rotate:42deg; }
   display:block; overflow:visible; }
 .nv-arrow .ar ellipse{ fill:#fff; opacity:0; transform-box:fill-box; transform-origin:center; }
 /* 알약이 캡션으로 옮겨 앉은 뒤에 튀어나온다 (--d 는 JS 가 뿌린 불규칙한 간격) */
-body.guiding .nv-arrow{ transition-delay:1.45s, 0s, 0s; }   /* 1s 는 등장(opacity)에만 : 회전까지 늦추면 안 된다 */
+body.guiding .nv-arrow{ transition-delay:1.25s, 0s, 0s; }   /* 1s 는 등장(opacity)에만 : 회전까지 늦추면 안 된다 */
 body.guiding .nv-arrow .ar ellipse{ animation:arPop .46s cubic-bezier(.2,1.55,.4,1) both;
-  animation-delay:calc(var(--d, 0ms) + 1.45s); }
+  animation-delay:calc(var(--d, 0ms) + 1.25s); }
 @keyframes arPop{ from{ opacity:0; transform:scale(.25); } to{ opacity:1; transform:scale(1); } }
 body.guiding .nv-arrow{ top:559.76px; opacity:1; }
 body.ask .nv-arrow{ top:539.63px; }
@@ -1519,7 +1521,7 @@ const nvStep = k => {
     // 들어오는 칩은 앞 칩이 원기둥을 다 넘어간 뒤(0.66s)에 올라온다 (겹치면 글자가 섞인다)
     const chip = k === 'ask' ? nvq('.nv-go') : nvq('.nv-who');
     if (k === 'ask') nvLater(1500, () => nvOnly(chip, 680));
-    else nvOnly(chip, 1000);
+    else nvOnly(chip, 520);
     nvq('.nv-map').classList.remove('on');
     const fresh = !GUIDE.includes(nvPrev);
     // 아래쪽 밝은 호 = 지금까지 온 거리, 위쪽 옅은 트랙 = 남은 거리.
@@ -1534,11 +1536,11 @@ const nvStep = k => {
       // 순서 : 알약이 캡션으로 옮겨 앉고(0~1s) → 화살표 도트가 튀어나오고(1s~) → 나머지(1.6s~)
       nvq('.nv-arrow').classList.remove('turn');
       nvLater(5200, () => nvq('.nv-arrow').classList.add('turn'));   // 직진 → 대각선
-      nvLater(1950, () => {
+      nvLater(1700, () => {
         dots.style.transition = ''; dots.style.removeProperty('opacity');
         dots.style.removeProperty('--dw'); dots.style.removeProperty('--dh');
         NV.style.setProperty('--gt', 'linear');
-        requestAnimationFrame(() => { NV.style.setProperty('--gd', (ms - 1950) + 'ms'); nvGauge(GFULL); });
+        requestAnimationFrame(() => { NV.style.setProperty('--gd', (ms - 1700) + 'ms'); nvGauge(GFULL); });
         navClockStart();
       });
     }
