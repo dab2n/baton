@@ -31,6 +31,10 @@ class H(http.server.SimpleHTTPRequestHandler):
             if not chunk: break
             dst.write(chunk); n -= len(chunk)
 
+    def end_headers(self):                      # 편집한 파일이 캐시로 남지 않게
+        self.send_header('Cache-Control', 'no-store')
+        super().end_headers()
+
     def log_message(self, *a): pass
 
 http.server.ThreadingHTTPServer(('', int(sys.argv[1]) if len(sys.argv) > 1 else 8777), H).serve_forever()
