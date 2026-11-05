@@ -1249,13 +1249,19 @@ body.follow .nav:not(.arrived) .navarrow{ animation:poke 2.6s cubic-bezier(.45,0
 // 접속하면 바로 전체화면. 제스처 없이 거절되면 첫 입력에서 다시 시도한다.
 // #cam : 카메라 테스트용 미리보기 (전체화면·자동진행 없음)
 const CAM = location.hash === '#cam';
-const full = () => document.documentElement.requestFullscreen?.().catch(() => {});
-// Esc 로 전체화면을 끈다 (전시 세팅 중 창을 다른 화면으로 옮길 때 필요하다)
-let firstKey = true;
+// 전체화면에선 Esc 를 가로채 둔다 : 전시 중 Esc 를 한 번 톡 눌러 창으로 빠지는 일이 없게.
+// (크롬 Keyboard Lock. 안 되는 브라우저에선 브라우저가 평소처럼 Esc 로 끈다)
+const full = () => document.documentElement.requestFullscreen?.()
+  .then(() => navigator.keyboard?.lock?.(['Escape']))
+  .catch(() => {});
+// Enter 로 전체화면, Esc 를 0.7초 이상 눌러 끈다 (전시 세팅 중 창을 다른 화면으로 옮길 때 필요하다)
+let escT = 0;
 addEventListener('keydown', e => {
-  if (e.key === 'Escape') { firstKey = false; document.exitFullscreen?.(); return; }
-  if (firstKey && !CAM) { firstKey = false; full(); }   // 첫 키 입력은 전체화면 전환에만
+  if (e.key === 'Escape') { escT ||= setTimeout(() => document.exitFullscreen?.(), 700); return; }
+  // 이미 전체화면이면 Enter 는 장면 넘기기로 흘려보낸다
+  if (e.key === 'Enter' && !document.fullscreenElement) { full(); e.stopImmediatePropagation(); }
 });
+addEventListener('keyup', e => { if (e.key === 'Escape') { clearTimeout(escT); escT = 0; } });
 if (!CAM) {
   full();
   // 첫 입력은 전체화면 전환에만 쓰고 시퀀스로 흘려보내지 않는다
@@ -1267,7 +1273,7 @@ const SCREEN = location.hash === '#screen';
 if (new URLSearchParams(location.search).has('rec')) document.body.classList.add('rec');   // ?rec=1 : 영상용 (버튼·썸네일 숨김)
 const fs = matchMedia('(display-mode: fullscreen)');
 const kiosk = () => {
-  const filled = innerWidth >= screen.width - 1 && innerHeight >= screen.height - 1;
+  const filled = innerWidth >= screen.width - 1 && innerHeight >= screen.height - 140;
   document.body.classList.toggle('kiosk', SCREEN || !!document.fullscreenElement || fs.matches || filled);
   fit();
 };
